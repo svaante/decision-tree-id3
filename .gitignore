@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+#Vim swap files
+*.swp
+
 # scikit-learn specific
 doc/_build/
 doc/auto_examples/

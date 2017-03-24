@@ -1,7 +1,7 @@
 #project-template - A template for scikit-learn extensions
 
 [![Travis Status](https://travis-ci.org/scikit-learn-contrib/project-template.svg?branch=master)](https://travis-ci.org/scikit-learn-contrib/project-template)
-[![Coveralls Status](https://coveralls.io/repos/scikit-learn-contrib/project-template/badge.svg?branch=master&service=github)](https://coveralls.io/r/scikit-learn-contrib/project-template)
+[![Coverage Status](https://coveralls.io/repos/github/svaante/decision-tree-c4.5/badge.svg?branch=master)](https://coveralls.io/github/svaante/decision-tree-c4.5?branch=master)
 [![CircleCI Status](https://circleci.com/gh/scikit-learn-contrib/project-template.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/scikit-learn-contrib/project-template/tree/master)
 
 **project-template** is a template project for 
