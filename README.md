@@ -1,8 +1,8 @@
 #project-template - A template for scikit-learn extensions
 
-[![Travis Status](https://travis-ci.org/svaante/decision-tree-c4.5.svg?branch=master)](https://travis-ci.org/svaante/decision-tree-c4.5)
-[![Coverage Status](https://coveralls.io/repos/github/svaante/decision-tree-c4.5/badge.svg?branch=master)](https://coveralls.io/github/svaante/decision-tree-c4.5?branch=master)
-[![CircleCI Status](https://circleci.com/gh/svaante/decision-tree-c4.5/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/svaante/decision-tree-c4.5/tree/master)
+[![Travis Status](https://travis-ci.org/svaante/decision-tree-c45.svg?branch=master)](https://travis-ci.org/svaante/decision-tree-c45)
+[![Coverage Status](https://coveralls.io/repos/github/svaante/decision-tree-c45/badge.svg?branch=master)](https://coveralls.io/github/svaante/decision-tree-c45?branch=master)
+[![CircleCI Status](https://circleci.com/gh/svaante/decision-tree-c45/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/svaante/decision-tree-c45/tree/master)
 
 **project-template** is a template project for 
 [scikit-learn](http://scikit-learn.org/) 
