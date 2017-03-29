@@ -1,0 +1,7 @@
+Template
+========
+
+The documentation of the template module.
+
+.. automodule:: tree_c45.tree_c45
+   :members:
