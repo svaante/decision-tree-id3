@@ -6,6 +6,37 @@ from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
+from scipy import stats.itemfreq
+
+
+def entropy(s):
+    """ Entropy for the the classes in the array y
+        H(S) = \sum_{x \in X} p(x) \log_{2}(1/p(x))
+
+        Parameters
+        ----------
+        s : nparray of shape [n_remaining attributes] containing the class
+            names
+    """
+    n = s.shape[0]
+    if n <= 0:
+        return 0
+    p = np.true_devide(np.bincount(s), n)
+    return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
+
+
+def information_gain(s, a, e):
+    """ Entropy for the the classes in the array y
+        IG(A,S) = H(S) - \sum_{t \in T} p(t)H(t)
+
+        Parameters
+        ----------
+        s : nparray of shape [n_remaining attributes] the remaining
+            containing the class names
+        a : nparray of the ramaining indices
+    """
+    n = s.shape[0]
+    unique = np.apply_along_axis(func1d=stats.itemfreq, array=s[:,a], axis=1)
 
 
 class TemplateEstimator(BaseEstimator):
