@@ -3,7 +3,6 @@ import numpy as np
 import os
 
 data_dir = os.path.dirname(os.path.abspath(__file__))
-
 def load_data(path, nominal=True):
     path = os.path.join(data_dir, path)
     with open(path, 'r') as f:

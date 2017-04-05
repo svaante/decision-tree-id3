@@ -7,7 +7,6 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
-from scipy import stats
 
 
 def entropy(y):
@@ -43,6 +42,7 @@ def information_gain(X, y, a):
     print(X_[:0])
     print(np.where(X_[0:] == unique[0:0]))
     print(unique)
+
 
 class Id3Estimator(BaseEstimator):
     """ A template estimator to be used as a reference implementation .
