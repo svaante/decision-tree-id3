@@ -1,6 +1,5 @@
-from .id3 import (TemplateEstimator, TemplateClassifier, TemplateTransformer)
-from .data import load_data
+from .id3 import (Id3Estimator, TemplateClassifier, TemplateTransformer)
 from . import id3
 
-__all__ = ['TemplateEstimator', 'TemplateClassifier',
+__all__ = ['Id3Estimator', 'TemplateClassifier',
            'TemplateTransformer', 'id3']
