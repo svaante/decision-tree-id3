@@ -11,37 +11,46 @@ from sklearn.preprocessing import LabelEncoder
 
 def entropy(y):
     """ Entropy for the the classes in the array y
-        H(S) = \sum_{x \in X} p(x) \log_{2}(1/p(x))
+    \sum_{x \in X} p(x) \log_{2}(1/p(x))
 
-        Parameters
-        ----------
-        y : nparray of shape [n_remaining attributes] containing the class
-            names
+    Parameters
+    ----------
+    y : nparray of shape [n_remaining attributes] containing the class
+        names
     """
     n = y.shape[0]
     if n <= 0:
         return 0
-    p = np.true_divide(np.bincount(y), n)
+    _, count = np.unique(y, return_counts=True)
+    p = np.true_divide(count, n)
     return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
 
-def information_gain(X, y, a):
-    """ Entropy for the the classes in the array y
-        IG(A,S) = H(S) - \sum_{t \in T} p(t)H(t)
+def gain_after(feature_values, y):
+    """ Gain for feature feature_values p(a)H(a)
 
-        Parameters
-        ----------
-        s : nparray of shape [n_remaining attributes] the remaining
-            containing the class names
-        a : nparray of the ramaining indices
+    Parameters
+    ----------
+    feature_values : nparray attribute column
+    y : nparray class array
     """
-    n = X.shape[0]
-    X_ = X[:, a]
-    unique = np.apply_along_axis(func1d=np.unique, arr=X_, axis=0)
-    count = np.apply_along_axis(func1d=np.bincount, arr=X_, axis=0)
-    print(X_[:0])
-    print(np.where(X_[0:] == unique[0:0]))
-    print(unique)
+    gain = 0
+    n = feature_values.shape
+    unique, count = np.unique(feature_values, return_counts=True)
+    for value, p in zip(unique, count):
+        gain += p * entropy(y[feature_values == value])
+    return gain * np.true_divide(1, n)
+
+
+def split(X, y):
+    """ Returns feture index for max gain split
+
+    Parameters
+    ----------
+    X : nparray feature 2d array
+    y : nparray class array
+    """
+    return np.argmin(np.apply_along_axis(gain_after, 0, X, y))
 
 
 class Id3Estimator(BaseEstimator):
@@ -74,7 +83,6 @@ class Id3Estimator(BaseEstimator):
         X, y = check_X_y(X, y)
         X = np.apply_along_axis(LabelEncoder().fit_transform, axis=0, arr=X)
         y = LabelEncoder().fit_transform(y)
-        information_gain(X, y, [0, 1])
         return self
 
     def predict(self, X):
