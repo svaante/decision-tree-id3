@@ -7,9 +7,7 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from data import load_contact_lenses
-from tests import test_common
 
-print(load_contact_lenses())
 
 class TemplateEstimator(BaseEstimator):
     """ A template estimator to be used as a reference implementation .
