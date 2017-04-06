@@ -4,4 +4,5 @@ from id3 import Id3Estimator
 from id3.node import Node
 
 def test_node():
-    pass
+
+    node = 
