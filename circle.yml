@@ -5,7 +5,7 @@ machine:
     USERNAME: "svaante"
 
     # The repository where the documentation will be hosted
-    DOC_REPO: "decision-tree-ID3"
+    DOC_REPO: "decision-tree-id3"
 
     # The base URL for the Github page where the documentation will be hosted
     DOC_URL: ""
