@@ -7,24 +7,6 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
-import time
-
-
-def entropy(y):
-    """ Entropy for the the classes in the array y
-    \sum_{x \in X} p(x) \log_{2}(1/p(x))
-
-    Parameters
-    ----------
-    y : nparray of shape [n_remaining attributes] containing the class
-        names
-    """
-    n = y.shape[0]
-    if n <= 0:
-        return 0
-    _, count = np.unique(y, return_counts=True)
-    p = np.true_divide(count, n)
-    return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
 '''
 def gain_after_tmp(feature_values, y):
@@ -45,31 +27,6 @@ def gain_after_tmp(feature_values, y):
     return gain * np.true_divide(1, n)
 '''
 
-def gain_after(feature_values, y):
-    """ Gain for feature feature_values p(a)H(a)
-
-    Parameters
-    ----------
-    feature_values : nparray attribute column
-    y : nparray class array
-    """
-    gain = 0
-    n = feature_values.shape
-    unique, count = np.unique(feature_values, return_counts=True)
-    for value, p in zip(unique, count):
-        gain += p * entropy(y[feature_values == value])
-    return gain * np.true_divide(1, n)
-
-def split(X, y):
-    """ Returns feture index for max gain split
-
-    Parameters
-    ----------
-    X : nparray feature 2d array
-    y : nparray class array
-    """
-    return np.argmin(np.apply_along_axis(gain_after, 0, X, y))
-
 
 class Id3Estimator(BaseEstimator):
     """ A template estimator to be used as a reference implementation .
@@ -82,6 +39,47 @@ class Id3Estimator(BaseEstimator):
     def __init__(self, demo_param='demo_param'):
         self.demo_param = demo_param
 
+    def _entropy(self, y):
+        """ Entropy for the the classes in the array y
+        \sum_{x \in X} p(x) \log_{2}(1/p(x))
+
+        Parameters
+        ----------
+        y : nparray of shape [n_remaining attributes] containing the class
+            names
+        """
+        n = y.shape[0]
+        if n <= 0:
+            return 0
+        _, count = np.unique(y, return_counts=True)
+        p = np.true_divide(count, n)
+        return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
+
+    def _gain_after(self, feature_values, y):
+        """ Gain for feature feature_values p(a)H(a)
+
+        Parameters
+        ----------
+        feature_values : nparray attribute column
+        y : nparray class array
+        """
+        gain = 0
+        n = feature_values.shape
+        unique, count = np.unique(feature_values, return_counts=True)
+        for value, p in zip(unique, count):
+            gain += p * self._entropy(y[feature_values == value])
+        return gain * np.true_divide(1, n)
+
+    def _split(self, X, y):
+        """ Returns feture index for max gain split
+
+        Parameters
+        ----------
+        X : nparray feature 2d array
+        y : nparray class array
+        """
+        return np.argmin(np.apply_along_axis(self._gain_after, 0, X, y))
+
     def fit(self, X, y):
         """A reference implementation of a fitting function
 
@@ -93,14 +91,32 @@ class Id3Estimator(BaseEstimator):
             The target values (class labels in classification, real numbers in
             regression).
 
+        Attributes
+        ----------
+        n_features : int
+            The number of features when ``fit`` is performed.
+
+        X_encoders : list
+            List of LabelEncoders that transforms input from labels to binary encodings and vice versa.
+
+        y_encoder : LabelEncoder
+            LabelEncoders that transforms output from labels to binary encodings and vice versa.
+
         Returns
         -------
         self : object
             Returns self.
         """
-        X, y = check_X_y(X, y)
-        X = np.apply_along_axis(LabelEncoder().fit_transform, axis=0, arr=X)
-        y = LabelEncoder().fit_transform(y)
+        X_, y = check_X_y(X, y)
+        n_samples, self.n_features = X.shape
+        X = np.zeros(X.shape, dtype=np.int)
+
+        self.X_encoders = [LabelEncoder() for _ in range(self.n_features)]
+        for i in range(self.n_features):
+            X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+        self.y_encoder = LabelEncoder()
+        y = self.y_encoder.fit_transform(y)
+
         return self
 
     def predict(self, X):
