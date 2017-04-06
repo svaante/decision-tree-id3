@@ -7,6 +7,7 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
+import time
 
 
 def entropy(y):
@@ -25,6 +26,24 @@ def entropy(y):
     p = np.true_divide(count, n)
     return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
+'''
+def gain_after_tmp(feature_values, y):
+    """ Gain for feature feature_values p(a)H(a)
+
+    Parameters
+    ----------
+    feature_values : nparray attribute column
+    y : nparray class array
+    """
+    def single_gain(p, value):
+        return p * entropy(y[feature_values == value])
+
+    n = feature_values.shape
+    unique, count = np.unique(feature_values, return_counts=True)
+    gain_ = np.vectorize(single_gain)
+    gain = np.sum(gain_(count, unique))
+    return gain * np.true_divide(1, n)
+'''
 
 def gain_after(feature_values, y):
     """ Gain for feature feature_values p(a)H(a)
@@ -40,7 +59,6 @@ def gain_after(feature_values, y):
     for value, p in zip(unique, count):
         gain += p * entropy(y[feature_values == value])
     return gain * np.true_divide(1, n)
-
 
 def split(X, y):
     """ Returns feture index for max gain split
