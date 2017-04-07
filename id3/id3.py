@@ -7,6 +7,7 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
+from .node import Node
 
 '''
 def gain_after_tmp(feature_values, y):
@@ -28,6 +29,8 @@ def gain_after_tmp(feature_values, y):
 '''
 
 
+# TODO(svaante): Intrinsic information
+# http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
 class Id3Estimator(BaseEstimator):
     """ A template estimator to be used as a reference implementation .
 
@@ -41,7 +44,8 @@ class Id3Estimator(BaseEstimator):
 
     def _entropy(self, y):
         """ Entropy for the the classes in the array y
-        \sum_{x \in X} p(x) \log_{2}(1/p(x))
+        :math: \sum_{x \in X} p(x) \log_{2}(1/p(x)) :math: from
+        https://en.wikipedia.org/wiki/ID3_algorithm
 
         Parameters
         ----------
@@ -56,7 +60,9 @@ class Id3Estimator(BaseEstimator):
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
     def _gain_after(self, feature_values, y):
-        """ Gain for feature feature_values p(a)H(a)
+        """ Gain for feature feature_values
+        :math: p(a)H(a) :math: from
+        https://en.wikipedia.org/wiki/ID3_algorithm
 
         Parameters
         ----------
@@ -64,23 +70,54 @@ class Id3Estimator(BaseEstimator):
         y : nparray class array
         """
         gain = 0
-        n = feature_values.shape
+        n = feature_values.shape[0]
         unique, count = np.unique(feature_values, return_counts=True)
         for value, p in zip(unique, count):
             gain += p * self._entropy(y[feature_values == value])
         return gain * np.true_divide(1, n)
 
-    def _split(self, X, y):
+    def _split(self, examples_idx, features_idx):
         """ Returns feture index for max gain split
 
         Parameters
         ----------
-        X : nparray feature 2d array
-        y : nparray class array
         """
-        return np.argmin(np.apply_along_axis(self._gain_after, 0, X, y))
+        X_ = self.X[np.ix_(examples_idx, features_idx)]
+        y_ = self.y[examples_idx]
+        gain_after = np.apply_along_axis(self._gain_after, 0, X_, y_)
+        argmin_gain_after = np.argmin(gain_after)
+        return features_idx[argmin_gain_after], gain_after[argmin_gain_after]
 
-    def fit(self, X, y):
+    def _build(self, examples_idx, features_idx):
+        unique, counts = np.unique(self.y[examples_idx], return_counts=True)
+        if features_idx.size == 0:
+            return Node(unique[np.argmax(counts)], self.y_encoder, False)
+        if unique.size == 1:
+            return Node(unique[0], self.y_encoder, False)
+        argmin, gain_after = self._split(examples_idx, features_idx)
+        encoder = self.X_encoders[argmin]
+        values = encoder.transform(encoder.classes_)
+        root = Node(self.feature_names[argmin],
+                    encoder,
+                    details={
+                                'Entropy':
+                                self._entropy(self.y[examples_idx]),
+                                'Info':
+                                gain_after
+                            })
+        new_features_idx = np.delete(features_idx,
+                                     np.where(features_idx == argmin))
+        for value in values:
+            new_X = self.X[np.ix_(examples_idx)]
+            new_examples_idx = examples_idx[new_X[:, argmin] == value]
+            if value in self.X[:, argmin]:
+                root.add_child(self._build(new_examples_idx, new_features_idx), encoder.inverse_transform(value))
+            else:
+                root.add_child(Node(self.y_encoder.inverse_transform(unique[np.argmax(counts)]), self.y_encoder,
+                               False), encoder.inverse_transform(value))
+        return root
+
+    def fit(self, X, y, feature_names):
         """A reference implementation of a fitting function
 
         Parameters
@@ -93,30 +130,34 @@ class Id3Estimator(BaseEstimator):
 
         Attributes
         ----------
-        n_features : int
+        n_features: int
             The number of features when ``fit`` is performed.
 
         X_encoders : list
-            List of LabelEncoders that transforms input from labels to binary encodings and vice versa.
+            List of LabelEncoders that transforms input from labels to binary
+            encodings and vice versa.
 
         y_encoder : LabelEncoder
-            LabelEncoders that transforms output from labels to binary encodings and vice versa.
+            LabelEncoders that transforms output from labels to binary
+            encodings and vice versa.
 
         Returns
         -------
         self : object
             Returns self.
         """
+        self.feature_names = feature_names
         X_, y = check_X_y(X, y)
-        n_samples, self.n_features = X.shape
-        X = np.zeros(X.shape, dtype=np.int)
+        n_samples, self.n_features_idx = X.shape
+        self.X = np.zeros(X.shape, dtype=np.int)
 
-        self.X_encoders = [LabelEncoder() for _ in range(self.n_features)]
-        for i in range(self.n_features):
-            X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+        self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
+        for i in range(self.n_features_idx):
+            self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
-        y = self.y_encoder.fit_transform(y)
+        self.y = self.y_encoder.fit_transform(y)
 
+        self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
         return self
 
     def predict(self, X):
@@ -124,7 +165,7 @@ class Id3Estimator(BaseEstimator):
 
         Parameters
         ----------
-        X : array-like of shape = [n_samples, n_features]
+        X : array-like of shape = [n_samples, n_features_idx]
             The input samples.
 
         Returns
@@ -146,7 +187,7 @@ class TemplateClassifier(BaseEstimator, ClassifierMixin):
 
     Attributes
     ----------
-    X_ : array, shape = [n_samples, n_features]
+    X_ : array, shape = [n_samples, n_features_idx]
         The input passed during :meth:`fit`
     y_ : array, shape = [n_samples]
         The labels passed during :meth:`fit`
@@ -159,7 +200,7 @@ class TemplateClassifier(BaseEstimator, ClassifierMixin):
 
         Parameters
         ----------
-        X : array-like, shape = [n_samples, n_features]
+        X : array-like, shape = [n_samples, n_features_idx]
             The training input samples.
         y : array-like, shape = [n_samples]
             The target values. An array of int.

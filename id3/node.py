@@ -10,13 +10,13 @@ class Node():
     """
     def __init__(self,
                  name,
-                 details,
                  estimator,
-                 is_feature=True):
+                 is_feature=True,
+                 details=None):
         self.name = name
-        self.details = details
         self.estimator = estimator
         self.is_feature = is_feature
+        self.details = details
         self.children = list()
 
     def add_child(self, node, edge_value):
@@ -26,6 +26,13 @@ class Node():
         ----------
         node : child node to be added
         edge_value : attribute value for the edge
-        is_feature : if current node represent a feature or classification 
+        is_feature : if current node represent a feature or classification
         """
         self.children.append((node, edge_value))
+
+    def print_tree(self, prefix=""):
+        print(prefix + str(self.name), end="") 
+        print(" - Feature" if self.is_feature else " - Classification")
+        for child, edge in self.children:
+            print(prefix + edge.decode('UTF-8'))
+            child.print_tree(prefix + "\t")

@@ -1,5 +1,5 @@
 from sklearn.utils.estimator_checks import check_estimator
-from id3 import (Id3Estimator, TemplateClassifier, TemplateTransformer)
+from id3 import (Id3Estimator, TemplateClassifier)
 
 
 def test_estimator():
@@ -10,5 +10,3 @@ def test_classifier():
     return check_estimator(TemplateClassifier)
 
 
-def test_transformer():
-    return check_estimator(TemplateTransformer)
