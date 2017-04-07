@@ -18,11 +18,11 @@ def test_split():
     X, y, targets = load_contact_lenses()
     X = np.apply_along_axis(LabelEncoder().fit_transform, axis=0, arr=X)
     y = LabelEncoder().fit_transform(y)
-    feature_index = id3Estimator._split(X, y)
+    feature_index = id3Estimator._split(X, y)[0]
     assert_almost_equal(feature_index, 3)
     X = X[X[:, feature_index] == 1]
     y = y[np.where(X[:, feature_index] == 1)]
-    feature_index = id3Estimator._split(X, y)
+    feature_index = id3Estimator._split(X, y)[0]
     assert_almost_equal(feature_index, 2)
 
 
