@@ -9,7 +9,7 @@ from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
 
 from .node import Node
-from .utils import check_numerical_column
+from .utils import check_numerical_array
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -180,7 +180,7 @@ class Id3Estimator(BaseEstimator):
         self.X = np.zeros(X.shape, dtype=np.int)
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
-            if check_input and check_numerical_column(X_[:, i]):
+            if check_input and check_numerical_array(X_[:, i]):
                 numerical_values.append(i)
             self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
