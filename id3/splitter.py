@@ -43,7 +43,7 @@ class Splitter(six.with_metaclass(ABCMeta)):
         pass
 
     @abstractmethod
-    def split(X, y, examples_idx, features_idx):
+    def split(values):
         """
         Returns
         -------
@@ -53,6 +53,10 @@ class Splitter(six.with_metaclass(ABCMeta)):
         pass
 
 class NominalSplitter(Splitter):
+
+    def __init__(self):
+        self._X = None
+        self._y = None
 
     def _info(self, x, y):
         """ info for feature feature_values
@@ -79,23 +83,39 @@ class NominalSplitter(Splitter):
         return info * np.true_divide(1, n)
 
     def calc(self, X, y, examples_idx, features_idx, gain_ratio=False):
+        """
+        Returns
+        -------
+        : int
+            Feature index for split
+        : dict
+            Returns all used information used for split
+        """
         calc_info = {
                      'entropy': None,
                      'info': None,
                      'split': None,
                      'info_split': None
                     }
-        X_ = X[np.ix_(examples_idx, features_idx)]
-        y_ = y[examples_idx]
-        features_info = np.apply_along_axis(self._info, 0, X_, y_)
+        self.X_ = X[np.ix_(examples_idx, features_idx)]
+        self.y_ = y[examples_idx]
+        features_info = np.apply_along_axis(self._info, 0, self.X_, self.y_)
         argmin_features_info = np.argmin(features_info)
-        entropy = self.super()._entropy(y_)
+        entropy = self.super()._entropy(self.y_)
         info = features_info[argmin_features_info]
         calc_info['entropy'] = entropy
         calc_info['loss'] = loss
         return features_idx[argmin_features_info], calc_info
 
 
+    def split(values):
+        """
+        Returns
+        -------
+        : np.array [n subsets]
+            Array contaning the the subsets for the split
+        """
+        pass
 
 class NumericalSplitter(Splitter):
 
