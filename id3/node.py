@@ -12,7 +12,7 @@ class Node():
                  name,
                  estimator,
                  is_feature=True,
-                 details=None):
+                 details={}):
         self.name = name
         self.estimator = estimator
         self.is_feature = is_feature
@@ -32,6 +32,11 @@ class Node():
 
     def print_tree(self, prefix=""):
         print(prefix + str(self.name), end="") 
+        try:
+            print(" - Entropy - {}".format(self.details['Entropy']), end="")
+            print(" - Gain - {}".format(self.details['Info']), end="")
+        except KeyError:
+            pass
         print(" - Feature" if self.is_feature else " - Classification")
         for child, edge in self.children:
             print(prefix + edge.decode('UTF-8'))

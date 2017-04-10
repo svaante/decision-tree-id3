@@ -37,25 +37,34 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
     dot_data : string
         String representation of the input tree in GraphViz dot format.
     """
+    max_depth = 500
+    def _recurse_tree(node, edge=None, parent=None, depth=0):
+        if max_depth is None or depth <= max_depth:
+            out_file.write(_node_to_dot(node, parent, edge))
+            for child, edge in node.children:
+                _recurse_tree(child, edge, node)
 
-    def _recurse_tree(tree):
-        pass
-
-    def _node_to_dot(node):
+    def _node_to_dot(node, parent=None, edge=None):
         """Get  a Node objects representation in dot format.
 
         """
+        node_repr = []
         
-        node_repr = ""
-        if node.is_feature:
-            pass
+        if parent != None:
+            node_repr.append('{} -> {} [ label = "{}" ];\n'.format(parent.name, node.name, edge))
+        res = "".join(node_repr)
+        return res
+            
 
+    
     if six.PY3:
         out_file = open(out_file, 'w', encoding='utf8')
     else:
         out_file = open(out_file, 'wb')
 
-    out_file.write('digraph ID3 Tree {\n')
+    out_file.write('digraph ID3_Tree {\n')
+    out_file.write('node [shape=box];\n')
+    decision_tree.print_tree()
     _recurse_tree(decision_tree)
-        
-export_graphviz(None)
+    out_file.write("}")
+    out_file.close()
