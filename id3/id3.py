@@ -7,27 +7,9 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
+
 from .node import Node
-
-'''
-def info_tmp(feature_values, y):
-    """ info for feature feature_values p(a)H(a)
-
-    Parameters
-    ----------
-    feature_values : nparray attribute column
-    y : nparray class array
-    """
-    def single_info(p, value):
-        return p * entropy(y[feature_values == value])
-
-    n = feature_values.shape
-    unique, count = np.unique(feature_values, return_counts=True)
-    info_ = np.vectorize(single_info)
-    info = np.sum(info_(count, unique))
-    return info * np.true_divide(1, n)
-'''
-
+from .utils import check_numerical_column
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -74,7 +56,7 @@ class Id3Estimator(BaseEstimator):
         feature_values : np.array of shape [n remaining examples]
             containing feature values
         y : np.array of shape [n remaining examples]
-            containing relevent class
+            containing relevant class
 
         Returns
         -------
@@ -136,7 +118,7 @@ class Id3Estimator(BaseEstimator):
         values = encoder.transform(encoder.classes_)
         root = Node(argmin,
                     encoder,
-                    self.feature_names[argmin] if self.feature_names else None,
+                    self.feature_names[argmin] if self.feature_names is not None else None,
                     is_feature=True,
                     details={
                                 'Entropy':
@@ -158,7 +140,7 @@ class Id3Estimator(BaseEstimator):
                                value)
         return root
 
-    def fit(self, X, y, feature_names=None):
+    def fit(self, X, y, feature_names=None, check_input=True):
         """A reference implementation of a fitting function
 
         Parameters
@@ -188,21 +170,23 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         self.feature_names = feature_names
+        numerical_values = []
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
-        if (self.feature_names and
-                len(self.feature_names) != self.n_features_idx):
-            return ValueError(("feature_names needs to have the same "
+        if (self.feature_names is not None and
+                len(self.feature_names) != (self.n_features_idx + 1)):
+            raise ValueError(("feature_names needs to have the same "
                                "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
+            if check_input and check_numerical_column(X_[:, i]):
+                numerical_values.append(i)
             self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        self.tree_ = self._build(np.arange(n_samples),
-                                 np.arange(self.n_features_idx))
+        self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
         return self
 
     def predict(self, X):
