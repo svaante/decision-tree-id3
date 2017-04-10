@@ -5,6 +5,8 @@ __pycache__/
 
 # Vim
 *.swp
+*.dot
+*.pdf
 
 # C extensions
 *.so

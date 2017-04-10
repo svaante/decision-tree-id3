@@ -110,7 +110,7 @@ class Id3Estimator(BaseEstimator):
         for value in values:
             new_X = self.X[np.ix_(examples_idx)]
             new_examples_idx = examples_idx[new_X[:, argmin] == value]
-            if value in self.X[:, argmin]:
+            if new_examples_idx.size != 0:
                 root.add_child(self._build(new_examples_idx, new_features_idx), encoder.inverse_transform(value))
             else:
                 root.add_child(Node(self.y_encoder.inverse_transform(unique[np.argmax(counts)]), self.y_encoder,

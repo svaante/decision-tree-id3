@@ -24,3 +24,5 @@ def load_data(path, nominal=True):
 def load_contact_lenses():
     return load_data('contact_lenses.csv')
 
+def load_will_wait():
+    return load_data('will_wait.csv')
