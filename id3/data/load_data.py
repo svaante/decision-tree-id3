@@ -26,3 +26,6 @@ def load_contact_lenses():
 
 def load_will_wait():
     return load_data('will_wait.csv')
+
+def load_weather():
+    return load_data('weather.csv')

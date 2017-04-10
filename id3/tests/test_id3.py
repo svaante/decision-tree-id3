@@ -16,7 +16,7 @@ def test_entropy():
 
 
 def test_fit():
-    X, y, targets = load_contact_lenses()
+    X, y, targets = load_weather()
     estimator = Id3Estimator()
     estimator.fit(X, y, targets)
     export_graphviz(estimator.tree_)
