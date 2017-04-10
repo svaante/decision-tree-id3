@@ -10,22 +10,22 @@ from sklearn.preprocessing import LabelEncoder
 from .node import Node
 
 '''
-def gain_after_tmp(feature_values, y):
-    """ Gain for feature feature_values p(a)H(a)
+def info_tmp(feature_values, y):
+    """ info for feature feature_values p(a)H(a)
 
     Parameters
     ----------
     feature_values : nparray attribute column
     y : nparray class array
     """
-    def single_gain(p, value):
+    def single_info(p, value):
         return p * entropy(y[feature_values == value])
 
     n = feature_values.shape
     unique, count = np.unique(feature_values, return_counts=True)
-    gain_ = np.vectorize(single_gain)
-    gain = np.sum(gain_(count, unique))
-    return gain * np.true_divide(1, n)
+    info_ = np.vectorize(single_info)
+    info = np.sum(info_(count, unique))
+    return info * np.true_divide(1, n)
 '''
 
 
@@ -43,14 +43,19 @@ class Id3Estimator(BaseEstimator):
         self.demo_param = demo_param
 
     def _entropy(self, y):
-        """ Entropy for the the classes in the array y
+        """ Entropy for the classes in the array y
         :math: \sum_{x \in X} p(x) \log_{2}(1/p(x)) :math: from
         https://en.wikipedia.org/wiki/ID3_algorithm
 
         Parameters
         ----------
-        y : nparray of shape [n_remaining attributes] containing the class
-            names
+        y : nparray of shape [n remaining attributes]
+            containing the class names
+
+        Returns
+        -------
+        : float
+            information for remaining examples given feature
         """
         n = y.shape[0]
         if n <= 0:
@@ -59,51 +64,85 @@ class Id3Estimator(BaseEstimator):
         p = np.true_divide(count, n)
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
-    def _gain_after(self, feature_values, y):
-        """ Gain for feature feature_values
+    def _info(self, feature_values, y):
+        """ info for feature feature_values
         :math: p(a)H(a) :math: from
         https://en.wikipedia.org/wiki/ID3_algorithm
 
         Parameters
         ----------
-        feature_values : nparray attribute column
-        y : nparray class array
+        feature_values : np.array of shape [n remaining examples]
+            containing feature values
+        y : np.array of shape [n remaining examples]
+            containing relevent class
+
+        Returns
+        -------
+        : float
+            information for remaining examples given feature
         """
-        gain = 0
+        info = 0
         n = feature_values.shape[0]
         unique, count = np.unique(feature_values, return_counts=True)
         for value, p in zip(unique, count):
-            gain += p * self._entropy(y[feature_values == value])
-        return gain * np.true_divide(1, n)
+            info += p * self._entropy(y[feature_values == value])
+        return info * np.true_divide(1, n)
 
     def _split(self, examples_idx, features_idx):
-        """ Returns feture index for max gain split
+        """ Returns feature index for max info split
 
         Parameters
         ----------
+        examples_idx: np.array
+            data row(s) to be considered
+        features_idx: np.array
+            feature colum(s) to be considered
+
+        Returns
+        -------
+        : int
+            feature to split on in global self.x index
+        : float
+            min info value
         """
         X_ = self.X[np.ix_(examples_idx, features_idx)]
         y_ = self.y[examples_idx]
-        gain_after = np.apply_along_axis(self._gain_after, 0, X_, y_)
-        argmin_gain_after = np.argmin(gain_after)
-        return features_idx[argmin_gain_after], gain_after[argmin_gain_after]
+        info = np.apply_along_axis(self._info, 0, X_, y_)
+        argmin_info = np.argmin(info)
+        return features_idx[argmin_info], info[argmin_info]
 
     def _build(self, examples_idx, features_idx):
+        """ Builds the tree with the self.X data and self.y classes
+
+        Parameters
+        ----------
+        examples_idx: np.array
+            data row(s) to be considered
+        features_idx: np.array
+            feature colum(s) to be considered
+
+        Returns
+        -------
+        root : Node
+            root node of tree
+        """
         unique, counts = np.unique(self.y[examples_idx], return_counts=True)
         if features_idx.size == 0:
-            return Node(unique[np.argmax(counts)], self.y_encoder, False)
+            return Node(unique[np.argmax(counts)], self.y_encoder)
         if unique.size == 1:
-            return Node(unique[0], self.y_encoder, False)
-        argmin, gain_after = self._split(examples_idx, features_idx)
+            return Node(unique[0], self.y_encoder)
+        argmin, info = self._split(examples_idx, features_idx)
         encoder = self.X_encoders[argmin]
         values = encoder.transform(encoder.classes_)
-        root = Node(self.feature_names[argmin],
+        root = Node(argmin,
                     encoder,
+                    self.feature_names[argmin] if self.feature_names else None,
+                    is_feature=True,
                     details={
                                 'Entropy':
                                 self._entropy(self.y[examples_idx]),
                                 'Info':
-                                gain_after
+                                info
                             })
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx == argmin))
@@ -111,13 +150,15 @@ class Id3Estimator(BaseEstimator):
             new_X = self.X[np.ix_(examples_idx)]
             new_examples_idx = examples_idx[new_X[:, argmin] == value]
             if new_examples_idx.size != 0:
-                root.add_child(self._build(new_examples_idx, new_features_idx), encoder.inverse_transform(value))
+                root.add_child(self._build(new_examples_idx, new_features_idx),
+                               value)
             else:
-                root.add_child(Node(self.y_encoder.inverse_transform(unique[np.argmax(counts)]), self.y_encoder,
-                               False), encoder.inverse_transform(value))
+                root.add_child(Node(unique[np.argmax(counts)],
+                                    self.y_encoder),
+                               value)
         return root
 
-    def fit(self, X, y, feature_names):
+    def fit(self, X, y, feature_names=None):
         """A reference implementation of a fitting function
 
         Parameters
@@ -149,15 +190,19 @@ class Id3Estimator(BaseEstimator):
         self.feature_names = feature_names
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
+        if (self.feature_names and
+                len(self.feature_names) != self.n_features_idx):
+            return ValueError(("feature_names needs to have the same "
+                               "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
-
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
             self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
+        self.tree_ = self._build(np.arange(n_samples),
+                                 np.arange(self.n_features_idx))
         return self
 
     def predict(self, X):

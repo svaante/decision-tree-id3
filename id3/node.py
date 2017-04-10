@@ -3,20 +3,22 @@ class Node():
 
     Parameters
     ----------
-    name : name of the node should be either class or feature name
+    value : value of the node should be either class or feature value
     details : list of values to be saved to be saved by the node
     estimator : label estimator
     is_feature : if current node represent a feature or classification
     """
     def __init__(self,
-                 name,
+                 value,
                  estimator,
-                 is_feature=True,
+                 name=None,
+                 is_feature=False,
                  details=None):
-        self.name = name
+        self.value = value
         self.estimator = estimator
         self.is_feature = is_feature
         self.details = details
+        self.name = name
         self.children = list()
 
     def add_child(self, node, edge_value):
@@ -31,7 +33,7 @@ class Node():
         self.children.append((node, edge_value))
 
     def print_tree(self, prefix=""):
-        print(prefix + str(self.name), end="") 
+        print(prefix + str(self.value), end="") 
         print(" - Feature" if self.is_feature else " - Classification")
         for child, edge in self.children:
             print(prefix + edge.decode('UTF-8'))
