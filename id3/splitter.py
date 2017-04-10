@@ -30,36 +30,40 @@ class Splitter(six.with_metaclass(ABCMeta)):
         p = np.true_divide(count, n)
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
-    @abstractmethod
-    def calc(X, y, examples_idx, features_idx, gain_ratio=False):
-        """
+    def _info_numerical(self, x, y):
+        """ info for numerical feature feature_values
+        sort values then find the best split value
+
+        Parameters
+        ----------
+        x : np.array of shape [n remaining examples]
+            containing feature values
+        y : np.array of shape [n remaining examples]
+            containing relevent class
+
         Returns
         -------
-        : dict
-            Returns all used information used for split
-        : int
-            Feature index for split
+        : float
+            information for remaining examples given feature
+        : float
+            wedge used set1 < wedge <= set2
         """
-        pass
+        sorted_idx = np.argsort(x, kind='quicksort')
+        n = x.size
+        sorted_y = y[sorted_idx]
+        min_info = float('inf')
+        min_info_wedge = 0
+        for i in range(n - 1):
+            if sorted_y[i] != sorted_y[i + 1]:
+                tmp_info = i * self._entropy(sorted_y[0: i]) + \
+                           (n - i) * self._entropy[i:]
+                if tmp_info < min_info:
+                    min_info = tmp_info
+                    min_info_wedge = i
+        return min_info * np.true_divide(1, n), min_info_wedge
 
-    @abstractmethod
-    def split(values):
-        """
-        Returns
-        -------
-        : np.array [n subsets]
-            Array contaning the the subsets for the split
-        """
-        pass
-
-class NominalSplitter(Splitter):
-
-    def __init__(self):
-        self._X = None
-        self._y = None
-
-    def _info(self, x, y):
-        """ info for feature feature_values
+    def _info_nominal(self, x, y):
+        """ info for nominal feature feature_values
         :math: p(a)H(a) :math: from
         https://en.wikipedia.org/wiki/ID3_algorithm
 
@@ -82,33 +86,41 @@ class NominalSplitter(Splitter):
             info += p * self._entropy(y[x == value])
         return info * np.true_divide(1, n)
 
-    def calc(self, X, y, examples_idx, features_idx, gain_ratio=False):
+    def calc(self, X, y, examples_idx, features_idx, is_numerical):
         """
         Returns
         -------
         : int
             Feature index for split
         : dict
-            Returns all used information used for split
+            Returns all information used for split
         """
         calc_info = {
                      'entropy': None,
                      'info': None,
-                     'split': None,
-                     'info_split': None
+                     'wedge': None,
                     }
-        self.X_ = X[np.ix_(examples_idx, features_idx)]
-        self.y_ = y[examples_idx]
-        features_info = np.apply_along_axis(self._info, 0, self.X_, self.y_)
-        argmin_features_info = np.argmin(features_info)
-        entropy = self.super()._entropy(self.y_)
-        info = features_info[argmin_features_info]
+        X_ = X[np.ix_(examples_idx, features_idx)]
+        y_ = y[examples_idx]
+        min_info = float('inf')
+        min_info_sub_idx = 0
+        min_info_wedge = None
+        for i, x_ in zip(range(X_.shape[1]), X_.T):
+            tmp_info, tmp_wedge = 0, 0
+            if is_numerical[features_idx[i]]:
+                tmp_info, tmp_wedge = self._info_numerical(x_, y_)
+            else:
+                tmp_info = self._info_nominal(x_, y_)
+            if tmp_info < min_info:
+                min_info, min_info_wedge = tmp_info, tmp_wedge
+                min_info_sub_idx = i
+        entropy = self.super()._entropy(y_)
         calc_info['entropy'] = entropy
-        calc_info['loss'] = loss
-        return features_idx[argmin_features_info], calc_info
+        calc_info['info'] = min_info
+        calc_info['wedge'] = min_info_wedge
+        return features_idx[min_info_sub_idx], calc_info
 
-
-    def split(values):
+    def split(self, X, y, examples_idx, split_idx, values):
         """
         Returns
         -------
@@ -116,7 +128,3 @@ class NominalSplitter(Splitter):
             Array contaning the the subsets for the split
         """
         pass
-
-class NumericalSplitter(Splitter):
-
-
