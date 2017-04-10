@@ -180,8 +180,8 @@ class Id3Estimator(BaseEstimator):
         self.X = np.zeros(X.shape, dtype=np.int)
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
-            if check_input and check_numerical_array(X_[:, i]):
-                numerical_values.append(i)
+            if check_input:
+                numerical_values.append(check_numerical_array(X_[:, i]))
             self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
