@@ -51,6 +51,7 @@ class Splitter(six.with_metaclass(ABCMeta)):
         sorted_idx = np.argsort(x, kind='quicksort')
         n = x.size
         sorted_y = y[sorted_idx]
+        sorted_x = x[sorted_idx]
         min_info = float('inf')
         min_info_wedge = 0
         for i in range(n - 1):
@@ -59,7 +60,7 @@ class Splitter(six.with_metaclass(ABCMeta)):
                            (n - i) * self._entropy[i:]
                 if tmp_info < min_info:
                     min_info = tmp_info
-                    min_info_wedge = i
+                    min_info_wedge = sorted_x[i + 1]
         return min_info * np.true_divide(1, n), min_info_wedge
 
     def _info_nominal(self, x, y):
