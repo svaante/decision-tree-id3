@@ -37,21 +37,36 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
     dot_data : string
         String representation of the input tree in GraphViz dot format.
     """
+    ranks = {}
+    node_ids = []
     max_depth = 500
-    def _recurse_tree(node, edge=None, parent=None, depth=0):
+    def _recurse_tree(node, node_id=0, edge=None, parent=None, depth=0):
+        #DOT language can't handle ``-``, use ``_`` instead
+        depth += 1
+        node_ids.append(_get_next_id())
         if max_depth is None or depth <= max_depth:
-            out_file.write(_node_to_dot(node, parent, edge))
+            out_file.write(_node_to_dot(node, node_id, parent, edge, depth))
             for child, edge in node.children:
-                _recurse_tree(child, edge, node)
+                _recurse_tree(child, _get_next_id(), edge, node_id, depth)
 
-    def _node_to_dot(node, parent=None, edge=None):
+    def _get_next_id():
+        if len(node_ids) == 0:
+            return 0
+        else:
+            return node_ids[-1] + 1
+    
+    def _node_to_dot(node, n_id=0, parent=None, edge=None, depth=0):
         """Get  a Node objects representation in dot format.
 
         """
         node_repr = []
+        if str(depth) not in ranks:
+            ranks[str(depth)] = []
+        ranks[str(depth)].append(str(n_id))
         
+        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id, node.name, depth))
         if parent != None:
-            node_repr.append('{} -> {} [ label = "{}" ];\n'.format(parent.name, node.name, edge))
+            node_repr.append('{} -> {} [ label = "{}"];\n'.format(parent, n_id, edge, depth))
         res = "".join(node_repr)
         return res
             
@@ -63,8 +78,8 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
         out_file = open(out_file, 'wb')
 
     out_file.write('digraph ID3_Tree {\n')
-    out_file.write('node [shape=box];\n')
-    decision_tree.print_tree()
     _recurse_tree(decision_tree)
+    for rank in sorted(ranks):
+        out_file.write("{rank=same; " + "; ".join(r for r in ranks[rank]) + "};\n")
     out_file.write("}")
     out_file.close()

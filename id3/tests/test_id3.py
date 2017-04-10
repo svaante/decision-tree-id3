@@ -29,7 +29,7 @@ def test_split():
     '''
 
 def test_fit():
-    X, y, targets = load_will_wait()
+    X, y, targets = load_contact_lenses()
     estimator = Id3Estimator()
     estimator.fit(X, y, targets)
     export_graphviz(estimator.tree_)
