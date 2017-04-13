@@ -1,12 +1,12 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
-from sklearn.extarnals import six
+from sklearn.externals import six
 
 
-class Splitter(six.with_metaclass(ABCMeta)):
+class BaseSplitter(six.with_metaclass(ABCMeta)):
 
-    def __init__(self):
-        pass
+    def __init__(self, is_numerical):
+        self._is_numerical = is_numerical
 
     def _entropy(self, y):
         """ Entropy for the classes in the array y
@@ -46,22 +46,22 @@ class Splitter(six.with_metaclass(ABCMeta)):
         : float
             information for remaining examples given feature
         : float
-            wedge used set1 < wedge <= set2
+            pivot used set1 < pivot <= set2
         """
         sorted_idx = np.argsort(x, kind='quicksort')
         n = x.size
         sorted_y = y[sorted_idx]
         sorted_x = x[sorted_idx]
         min_info = float('inf')
-        min_info_wedge = 0
+        min_info_pivot = 0
         for i in range(n - 1):
             if sorted_y[i] != sorted_y[i + 1]:
                 tmp_info = i * self._entropy(sorted_y[0: i]) + \
                            (n - i) * self._entropy[i:]
                 if tmp_info < min_info:
                     min_info = tmp_info
-                    min_info_wedge = sorted_x[i + 1]
-        return min_info * np.true_divide(1, n), min_info_wedge
+                    min_info_pivot = sorted_x[i + 1]
+        return min_info * np.true_divide(1, n), min_info_pivot
 
     def _info_nominal(self, x, y):
         """ info for nominal feature feature_values
@@ -87,7 +87,7 @@ class Splitter(six.with_metaclass(ABCMeta)):
             info += p * self._entropy(y[x == value])
         return info * np.true_divide(1, n)
 
-    def calc(self, X, y, examples_idx, features_idx, is_numerical):
+    def calc(self, X, y, examples_idx, features_idx):
         """
         Returns
         -------
@@ -99,26 +99,26 @@ class Splitter(six.with_metaclass(ABCMeta)):
         calc_info = {
                      'entropy': None,
                      'info': None,
-                     'wedge': None,
+                     'pivot': None,
                     }
         X_ = X[np.ix_(examples_idx, features_idx)]
         y_ = y[examples_idx]
         min_info = float('inf')
         min_info_sub_idx = 0
-        min_info_wedge = None
+        min_info_pivot = None
         for i, x_ in zip(range(X_.shape[1]), X_.T):
-            tmp_info, tmp_wedge = 0, 0
-            if is_numerical[features_idx[i]]:
-                tmp_info, tmp_wedge = self._info_numerical(x_, y_)
+            tmp_info, tmp_pivot = 0, 0
+            if self._is_numerical[features_idx[i]]:
+                tmp_info, tmp_pivot = self._info_numerical(x_, y_)
             else:
                 tmp_info = self._info_nominal(x_, y_)
             if tmp_info < min_info:
-                min_info, min_info_wedge = tmp_info, tmp_wedge
+                min_info, min_info_pivot = tmp_info, tmp_pivot
                 min_info_sub_idx = i
         entropy = self.super()._entropy(y_)
         calc_info['entropy'] = entropy
         calc_info['info'] = min_info
-        calc_info['wedge'] = min_info_wedge
+        calc_info['pivot'] = min_info_pivot
         return features_idx[min_info_sub_idx], calc_info
 
     def split(self, X, y, examples_idx, split_idx, values):

@@ -9,6 +9,7 @@ from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
 
 from .node import Node
+from .splitter import BaseSplitter
 from .utils import check_numerical_array
 
 # TODO(svaante): Intrinsic information
@@ -23,52 +24,6 @@ class Id3Estimator(BaseEstimator):
     """
     def __init__(self, demo_param='demo_param'):
         self.demo_param = demo_param
-
-    def _entropy(self, y):
-        """ Entropy for the classes in the array y
-        :math: \sum_{x \in X} p(x) \log_{2}(1/p(x)) :math: from
-        https://en.wikipedia.org/wiki/ID3_algorithm
-
-        Parameters
-        ----------
-        y : nparray of shape [n remaining attributes]
-            containing the class names
-
-        Returns
-        -------
-        : float
-            information for remaining examples given feature
-        """
-        n = y.shape[0]
-        if n <= 0:
-            return 0
-        _, count = np.unique(y, return_counts=True)
-        p = np.true_divide(count, n)
-        return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
-
-    def _info(self, feature_values, y):
-        """ info for feature feature_values
-        :math: p(a)H(a) :math: from
-        https://en.wikipedia.org/wiki/ID3_algorithm
-
-        Parameters
-        ----------
-        feature_values : np.array of shape [n remaining examples]
-            containing feature values
-        y : np.array of shape [n remaining examples]
-            containing relevant class
-
-        Returns
-        -------
-        : float
-            information for remaining examples given feature
-        """
-        info = 0
-        n = feature_values.shape[0]
-        unique, count = np.unique(feature_values, return_counts=True)
-        for value, p in zip(unique, count):
-            info += p * self._entropy(y[feature_values == value])
-        return info * np.true_divide(1, n)
 
     def _split(self, examples_idx, features_idx):
         """ Returns feature index for max info split
@@ -113,6 +68,7 @@ class Id3Estimator(BaseEstimator):
             return Node(unique[np.argmax(counts)], self.y_encoder)
         if unique.size == 1:
             return Node(unique[0], self.y_encoder)
+        self._splitter._split()
         argmin, info = self._split(examples_idx, features_idx)
         encoder = self.X_encoders[argmin]
         values = encoder.transform(encoder.classes_)
@@ -170,7 +126,7 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         self.feature_names = feature_names
-        numerical_values = []
+        is_numerical = []
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
         if (self.feature_names is not None and
@@ -181,11 +137,12 @@ class Id3Estimator(BaseEstimator):
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
             if check_input:
-                numerical_values.append(check_numerical_array(X_[:, i]))
+                is_numerical.append(check_numerical_array(X_[:, i]))
             self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = LabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
+        self._splitter = BaseSplitter(is_numerical)
         self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
         return self
 

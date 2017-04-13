@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
 from id3 import Id3Estimator
-from id3.data import load_contact_lenses, load_will_wait
+from id3.data import load_contact_lenses, load_will_wait, load_weather
 from sklearn.preprocessing import LabelEncoder
 from id3 import export_graphviz
 
