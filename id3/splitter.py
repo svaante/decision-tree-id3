@@ -1,11 +1,25 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from sklearn.externals import six
-import namedtuple
 
-CalcRecord = namedtuple('CalcRecord', ['feature_idx', 'entropy', 'info', 'pivot', 'type'])
-NUM = 0
-NOM = 1
+
+class CalcRecord():
+    NUM = 0
+    NOM = 1
+
+    def __init__(self, split_type, info, feature_idx=None, entropy=None,
+                 pivot=None):
+        self.split_type = split_type
+        self.feature_idx = feature_idx
+        self.entropy = entropy
+        self.info = info
+        self.pivot = pivot
+
+    def __lt__(self, other):
+        if not isinstance(other, CalcRecord):
+            return False
+        return self.info < other.info
+
 
 class BaseSplitter(six.with_metaclass(ABCMeta)):
 
@@ -15,10 +29,9 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         self.calc_info = None
         self.examples_idx = None
 
-
+    @abstractmethod
     def _info(self, x, y):
         pass
-
 
     def _entropy(self, y):
         """ Entropy for the classes in the array y
@@ -42,7 +55,6 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         p = np.true_divide(count, n)
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
-
     def calc(self, X, y, examples_idx, features_idx):
         """
         Returns
@@ -55,7 +67,6 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         self.X_ = X[np.ix_(examples_idx, features_idx)]
         self.y_ = y[examples_idx]
         self.examples_idx = examples_idx
-
 
     def split(self, nominal_values=None):
         """
@@ -83,29 +94,33 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
 
 class NumericalSplitter(BaseSplitter):
 
-
     def calc(self, X, y, examples_idx, features_idx):
+        """
         super().calc()
+        min_info = float('inf')
+        min_idx = -1
         for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
             tmp_info, tmp_pivot = self._info(x_, self.y_)
-            min_info, min_info_pivot, min_info_idx = self._update_info(min_info,
-                                                                       tmp_info,
-                                                                       min_info_idx,
-                                                                       i
-                                                                       )
-        self.split_idx = features_id[min_info_idx]
+            min_info, min_pivot, min_idx = self._update_info(min_info,
+                                                             tmp_info,
+                                                             min_idx,
+                                                             i)
+        self.split_idx = features_idx[min_idx]
         entropy = self._entropy(self.y_)
-        self.calc_record = Point(features_idx[min_info_idx],
-                                 entropy,
-                                 min_info,
-                                 min_info_pivot,
-                                 NUM)
+        self.calc_record = CalcRecord(features_idx[min_idx],
+                                      entropy,
+                                      min_info,
+                                      min_pivot,
+                                      NUM)
         return self.calc_record
-
+        """
+        pass
 
     def _update_info(self, min_info, tmp_info, min_info_idx, tmp_idx):
-        return (min_info, min_info_idx) if min_info[0] < tmp_info[0] else (tmp_info, tmp_idx)
-
+        if min_info[0] < tmp_info[0]:
+            return (min_info, min_info_idx)
+        else:
+            return (tmp_info, tmp_idx)
 
     def _info(self, x, y):
         """ Info for numerical feature feature_values
@@ -138,25 +153,37 @@ class NumericalSplitter(BaseSplitter):
                 if tmp_info < min_info:
                     min_info = tmp_info
                     min_info_pivot = sorted_x[i + 1]
-        return min_info * np.true_divide(1, n), min_info_pivot
+        return CalcRecord(CalcRecord.NUM,
+                          min_info * np.true_divide(1, n),
+                          pivot=min_info_pivot)
 
 
 class NominalSplitter(BaseSplitter):
 
+    def __init__(self, encoders):
+        self.encoders = encoders
+
     def calc(self, X, y, examples_idx, features_idx):
+        """
         super.calc(X, y, examples_idx, features_idx)
+        min_info = float('inf')
+        min_idx = -1
         for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
             tmp_info = self._info(x_, self.y_)
-            tmp_info, min_info_idx = self._update_info(min_info, tmp_info, min_info_idx, i)
-        self.split_idx = features_idx[min_info_idx]
+            tmp_info, min_idx = self._update_info(min_info,
+                                                  tmp_info,
+                                                  min_idx,
+                                                  i)
+        self.split_idx = features_idx[min_idx]
         entropy = self._entropy(self.y_)
-        self.calc_record = Point(features_idx[min_info_idx],
-                                 entropy,
-                                 min_info,
-                                 None,
-                                 NOM)
+        self.calc_record = CalcRecord(features_idx[min_idx],
+                                      entropy,
+                                      min_info,
+                                      None,
+                                      NOM)
         return self.calc_record
-
+        """
+        pass
 
     def _info(self, x, y):
         """ Info for nominal feature feature_values
@@ -181,41 +208,40 @@ class NominalSplitter(BaseSplitter):
         unique, count = np.unique(x, return_counts=True)
         for value, p in zip(unique, count):
             info += p * self._entropy(y[x == value])
-        return info * np.true_divide(1, n)
-
+        return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n))
 
     def _update_info(self, min_info, tmp_info, min_info_idx, tmp_idx):
-        return (min_info, min_info_idx) if min_info < tmp_info else (tmp_info, tmp_idx)
+        if min_info < tmp_info:
+            return (min_info, min_info_idx)
+        else:
+            return (tmp_info, tmp_idx)
 
 
 class HybridSplitter(BaseSplitter):
 
-    def __init__(self, is_numerical):
+    def __init__(self, is_numerical, encoders):
         self._is_numerical = is_numerical
         self._numerical_splitter = NumericalSplitter()
-        self._nominal_splitter = NominalSplitter()
+        self._nominal_splitter = NominalSplitter(encoders)
 
     def calc(self, X, y, examples_idx, features_idx):
         super.calc(X, y, examples_idx, features_idx)
-        min_info = float('inf')
-        min_info_sub_idx = 0
+        calc_record = None
         for feature, idx in enumerate(self._X.T):
             splitter = self._get_splitter(idx)
-            tmp_info = splitter._info(feature, y)
-            min_info, min_info_idx = splitter._update_info(min_info, tmp_info, min_info_idx, idx)
-        self.split_idx = features_idx[min_info_sub_idx]
-        entropy = self._entropy(self.y_)
-        self.calc_record = CalcRecord(features_idx[min_info_sub_idx],
-                                 entropy,
-                                 min_info,
-                                 None,
-                                 NOM)
+            tmp_calc_record = splitter._info(feature, self.y_)
+            tmp_calc_record.feature_idx = features_idx[idx]
+            if tmp_calc_record < calc_record:
+                calc_record = tmp_calc_record
+        calc_record.entropy = self._entropy(self.y_)
         return self.calc_record
+
+    def split(self):
+        splitter = self._get_splitter(self.calc_record.feature_idx)
+        splitter.split(self.X_, )
 
     def _get_splitter(self, idx):
         if self._is_numerical[idx]:
             return self._numerical_splitter
         else:
             return self._nominal_splitter
-
-
