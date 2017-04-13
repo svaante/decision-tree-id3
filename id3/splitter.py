@@ -19,6 +19,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
     def _info(self, x, y):
         pass
 
+
     def _entropy(self, y):
         """ Entropy for the classes in the array y
         :math: \sum_{x \in X} p(x) \log_{2}(1/p(x)) :math: from
@@ -41,6 +42,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         p = np.true_divide(count, n)
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
+
     def calc(self, X, y, examples_idx, features_idx):
         """
         Returns
@@ -53,31 +55,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         self.X_ = X[np.ix_(examples_idx, features_idx)]
         self.y_ = y[examples_idx]
         self.examples_idx = examples_idx
-        min_info = float('inf')
-        min_info_sub_idx = 0
-        min_info_pivot = None
-        for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
-            tmp_info, tmp_pivot = None, None
-            if self._is_numerical[features_idx[i]]:
-                tmp_info, tmp_pivot = self._info_numerical(x_, self.y_)
-            else:
-                tmp_info = self._info_nominal(x_, self.y_)
-            if tmp_info < min_info:
-                min_info, min_info_pivot = tmp_info, tmp_pivot
-                min_info_sub_idx = i
-        if min_info_pivot is None:
-            is_numerical_split = False
-        else:
-            is_numerical_split = True
-            pivot = min_info_pivot
-        self.split_idx = features_idx[min_info_sub_idx]
-        entropy = self.super()._entropy(self.y_)
-        self.calc_info['features_idx'] = features_idx[min_info_sub_idx]
-        self.calc_info['entropy'] = entropy
-        self.calc_info['info'] = min_info
-        self.calc_info['pivot'] = pivot
-        self.calc_info['type'] = self.NUM if is_numerical_split else self.NOM
-        return self.calc_info
+
 
     def split(self, nominal_values=None):
         """
@@ -85,6 +63,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         -------
         : list
             Array contaning the the subsets for the split
+        """
         """
         if self._X is None:
             return None
@@ -98,6 +77,9 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
             for value, i in enumerate(nominal_values):
                 bags[i] = np.where(self.X_[:, feature_idx] == value)
             return bags
+        """
+        pass
+
 
 class NumericalSplitter(BaseSplitter):
 
@@ -106,12 +88,14 @@ class NumericalSplitter(BaseSplitter):
         super().calc()
         for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
             tmp_info, tmp_pivot = self._info(x_, self.y_)
-            if tmp_info < min_info:
-                min_info, min_info_pivot = tmp_info, tmp_pivot
-                min_info_sub_idx = i
-        self.split_idx = features_id[min_info_sub_idx]
+            min_info, min_info_pivot, min_info_idx = self._update_info(min_info,
+                                                                       tmp_info,
+                                                                       min_info_idx,
+                                                                       i
+                                                                       )
+        self.split_idx = features_id[min_info_idx]
         entropy = self._entropy(self.y_)
-        self.calc_record = Point(features_idx[min_info_sub_idx],
+        self.calc_record = Point(features_idx[min_info_idx],
                                  entropy,
                                  min_info,
                                  min_info_pivot,
@@ -119,8 +103,8 @@ class NumericalSplitter(BaseSplitter):
         return self.calc_record
 
 
-    def _update_info(self, min_info, tmp_info):
-        return min_info if min_info[0] < tmp_info[0] else tmp_info
+    def _update_info(self, min_info, tmp_info, min_info_idx, tmp_idx):
+        return (min_info, min_info_idx) if min_info[0] < tmp_info[0] else (tmp_info, tmp_idx)
 
 
     def _info(self, x, y):
@@ -156,17 +140,17 @@ class NumericalSplitter(BaseSplitter):
                     min_info_pivot = sorted_x[i + 1]
         return min_info * np.true_divide(1, n), min_info_pivot
 
+
 class NominalSplitter(BaseSplitter):
 
     def calc(self, X, y, examples_idx, features_idx):
+        super.calc(X, y, examples_idx, features_idx)
         for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
             tmp_info = self._info(x_, self.y_)
-            if tmp_info < min_info:
-                min_info = tmp_info
-                min_info_sub_idx = i
-        self.split_idx = features_idx[min_info_sub_idx]
+            tmp_info, min_info_idx = self._update_info(min_info, tmp_info, min_info_idx, i)
+        self.split_idx = features_idx[min_info_idx]
         entropy = self._entropy(self.y_)
-        self.calc_record = Point(features_idx[min_info_sub_idx],
+        self.calc_record = Point(features_idx[min_info_idx],
                                  entropy,
                                  min_info,
                                  None,
@@ -200,8 +184,9 @@ class NominalSplitter(BaseSplitter):
         return info * np.true_divide(1, n)
 
 
-    def _update_info(self, min_info, tmp_info):
-        return min_info if min_info < tmp_info else tmp_info
+    def _update_info(self, min_info, tmp_info, min_info_idx, tmp_idx):
+        return (min_info, min_info_idx) if min_info < tmp_info else (tmp_info, tmp_idx)
+
 
 class HybridSplitter(BaseSplitter):
 
@@ -211,16 +196,16 @@ class HybridSplitter(BaseSplitter):
         self._nominal_splitter = NominalSplitter()
 
     def calc(self, X, y, examples_idx, features_idx):
+        super.calc(X, y, examples_idx, features_idx)
         min_info = float('inf')
         min_info_sub_idx = 0
         for feature, idx in enumerate(self._X.T):
             splitter = self._get_splitter(idx)
             tmp_info = splitter._info(feature, y)
-            min_info = splitter._update_info(min_info, tmp_info)
-            min_info_sub_idx = idx
+            min_info, min_info_idx = splitter._update_info(min_info, tmp_info, min_info_idx, idx)
         self.split_idx = features_idx[min_info_sub_idx]
         entropy = self._entropy(self.y_)
-        self.calc_record = Point(features_idx[min_info_sub_idx],
+        self.calc_record = CalcRecord(features_idx[min_info_sub_idx],
                                  entropy,
                                  min_info,
                                  None,

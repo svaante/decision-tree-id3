@@ -171,7 +171,13 @@ class Id3Estimator(BaseEstimator):
         self.y_encoder = LabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        self._splitter = BaseSplitter(is_numerical)
+        if not any(is_numerical):
+            self._splitter = NominalSplitter(self.X_encoders)
+        elif all(is_numerical):
+            self._splitter = NumericalSplitter()
+        else:
+            self._splitter = HybridSplitter(self.X_encoders, is_numerical)
+
         self.tree_ = self._build(np.arange(n_samples),
                                  np.arange(self.n_features_idx))
         return self
