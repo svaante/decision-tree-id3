@@ -11,6 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 from .node import Node
 from .splitter import BaseSplitter
 from .utils import check_numerical_array
+from .splitter import CalcRecord
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -24,29 +25,6 @@ class Id3Estimator(BaseEstimator):
     """
     def __init__(self, demo_param='demo_param'):
         self.demo_param = demo_param
-
-    def _split(self, examples_idx, features_idx):
-        """ Returns feature index for max info split
-
-        Parameters
-        ----------
-        examples_idx: np.array
-            data row(s) to be considered
-        features_idx: np.array
-            feature colum(s) to be considered
-
-        Returns
-        -------
-        : int
-            feature to split on in global self.x index
-        : float
-            min info value
-        """
-        X_ = self.X[np.ix_(examples_idx, features_idx)]
-        y_ = self.y[examples_idx]
-        info = np.apply_along_axis(self._info, 0, X_, y_)
-        argmin_info = np.argmin(info)
-        return features_idx[argmin_info], info[argmin_info]
 
     def _build2(self, examples_idx, features_idx):
         """ Builds the tree with the self.X data and self.y classes
@@ -122,22 +100,19 @@ class Id3Estimator(BaseEstimator):
             return Node(unique[np.argmax(counts)], self.y_encoder)
         if unique.size == 1:
             return Node(unique[0], self.y_encoder)
-        self._splitter._split()
-        argmin, info = self._split(examples_idx, features_idx)
-        encoder = self.X_encoders[argmin]
+        calc_record = self._splitter.calc(self.X, self.y, examples_idx, features_idx)
+        best_feature = calc_record.feature_idx
+        encoder = self.X_encoders[best_feature]
         values = encoder.transform(encoder.classes_)
-        root = Node(argmin,
+        root = Node(best_feature,
                     encoder,
-                    self.feature_names[argmin] if self.feature_names is not None else None,
+                    self.feature_names[best_feature] if self.feature_names is not None else None,
                     is_feature=True,
-                    details={
-                                'Entropy':
-                                self._entropy(self.y[examples_idx]),
-                                'Info':
-                                info
-                            })
+                    details=calc_record
+                    )
         new_features_idx = np.delete(features_idx,
-                                     np.where(features_idx == argmin))
+                                     np.where(features_idx == best_feature))
+        self._splitter.split(self.X, self.y, new_features_idx, examples_idx)
         for value in values:
             new_X = self.X[np.ix_(examples_idx)]
             new_examples_idx = examples_idx[new_X[:, argmin] == value]
