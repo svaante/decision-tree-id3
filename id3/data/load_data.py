@@ -4,6 +4,29 @@ import os
 
 data_dir = os.path.dirname(os.path.abspath(__file__))
 def load_data(path, nominal=True):
+    """Loads data from path
+
+    Parameters
+    ----------
+    path : String
+        Name of file to be loaded.
+
+    nominal : Boolean
+        Flag if data should be loaded as nominal
+
+    Returns
+    -------
+    data : np.array
+        A 2D array with each column representing a feature of the data and
+        each row representing a sample.
+
+    target : np.array
+        A 1D array with the target variables for the samples in the loaded data.
+        
+    target_names : np.array
+        A 1D array with the classification names for the targets in the loaded data.
+
+    """
     path = os.path.join(data_dir, path)
     with open(path, 'r', encoding='utf8') as f:
         data_file = csv.reader(f)
@@ -22,10 +45,55 @@ def load_data(path, nominal=True):
     return data, target, target_names
 
 def load_contact_lenses():
-    return load_data('contact_lenses.csv')
+    """Loads the dataset ``contact lenses``
+
+    Returns
+    -------
+    data : np.array
+        A 2D array with each column representing a feature of the data and
+        each row representing a sample.
+
+    target : np.array
+        A 1D array with the target variables for the samples in the loaded data.
+        
+    target_names : np.array
+        A 1D array with the classification names for the targets in the loaded data.
+
+    """
+    data, target, target_names = load_data('contact_lenses.csv')
+    return data, target, target_names
 
 def load_will_wait():
+    """Loads the dataset ``will wait``
+
+    Returns
+    -------
+    data : np.array
+        A 2D array with each column representing a feature of the data and
+        each row representing a sample.
+
+    target : np.array
+        A 1D array with the target variables for the samples in the loaded data.
+        
+    target_names : np.array
+        A 1D array with the classification names for the targets in the loaded data.
+
+    """
     return load_data('will_wait.csv')
 
 def load_weather():
+    """Loads the dataset ``weather``
+
+    Returns
+    -------
+    data : np.array
+        A 2D array with each column representing a feature of the data and
+        each row representing a sample.
+
+    target : np.array
+        A 1D array with the target variables for the samples in the loaded data.
+        
+    target_names : np.array
+        A 1D array with the classification names for the targets in the loaded data.
+
     return load_data('weather.csv')
