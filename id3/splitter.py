@@ -5,8 +5,15 @@ from sklearn.externals import six
 
 class BaseSplitter(six.with_metaclass(ABCMeta)):
 
+    NUM = 0
+    NOM = 1
+
     def __init__(self, is_numerical):
+        self._X = None
+        self._y = None
         self._is_numerical = is_numerical
+        self.calc_info = None
+        self.examples_idx = None
 
     def _entropy(self, y):
         """ Entropy for the classes in the array y
@@ -96,36 +103,58 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         : dict
             Returns all information used for split
         """
-        calc_info = {
+        self.calc_info = {
+                     'feature_idx': None,
                      'entropy': None,
                      'info': None,
                      'pivot': None,
+                     'type': None,
                     }
-        X_ = X[np.ix_(examples_idx, features_idx)]
-        y_ = y[examples_idx]
+        self.X_ = X[np.ix_(examples_idx, features_idx)]
+        self.y_ = y[examples_idx]
+        self.examples_idx = examples_idx
         min_info = float('inf')
         min_info_sub_idx = 0
         min_info_pivot = None
-        for i, x_ in zip(range(X_.shape[1]), X_.T):
-            tmp_info, tmp_pivot = 0, 0
+        for i, x_ in zip(range(self.X_.shape[1]), self.X_.T):
+            tmp_info, tmp_pivot = None, None
             if self._is_numerical[features_idx[i]]:
-                tmp_info, tmp_pivot = self._info_numerical(x_, y_)
+                tmp_info, tmp_pivot = self._info_numerical(x_, self.y_)
             else:
-                tmp_info = self._info_nominal(x_, y_)
+                tmp_info = self._info_nominal(x_, self.y_)
             if tmp_info < min_info:
                 min_info, min_info_pivot = tmp_info, tmp_pivot
                 min_info_sub_idx = i
-        entropy = self.super()._entropy(y_)
-        calc_info['entropy'] = entropy
-        calc_info['info'] = min_info
-        calc_info['pivot'] = min_info_pivot
-        return features_idx[min_info_sub_idx], calc_info
+        if min_info_pivot is None:
+            is_numerical_split = False
+        else:
+            is_numerical_split = True
+            pivot = min_info_pivot
+        self.split_idx = features_idx[min_info_sub_idx]
+        entropy = self.super()._entropy(self.y_)
+        self.calc_info['features_idx'] = features_idx[min_info_sub_idx]
+        self.calc_info['entropy'] = entropy
+        self.calc_info['info'] = min_info
+        self.calc_info['pivot'] = pivot
+        self.calc_info['type'] = self.NUM if is_numerical_split else self.NOM
+        return self.calc_info
 
-    def split(self, X, y, examples_idx, split_idx, values):
+    def split(self, nominal_values=None):
         """
         Returns
         -------
-        : np.array [n subsets]
+        : list
             Array contaning the the subsets for the split
         """
-        pass
+        if self._X is None:
+            return None
+        if nominal_values is None:
+            feature_idx = self.calc_info["features_idx"]
+            pivot = self.calc_info["pivot"]
+            return [np.where(self.X_[:, feature_idx] < pivot),
+                    np.where(pivot <= self.X_[:, feature_idx])]
+        else:
+            bags = [None] * len(nominal_values)
+            for value, i in enumerate(nominal_values):
+                bags[i] = np.where(self.X_[:, feature_idx] == value)
+            return bags

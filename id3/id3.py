@@ -48,6 +48,60 @@ class Id3Estimator(BaseEstimator):
         argmin_info = np.argmin(info)
         return features_idx[argmin_info], info[argmin_info]
 
+    def _build2(self, examples_idx, features_idx):
+        """ Builds the tree with the self.X data and self.y classes
+
+        Parameters
+        ----------
+        examples_idx: np.array
+            data row(s) to be considered
+        features_idx: np.array
+            feature colum(s) to be considered
+
+        Returns
+        -------
+        root : Node
+            root node of tree
+        """
+        unique, counts = np.unique(self.y[examples_idx], return_counts=True)
+        if features_idx.size == 0:
+            return Node(unique[np.argmax(counts)], self.y_encoder)
+        if unique.size == 1:
+            return Node(unique[0], self.y_encoder)
+        calc_info = self._splitter.calc(self.X, self.y, examples_idx,
+                                        features_idx)
+        encoder = self.X_encoders[calc_info['feature_idx']]
+        values = encoder.transform(encoder.classes_)
+        feature_name = (self.feature_names[calc_info['feature_idx']]
+                        if self.feature_names is not None else None)
+        root = Node(calc_info['feature_idx'],
+                    encoder,
+                    feature_name,
+                    is_feature=True,
+                    details=calc_info)
+        new_features_idx = np.delete(features_idx,
+                                     np.where(features_idx ==
+                                              calc_info['feature_idx']))
+        bags = None
+        if calc_info['type'] == self._splitter.NOM:
+            bags = self._splitter.split(values)
+        else:
+            bags = self._splitter.split()
+        for bag in bags:
+            if bag == None:
+                root.add_child(self._build(new_examples_idx, new_features_idx),
+                               value)
+            new_X = self.X[np.ix_(examples_idx)]
+            new_examples_idx = examples_idx[new_X[:, argmin] == value]
+            if new_examples_idx.size != 0:
+                root.add_child(self._build(new_examples_idx, new_features_idx),
+                               value)
+            else:
+                root.add_child(Node(unique[np.argmax(counts)],
+                                    self.y_encoder),
+                               value)
+        return root
+
     def _build(self, examples_idx, features_idx):
         """ Builds the tree with the self.X data and self.y classes
 
@@ -132,7 +186,7 @@ class Id3Estimator(BaseEstimator):
         if (self.feature_names is not None and
                 len(self.feature_names) != (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
-                               "number of elements as features in X"),)
+                              "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
         self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
         for i in range(self.n_features_idx):
@@ -143,7 +197,8 @@ class Id3Estimator(BaseEstimator):
         self.y = self.y_encoder.fit_transform(y)
 
         self._splitter = BaseSplitter(is_numerical)
-        self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
+        self.tree_ = self._build(np.arange(n_samples),
+                                 np.arange(self.n_features_idx))
         return self
 
     def predict(self, X):
