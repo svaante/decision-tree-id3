@@ -33,13 +33,16 @@ class Node():
         self.children.append((node, edge_value))
 
     def print_tree(self, prefix=""):
-        print(prefix + str(self.value), end="") 
-        try:
-            print(" - Entropy - {}".format(self.details['Entropy']), end="")
-            print(" - Gain - {}".format(self.details['Info']), end="")
-        except KeyError:
-            pass
+        if self.is_feature:
+            print(prefix + self.name, end="") 
+            try:
+                print(" - Entropy - {}".format(self.details.entropy), end="")
+                print(" - Gain - {}".format(self.details.info), end="")
+            except KeyError:
+                pass
+        else:
+            print(prefix + str(self.estimator.inverse_transform(self.value)), end="") 
         print(" - Feature" if self.is_feature else " - Classification")
         for child, edge in self.children:
-            print(prefix + edge.decode('UTF-8'))
+            print(prefix + str(edge))
             child.print_tree(prefix + "\t")
