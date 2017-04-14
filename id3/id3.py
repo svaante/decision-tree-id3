@@ -9,9 +9,8 @@ from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import LabelEncoder
 
 from .node import Node
-from .splitter import BaseSplitter
+from .splitter import HybridSplitter, NumericalSplitter, NominalSplitter, CalcRecord
 from .utils import check_numerical_array
-from .splitter import CalcRecord
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -102,17 +101,15 @@ class Id3Estimator(BaseEstimator):
             return Node(unique[0], self.y_encoder)
         calc_record = self._splitter.calc(self.X, self.y, examples_idx, features_idx)
         best_feature = calc_record.feature_idx
-        encoder = self.X_encoders[best_feature]
-        values = encoder.transform(encoder.classes_)
         root = Node(best_feature,
-                    encoder,
+                    None,
                     self.feature_names[best_feature] if self.feature_names is not None else None,
                     is_feature=True,
                     details=calc_record
                     )
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx == best_feature))
-        self._splitter.split(self.X, self.y, new_features_idx, examples_idx)
+        self._splitter.split()
         for value in values:
             new_X = self.X[np.ix_(examples_idx)]
             new_examples_idx = examples_idx[new_X[:, argmin] == value]
@@ -176,7 +173,7 @@ class Id3Estimator(BaseEstimator):
         elif all(is_numerical):
             self._splitter = NumericalSplitter()
         else:
-            self._splitter = HybridSplitter(self.X_encoders, is_numerical)
+            self._splitter = HybridSplitter(is_numerical, self.X_encoders)
 
         self.tree_ = self._build(np.arange(n_samples),
                                  np.arange(self.n_features_idx))

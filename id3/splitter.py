@@ -23,15 +23,16 @@ class CalcRecord():
 
 class BaseSplitter(six.with_metaclass(ABCMeta)):
 
-    def __init__(self, is_numerical):
+    def __init__(self):
         self._X = None
         self._y = None
         self.calc_info = None
         self.examples_idx = None
 
-    @abstractmethod
+
     def _info(self, x, y):
         pass
+
 
     def _entropy(self, y):
         """ Entropy for the classes in the array y
@@ -55,6 +56,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         p = np.true_divide(count, n)
         return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
 
+
     def calc(self, X, y, examples_idx, features_idx):
         """
         Returns
@@ -67,6 +69,7 @@ class BaseSplitter(six.with_metaclass(ABCMeta)):
         self.X_ = X[np.ix_(examples_idx, features_idx)]
         self.y_ = y[examples_idx]
         self.examples_idx = examples_idx
+
 
     def split(self, nominal_values=None):
         """
@@ -149,13 +152,17 @@ class NumericalSplitter(BaseSplitter):
         for i in range(n - 1):
             if sorted_y[i] != sorted_y[i + 1]:
                 tmp_info = i * self._entropy(sorted_y[0: i]) + \
-                           (n - i) * self._entropy[i:]
+                           (n - i) * self._entropy(sorted_y[i:])
                 if tmp_info < min_info:
                     min_info = tmp_info
                     min_info_pivot = sorted_x[i + 1]
         return CalcRecord(CalcRecord.NUM,
                           min_info * np.true_divide(1, n),
                           pivot=min_info_pivot)
+
+
+        def split(self):
+            pass
 
 
 class NominalSplitter(BaseSplitter):
@@ -224,21 +231,25 @@ class HybridSplitter(BaseSplitter):
         self._numerical_splitter = NumericalSplitter()
         self._nominal_splitter = NominalSplitter(encoders)
 
+
     def calc(self, X, y, examples_idx, features_idx):
-        super.calc(X, y, examples_idx, features_idx)
-        calc_record = None
-        for feature, idx in enumerate(self._X.T):
+        super().calc(X, y, examples_idx, features_idx)
+        calc_record = CalcRecord(-1, float('inf'))
+        for idx, feature in enumerate(self.X_.T):
             splitter = self._get_splitter(idx)
             tmp_calc_record = splitter._info(feature, self.y_)
             tmp_calc_record.feature_idx = features_idx[idx]
             if tmp_calc_record < calc_record:
                 calc_record = tmp_calc_record
         calc_record.entropy = self._entropy(self.y_)
+        self.calc_record = calc_record
         return self.calc_record
+
 
     def split(self):
         splitter = self._get_splitter(self.calc_record.feature_idx)
-        splitter.split(self.X_, )
+        splitter.split()
+
 
     def _get_splitter(self, idx):
         if self._is_numerical[idx]:
