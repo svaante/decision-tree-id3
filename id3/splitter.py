@@ -160,6 +160,13 @@ class NumericalSplitter(BaseSplitter):
                           min_info * np.true_divide(1, n),
                           pivot=min_info_pivot)
 
+    def split(self, X_, examples_idx, calc_info):
+        feature_sub_idx = examples_idx[calc_info.feature_idx]
+        return [examples_idx[np.where(X_[:, feature_sub_idx] <
+                                      calc_info.pivot)],
+                examples_idx[np.where(X_[:, feature_sub_idx] >=
+                                      calc_info.pivot)]]
+
 
         def split(self):
             pass
@@ -217,6 +224,15 @@ class NominalSplitter(BaseSplitter):
             info += p * self._entropy(y[x == value])
         return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n))
 
+    def split(self, X_, examples_idx, calc_info):
+        encoder = self.encoders[calc_info.feature_idx]
+        values = encoder.transform(_classes)
+        bag = [None] * len(values)
+        for value, i in enumerate(values):
+            feature_sub_idx = examples_idx[calc_info.feature_idx]
+            bag[i] = examples_idx[np.where(X_[:, feature_sub_idx] == value)]
+        return bag
+
     def _update_info(self, min_info, tmp_info, min_info_idx, tmp_idx):
         if min_info < tmp_info:
             return (min_info, min_info_idx)
@@ -248,8 +264,7 @@ class HybridSplitter(BaseSplitter):
 
     def split(self):
         splitter = self._get_splitter(self.calc_record.feature_idx)
-        splitter.split()
-
+        splitter.split(self.X_, self.examples_idx, self.calc_info)
 
     def _get_splitter(self, idx):
         if self._is_numerical[idx]:
