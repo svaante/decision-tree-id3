@@ -87,11 +87,22 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
             ranks[str(depth)] = []
         ranks[str(depth)].append(str(n_id))
         
-        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id, node.value, depth))
+        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id,
+                                                                                              _extract_node_info(node),
+                                                                                              depth))
         if parent != None:
             node_repr.append('{} -> {} [ label = "{}"];\n'.format(parent, n_id, edge, depth))
         res = "".join(node_repr)
         return res
+
+    def _extract_node_info(node):
+        result = ""
+        result += str(node.value) + "\n"
+        if node.is_feature:
+            result += "Gain info: {}\n".format(node.details.info)
+            result += "Entropy: {}\n".format(node.details.entropy)
+        return result
+
             
 
     

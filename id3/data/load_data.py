@@ -79,6 +79,7 @@ def load_will_wait():
         A 1D array with the classification names for the targets in the loaded data.
 
     """
+
     return load_data('will_wait.csv')
 
 def load_weather():
@@ -95,5 +96,6 @@ def load_weather():
         
     target_names : np.array
         A 1D array with the classification names for the targets in the loaded data.
+    """
 
     return load_data('weather.csv')
