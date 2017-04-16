@@ -10,15 +10,11 @@ class Node():
     """
     def __init__(self,
                  value,
-                 estimator,
-                 name=None,
                  is_feature=False,
                  details={}):
         self.value = value
-        self.estimator = estimator
         self.is_feature = is_feature
         self.details = details
-        self.name = name
         self.children = list()
 
     def add_child(self, node, split_record):
