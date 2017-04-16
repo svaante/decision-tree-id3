@@ -1,6 +1,29 @@
 from sklearn.externals import six
+import pydotplus
 
-def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, class_names=None):
+class DotTree():
+
+    def __init__(self):
+        self.dot_tree = ""
+        self.closed = False
+
+    def write(self, content):
+        if not self.closed:
+            self.dot_tree += content
+
+    def close(self):
+        self.closed = True
+
+    def to_string(self):
+        return self.dot_tree
+
+
+def export_pdf(decision_tree, out_file='tree.pdf', feature_names=None, class_names=None):
+    dot_tree = export_graphviz(decision_tree)
+    graph = pydotplus.graph_from_dot_data(dot_tree.to_string())
+    graph.write_pdf(out_file)
+
+def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class_names=None):
     """Export a decision tree in DOT format.
     
     This function generates a GraphViz representation of the decision tree,
@@ -72,9 +95,9 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
             
 
     
-    if six.PY3:
+    if not isinstance(out_file, DotTree) and six.PY3:
         out_file = open(out_file, 'w', encoding='utf8')
-    else:
+    elif not isinstance(out_file, DotTree):
         out_file = open(out_file, 'wb')
 
     out_file.write('digraph ID3_Tree {\n')
@@ -86,5 +109,6 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
             out_file.write(str(r) + ";")
         out_file.write("};\n")
     out_file.write("}")
-
     out_file.close()
+    return out_file
+

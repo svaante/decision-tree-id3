@@ -139,13 +139,13 @@ class Splitter():
         idx = calc_record.feature_idx
         split_records = [None] * 2
         split_records[0] = SplitRecord(calc_record,
-                                        examples_idx[X_[:, idx] < calc_record.pivot],
-                                        SplitRecord.LESS,
-                                        "<{}".format(calc_record.pivot))
+                                       examples_idx[X_[:, idx] < calc_record.pivot],
+                                       SplitRecord.LESS,
+                                       "<{}".format(calc_record.pivot))
         split_records[1] = SplitRecord(calc_record,
-                                        examples_idx[X_[:, idx] >= calc_record.pivot],
-                                        SplitRecord.GREATER,
-                                        ">={}".format(calc_record.pivot))
+                                       examples_idx[X_[:, idx] >= calc_record.pivot],
+                                       SplitRecord.GREATER,
+                                       ">={}".format(calc_record.pivot))
         return split_records
 
     def calc(self, examples_idx, features_idx):
