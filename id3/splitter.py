@@ -5,11 +5,12 @@ class SplitRecord():
     LESS = 0
     GREATER = 1
 
-    def __init__(self, calc_record, bag, value):
+    def __init__(self, calc_record, bag, value, attribute_value):
         self.calc_record = calc_record
         self.bag = bag
         self.value = value
         self.size = len(bag) if bag is not None else 0
+        self.attribute_value = attribute_value
 
 
 class CalcRecord():
@@ -124,24 +125,28 @@ class Splitter():
 
     def _split_nominal(self, X_, examples_idx, calc_record):
         values = self.encoders[calc_record.feature_idx].encoded_classes_
+        classes = self.encoders[calc_record.feature_idx].classes_
         split_records = [None] * len(values)
         for value, i in enumerate(values):
             split_records[i] = SplitRecord(calc_record,
                                           examples_idx[X_[:,
                                           calc_record.feature_idx] == value],
-                                          value)
+                                          value,
+                                          classes[i])
         return split_records
 
 
     def _split_numerical(self, X_, examples_idx, calc_record):
         idx = calc_record.feature_idx
         split_records = [None] * 2
-        split_records[0] = (SplitRecord(calc_record,
+        split_records[0] = SplitRecord(calc_record,
                                         examples_idx[X_[:, idx] < calc_record.pivot],
-                                        SplitRecord.LESS))
-        split_records[1] = (SplitRecord(calc_record,
+                                        SplitRecord.LESS,
+                                        "<{}".format(calc_record.pivot))
+        split_records[1] = SplitRecord(calc_record,
                                         examples_idx[X_[:, idx] >= calc_record.pivot],
-                                        SplitRecord.MORE))
+                                        SplitRecord.MORE,
+                                        "<{}".format(calc_record.pivot))
         return split_records
 
     def calc(self, examples_idx, features_idx):
@@ -154,11 +159,13 @@ class Splitter():
                 tmp_calc_record = self._info_numerical(feature, y_)
             else:
                 tmp_calc_record = self._info_nominal(feature, y_)
-            tmp_calc_record.feature_idx = features_idx[idx]
             if self.feature_names is not None:
                 tmp_calc_record.feature_name = self.feature_names[idx]
             if tmp_calc_record < calc_record:
+                ft_idx = features_idx[idx]
                 calc_record = tmp_calc_record
+                calc_record.feature_idx = ft_idx
+                calc_record.feature_name = self.feature_names[ft_idx]
         calc_record.entropy = self._entropy(y_)
         return calc_record
 

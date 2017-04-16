@@ -34,7 +34,7 @@ class Node():
 
     def print_tree(self, prefix=""):
         if self.is_feature:
-            print(prefix + self.name, end="") 
+            print(prefix + self.value, end="") 
             try:
                 print(" - Entropy - {}".format(self.details.entropy), end="")
                 print(" - Gain - {}".format(self.details.info), end="")

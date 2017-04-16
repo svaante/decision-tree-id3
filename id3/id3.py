@@ -45,18 +45,16 @@ class Id3Estimator(BaseEstimator):
             return Node(unique[np.argmax(counts)], self.y_encoder)
         if unique.size == 1:
             return Node(unique[0], self.y_encoder)
+
         calc_record = self._splitter.calc(examples_idx, features_idx)
-        best_feature = calc_record.feature_idx
-        encoder = self.X_encoders[best_feature]
-        root = Node(best_feature,
-                    None,
-                    self.feature_names[best_feature] if self.feature_names is not None else None,
-                    is_feature=True,
-                    details=calc_record
-                    )
-        new_features_idx = np.delete(features_idx,
-                                     np.where(features_idx == best_feature))
         split_records = self._splitter.split(examples_idx, calc_record)
+        new_features_idx = np.delete(features_idx,
+                                     np.where(features_idx == calc_record.feature_idx))
+        root = Node(calc_record.feature_name,
+                    None,
+                    None,
+                    is_feature=True,
+                    details=calc_record)
         for record in split_records:
             if record.size == 0:
                 root.add_child(Node(unique[np.argmax(counts)],
