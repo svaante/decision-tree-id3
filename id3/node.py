@@ -21,7 +21,7 @@ class Node():
         self.name = name
         self.children = list()
 
-    def add_child(self, node, edge_value):
+    def add_child(self, node, split_record):
         """ Add a child to node
 
         Parameters
@@ -30,7 +30,7 @@ class Node():
         edge_value : attribute value for the edge
         is_feature : if current node represent a feature or classification
         """
-        self.children.append((node, edge_value))
+        self.children.append((node, split_record.attribute_value))
 
     def print_tree(self, prefix=""):
         if self.is_feature:
@@ -41,7 +41,7 @@ class Node():
             except KeyError:
                 pass
         else:
-            print(prefix + str(self.estimator.inverse_transform(self.value)), end="") 
+            print(prefix + str(self.value), end="")
         print(" - Feature" if self.is_feature else " - Classification")
         for child, edge in self.children:
             print(prefix + str(edge))

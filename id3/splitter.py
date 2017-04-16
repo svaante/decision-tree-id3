@@ -129,8 +129,7 @@ class Splitter():
         split_records = [None] * len(values)
         for value, i in enumerate(values):
             split_records[i] = SplitRecord(calc_record,
-                                          examples_idx[X_[:,
-                                          calc_record.feature_idx] == value],
+                                          examples_idx[X_[:, calc_record.feature_idx] == value],
                                           value,
                                           classes[i])
         return split_records
@@ -145,8 +144,8 @@ class Splitter():
                                         "<{}".format(calc_record.pivot))
         split_records[1] = SplitRecord(calc_record,
                                         examples_idx[X_[:, idx] >= calc_record.pivot],
-                                        SplitRecord.MORE,
-                                        "<{}".format(calc_record.pivot))
+                                        SplitRecord.GREATER,
+                                        ">={}".format(calc_record.pivot))
         return split_records
 
     def calc(self, examples_idx, features_idx):

@@ -64,7 +64,7 @@ def export_graphviz(decision_tree, out_file='tree.dot', feature_names=None, clas
             ranks[str(depth)] = []
         ranks[str(depth)].append(str(n_id))
         
-        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id, node.name, depth))
+        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id, node.value, depth))
         if parent != None:
             node_repr.append('{} -> {} [ label = "{}"];\n'.format(parent, n_id, edge, depth))
         res = "".join(node_repr)

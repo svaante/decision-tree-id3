@@ -41,10 +41,12 @@ class Id3Estimator(BaseEstimator):
             root node of tree
         """
         unique, counts = np.unique(self.y[examples_idx], return_counts=True)
+        classification = unique[np.argmax(counts)]
+        classification_name = self.y_encoder.inverse_transform(classification)
         if features_idx.size == 0:
-            return Node(unique[np.argmax(counts)], self.y_encoder)
+            return Node(classification_name, None)
         if unique.size == 1:
-            return Node(unique[0], self.y_encoder)
+            return Node(classification_name, None)
 
         calc_record = self._splitter.calc(examples_idx, features_idx)
         split_records = self._splitter.split(examples_idx, calc_record)
@@ -56,14 +58,16 @@ class Id3Estimator(BaseEstimator):
                     is_feature=True,
                     details=calc_record)
         for record in split_records:
+            print(self.y_encoder.inverse_transform(unique[np.argmax(counts)]))
             if record.size == 0:
-                root.add_child(Node(unique[np.argmax(counts)],
-                               self.y_encoder),
-                               record.value)
+                classification = self.y_encoder.inverse_transform(unique[np.argmax(counts)])
+                root.add_child(Node(classification,
+                                    None),
+                                    record.value)
             else:
                 root.add_child(self._build(record.bag,
                                new_features_idx),
-                               record.value)
+                               record)
         return root
 
     def fit(self, X, y, feature_names=None, check_input=True):
