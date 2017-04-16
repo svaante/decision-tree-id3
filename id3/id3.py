@@ -2,15 +2,15 @@
 This is a module to be used as a reference for building other modules
 """
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
-from sklearn.preprocessing import LabelEncoder
 
 from .node import Node
-from .splitter import HybridSplitter, NumericalSplitter, NominalSplitter, CalcRecord
-from .utils import check_numerical_array
+from .splitter import Splitter, SplitRecord, CalcRecord
+from .utils import check_numerical_array, ExtendedLabelEncoder
+
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -24,60 +24,6 @@ class Id3Estimator(BaseEstimator):
     """
     def __init__(self, demo_param='demo_param'):
         self.demo_param = demo_param
-
-    def _build2(self, examples_idx, features_idx):
-        """ Builds the tree with the self.X data and self.y classes
-
-        Parameters
-        ----------
-        examples_idx: np.array
-            data row(s) to be considered
-        features_idx: np.array
-            feature colum(s) to be considered
-
-        Returns
-        -------
-        root : Node
-            root node of tree
-        """
-        unique, counts = np.unique(self.y[examples_idx], return_counts=True)
-        if features_idx.size == 0:
-            return Node(unique[np.argmax(counts)], self.y_encoder)
-        if unique.size == 1:
-            return Node(unique[0], self.y_encoder)
-        calc_info = self._splitter.calc(self.X, self.y, examples_idx,
-                                        features_idx)
-        encoder = self.X_encoders[calc_info['feature_idx']]
-        values = encoder.transform(encoder.classes_)
-        feature_name = (self.feature_names[calc_info['feature_idx']]
-                        if self.feature_names is not None else None)
-        root = Node(calc_info['feature_idx'],
-                    encoder,
-                    feature_name,
-                    is_feature=True,
-                    details=calc_info)
-        new_features_idx = np.delete(features_idx,
-                                     np.where(features_idx ==
-                                              calc_info['feature_idx']))
-        bags = None
-        if calc_info['type'] == self._splitter.NOM:
-            bags = self._splitter.split(values)
-        else:
-            bags = self._splitter.split()
-        for bag in bags:
-            if bag == None:
-                root.add_child(self._build(new_examples_idx, new_features_idx),
-                               value)
-            new_X = self.X[np.ix_(examples_idx)]
-            new_examples_idx = examples_idx[new_X[:, argmin] == value]
-            if new_examples_idx.size != 0:
-                root.add_child(self._build(new_examples_idx, new_features_idx),
-                               value)
-            else:
-                root.add_child(Node(unique[np.argmax(counts)],
-                                    self.y_encoder),
-                               value)
-        return root
 
     def _build(self, examples_idx, features_idx):
         """ Builds the tree with the self.X data and self.y classes
@@ -99,8 +45,9 @@ class Id3Estimator(BaseEstimator):
             return Node(unique[np.argmax(counts)], self.y_encoder)
         if unique.size == 1:
             return Node(unique[0], self.y_encoder)
-        calc_record = self._splitter.calc(self.X, self.y, examples_idx, features_idx)
+        calc_record = self._splitter.calc(examples_idx, features_idx)
         best_feature = calc_record.feature_idx
+        encoder = self.X_encoders[best_feature]
         root = Node(best_feature,
                     None,
                     self.feature_names[best_feature] if self.feature_names is not None else None,
@@ -109,17 +56,16 @@ class Id3Estimator(BaseEstimator):
                     )
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx == best_feature))
-        self._splitter.split()
-        for value in values:
-            new_X = self.X[np.ix_(examples_idx)]
-            new_examples_idx = examples_idx[new_X[:, argmin] == value]
-            if new_examples_idx.size != 0:
-                root.add_child(self._build(new_examples_idx, new_features_idx),
-                               value)
-            else:
+        split_records = self._splitter.split(examples_idx, calc_record)
+        for record in split_records:
+            if record.size == 0:
                 root.add_child(Node(unique[np.argmax(counts)],
-                                    self.y_encoder),
-                               value)
+                               self.y_encoder),
+                               record.value)
+            else:
+                root.add_child(self._build(record.bag,
+                               new_features_idx),
+                               record.value)
         return root
 
     def fit(self, X, y, feature_names=None, check_input=True):
@@ -152,29 +98,30 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         self.feature_names = feature_names
-        is_numerical = []
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
+        is_numerical = [False] * self.n_features_idx
         if (self.feature_names is not None and
                 len(self.feature_names) != (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
                               "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
-        self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
+        self.X_encoders = [ExtendedLabelEncoder() for _ in
+                           range(self.n_features_idx)]
         for i in range(self.n_features_idx):
-            if check_input:
-                is_numerical.append(check_numerical_array(X_[:, i]))
-            self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
-        self.y_encoder = LabelEncoder()
+            if check_input and check_numerical_array(X_[:, i]):
+                is_numerical[i] = True
+                self.X[:, i] = X_[:, i]
+            else:
+                self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+        self.y_encoder = ExtendedLabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        if not any(is_numerical):
-            self._splitter = NominalSplitter(self.X_encoders)
-        elif all(is_numerical):
-            self._splitter = NumericalSplitter()
-        else:
-            self._splitter = HybridSplitter(is_numerical, self.X_encoders)
-
+        self._splitter = Splitter(self.X,
+                                  self.y,
+                                  is_numerical,
+                                  self.X_encoders,
+                                  self.feature_names)
         self.tree_ = self._build(np.arange(n_samples),
                                  np.arange(self.n_features_idx))
         return self

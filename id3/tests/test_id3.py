@@ -8,15 +8,18 @@ from id3 import export_graphviz
 id3Estimator = Id3Estimator()
 
 
+"""
 def test_entropy():
     y = np.array([0, 1, 2, 2, 3])
     x = 1 / 5. * np.log2(1 / (1 / 5.)) + 1 / 5. * np.log2(1 / (1 / 5.)) + \
         2 / 5. * np.log2(1 / (2 / 5.)) + 1 / 5. * np.log2(1 / (1 / 5.))
-    #assert_almost_equal(Id3Estimator()._entropy(y), x)
+    assert_almost_equal(Id3Estimator()._entropy(y), x)
+"""
 
 
 def test_fit():
-    X, y, targets = load_weather()
+    X, y, targets = load_contact_lenses()
     estimator = Id3Estimator()
     estimator.fit(X, y, targets)
+    estimator.tree_.print_tree()
     export_graphviz(estimator.tree_)
