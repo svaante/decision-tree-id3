@@ -2,15 +2,15 @@
 This is a module to be used as a reference for building other modules
 """
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
-from sklearn.preprocessing import LabelEncoder
 
 from .node import Node
-from .splitter import BaseSplitter
-from .utils import check_numerical_array
+from .splitter import Splitter, SplitRecord, CalcRecord
+from .utils import check_numerical_array, ExtendedLabelEncoder
+
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -24,29 +24,6 @@ class Id3Estimator(BaseEstimator):
     """
     def __init__(self, demo_param='demo_param'):
         self.demo_param = demo_param
-
-    def _split(self, examples_idx, features_idx):
-        """ Returns feature index for max info split
-
-        Parameters
-        ----------
-        examples_idx: np.array
-            data row(s) to be considered
-        features_idx: np.array
-            feature colum(s) to be considered
-
-        Returns
-        -------
-        : int
-            feature to split on in global self.x index
-        : float
-            min info value
-        """
-        X_ = self.X[np.ix_(examples_idx, features_idx)]
-        y_ = self.y[examples_idx]
-        info = np.apply_along_axis(self._info, 0, X_, y_)
-        argmin_info = np.argmin(info)
-        return features_idx[argmin_info], info[argmin_info]
 
     def _build(self, examples_idx, features_idx):
         """ Builds the tree with the self.X data and self.y classes
@@ -64,36 +41,26 @@ class Id3Estimator(BaseEstimator):
             root node of tree
         """
         unique, counts = np.unique(self.y[examples_idx], return_counts=True)
-        if features_idx.size == 0:
-            return Node(unique[np.argmax(counts)], self.y_encoder)
-        if unique.size == 1:
-            return Node(unique[0], self.y_encoder)
-        self._splitter._split()
-        argmin, info = self._split(examples_idx, features_idx)
-        encoder = self.X_encoders[argmin]
-        values = encoder.transform(encoder.classes_)
-        root = Node(argmin,
-                    encoder,
-                    self.feature_names[argmin] if self.feature_names is not None else None,
-                    is_feature=True,
-                    details={
-                                'Entropy':
-                                self._entropy(self.y[examples_idx]),
-                                'Info':
-                                info
-                            })
+        classification = unique[np.argmax(counts)]
+        classification_name = self.y_encoder.inverse_transform(classification)
+        if features_idx.size == 0 or unique.size == 1:
+            return Node(classification_name)
+
+        calc_record = self._splitter.calc(examples_idx, features_idx)
+        split_records = self._splitter.split(examples_idx, calc_record)
         new_features_idx = np.delete(features_idx,
-                                     np.where(features_idx == argmin))
-        for value in values:
-            new_X = self.X[np.ix_(examples_idx)]
-            new_examples_idx = examples_idx[new_X[:, argmin] == value]
-            if new_examples_idx.size != 0:
-                root.add_child(self._build(new_examples_idx, new_features_idx),
-                               value)
+                                     np.where(features_idx == calc_record.feature_idx))
+        root = Node(calc_record.feature_name,
+                    is_feature=True,
+                    details=calc_record)
+        for record in split_records:
+            if record.size == 0:
+                classification = self.y_encoder.inverse_transform(unique[np.argmax(counts)])
+                root.add_child(Node(classification_name), record)
             else:
-                root.add_child(Node(unique[np.argmax(counts)],
-                                    self.y_encoder),
-                               value)
+                root.add_child(self._build(record.bag,
+                               new_features_idx),
+                               record)
         return root
 
     def fit(self, X, y, feature_names=None, check_input=True):
@@ -126,24 +93,32 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         self.feature_names = feature_names
-        is_numerical = []
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
+        is_numerical = [False] * self.n_features_idx
         if (self.feature_names is not None and
                 len(self.feature_names) != (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
-                               "number of elements as features in X"),)
+                              "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
-        self.X_encoders = [LabelEncoder() for _ in range(self.n_features_idx)]
+        self.X_encoders = [ExtendedLabelEncoder() for _ in
+                           range(self.n_features_idx)]
         for i in range(self.n_features_idx):
-            if check_input:
-                is_numerical.append(check_numerical_array(X_[:, i]))
-            self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
-        self.y_encoder = LabelEncoder()
+            if check_input and check_numerical_array(X_[:, i]):
+                is_numerical[i] = True
+                self.X[:, i] = X_[:, i]
+            else:
+                self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+        self.y_encoder = ExtendedLabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        self._splitter = BaseSplitter(is_numerical)
-        self.tree_ = self._build(np.arange(n_samples), np.arange(self.n_features_idx))
+        self._splitter = Splitter(self.X,
+                                  self.y,
+                                  is_numerical,
+                                  self.X_encoders,
+                                  self.feature_names)
+        self.tree_ = self._build(np.arange(n_samples),
+                                 np.arange(self.n_features_idx))
         return self
 
     def predict(self, X):
