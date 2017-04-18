@@ -9,8 +9,8 @@ from sklearn.metrics import euclidean_distances
 
 from .node import Node
 from .splitter import Splitter, SplitRecord, CalcRecord
+from .pruner import BasePruner, ErrorPruner, CostPruner
 from .utils import check_numerical_array, ExtendedLabelEncoder
-
 
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
@@ -63,7 +63,7 @@ class Id3Estimator(BaseEstimator):
                                record)
         return root
 
-    def fit(self, X, y, feature_names=None, check_input=True):
+    def fit(self, X, y, feature_names=None, check_input=True, pruner=None):
         """A reference implementation of a fitting function
 
         Parameters
@@ -93,11 +93,12 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         self.feature_names = feature_names
+        self.pruner = pruner
         X_, y = check_X_y(X, y)
         n_samples, self.n_features_idx = X.shape
         is_numerical = [False] * self.n_features_idx
-        if (self.feature_names is not None and
-                len(self.feature_names) != (self.n_features_idx + 1)):
+        if (self.feature_names is not None and not
+                self.n_features_idx <= len(self.feature_names) <= (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
                               "number of elements as features in X"),)
         self.X = np.zeros(X.shape, dtype=np.int)
@@ -119,6 +120,10 @@ class Id3Estimator(BaseEstimator):
                                   self.feature_names)
         self.tree_ = self._build(np.arange(n_samples),
                                  np.arange(self.n_features_idx))
+
+        if isinstance(self.pruner, BasePruner):
+            self.pruner.prune(self.tree_)
+
         return self
 
     def predict(self, X):
