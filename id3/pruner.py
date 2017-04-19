@@ -16,7 +16,7 @@ class ErrorPruner(BasePruner):
     def __init__(self):
         pass
 
-    def prune(self, tree):
+    def prune(self, tree, X_test, y_test):
         print("pruning")
 
 class CostPruner(BasePruner):

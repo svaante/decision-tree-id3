@@ -100,13 +100,13 @@ class Id3Estimator(BaseEstimator):
         if prune:
             X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
 
-        n_samples, self.n_features_idx = X.shape
+        n_samples, self.n_features_idx = X_.shape
         is_numerical = [False] * self.n_features_idx
         if (self.feature_names is not None and not
                 self.n_features_idx <= len(self.feature_names) <= (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
                               "number of elements as features in X"),)
-        self.X = np.zeros(X.shape, dtype=np.int)
+        self.X = np.zeros(X_.shape, dtype=np.int)
         self.X_encoders = [ExtendedLabelEncoder() for _ in
                            range(self.n_features_idx)]
         for i in range(self.n_features_idx):
