@@ -26,7 +26,7 @@ class Node():
         edge_value : attribute value for the edge
         is_feature : if current node represent a feature or classification
         """
-        self.children.append((node, split_record.attribute_value))
+        self.children.append((node, split_record))
 
     def print_tree(self, prefix=""):
         if self.is_feature:

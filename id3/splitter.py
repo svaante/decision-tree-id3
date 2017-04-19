@@ -5,20 +5,27 @@ class SplitRecord():
     LESS = 0
     GREATER = 1
 
-    def __init__(self, calc_record, bag, value, attribute_value):
+    def __init__(self, calc_record, bag, value_encoded, value_decoded):
         self.calc_record = calc_record
         self.bag = bag
-        self.value = value
+        self.value_encoded = value_encoded
+        self.value_decoded = value_decoded
         self.size = len(bag) if bag is not None else 0
-        self.attribute_value = attribute_value
 
 
 class CalcRecord():
     NUM = 0
     NOM = 1
 
-    def __init__(self, split_type, info, feature_idx=None, feature_name=None,
-                 entropy=None, pivot=None, attribute_counts=None, class_counts=None):
+    def __init__(self,
+                 split_type,
+                 info,
+                 feature_idx=None,
+                 feature_name=None,
+                 entropy=None,
+                 pivot=None,
+                 attribute_counts=None,
+                 class_counts=None):
         self.split_type = split_type
         self.feature_idx = feature_idx
         self.feature_name = feature_name
@@ -26,7 +33,7 @@ class CalcRecord():
         self.info = info
         self.pivot = pivot
         self.class_counts = class_counts
-        self.attribute_counts = attribute_counts 
+        self.attribute_counts = attribute_counts
 
     def __lt__(self, other):
         if not isinstance(other, CalcRecord):
@@ -90,7 +97,7 @@ class Splitter():
         n = x.shape[0]
         unique, count = np.unique(x, return_counts=True)
         for value, p in zip(unique, count):
-            info += p * self._entropy(y[x==value])
+            info += p * self._entropy(y[x == value])
         return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n),
                           attribute_counts=np.stack((unique, count), axis=-1))
 
@@ -134,25 +141,28 @@ class Splitter():
                           attribute_counts=min_attribute_counts)
 
     def _split_nominal(self, X_, examples_idx, calc_record):
-        values = self.encoders[calc_record.feature_idx].encoded_classes_
-        classes = self.encoders[calc_record.feature_idx].classes_
+        ft_idx = calc_record.feature_idx
+        values = self.encoders[ft_idx].encoded_classes_
+        classes = self.encoders[ft_idx].classes_
         split_records = [None] * len(values)
-        for value, i in enumerate(values):
+        for val, i in enumerate(values):
             split_records[i] = SplitRecord(calc_record,
-                                          examples_idx[X_[:, calc_record.feature_idx] == value],
-                                          value,
-                                          classes[i])
+                                           examples_idx[X_[:, ft_idx] == val],
+                                           val,
+                                           classes[i])
         return split_records
 
     def _split_numerical(self, X_, examples_idx, calc_record):
         idx = calc_record.feature_idx
         split_records = [None] * 2
         split_records[0] = SplitRecord(calc_record,
-                                       examples_idx[X_[:, idx] < calc_record.pivot],
+                                       examples_idx[X_[:, idx]
+                                                    < calc_record.pivot],
                                        SplitRecord.LESS,
                                        "<{}".format(calc_record.pivot))
         split_records[1] = SplitRecord(calc_record,
-                                       examples_idx[X_[:, idx] >= calc_record.pivot],
+                                       examples_idx[X_[:, idx]
+                                                    >= calc_record.pivot],
                                        SplitRecord.GREATER,
                                        ">={}".format(calc_record.pivot))
         return split_records
@@ -174,7 +184,7 @@ class Splitter():
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = ft_idx
                 calc_record.feature_name = self.feature_names[ft_idx]
-        calc_record.entropy, calc_record.class_counts = self._entropy(y_, return_class_counts=True)
+        calc_record.entropy, calc_record.class_counts = self._entropy(y_, True)
         return calc_record
 
     def split(self, examples_idx, calc_record):

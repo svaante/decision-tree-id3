@@ -13,6 +13,7 @@ from .splitter import Splitter, SplitRecord, CalcRecord
 from .pruner import BasePruner, ErrorPruner, CostPruner
 from .utils import check_numerical_array, ExtendedLabelEncoder
 
+
 # TODO(svaante): Intrinsic information
 # http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
 class Id3Estimator(BaseEstimator):
@@ -50,13 +51,13 @@ class Id3Estimator(BaseEstimator):
         calc_record = self._splitter.calc(examples_idx, features_idx)
         split_records = self._splitter.split(examples_idx, calc_record)
         new_features_idx = np.delete(features_idx,
-                                     np.where(features_idx == calc_record.feature_idx))
+                                     np.where(features_idx ==
+                                              calc_record.feature_idx))
         root = Node(calc_record.feature_name,
                     is_feature=True,
                     details=calc_record)
         for record in split_records:
             if record.size == 0:
-                classification = self.y_encoder.inverse_transform(unique[np.argmax(counts)])
                 root.add_child(Node(classification_name), record)
             else:
                 root.add_child(self._build(record.bag,
@@ -101,9 +102,11 @@ class Id3Estimator(BaseEstimator):
             X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
 
         n_samples, self.n_features_idx = X_.shape
-        is_numerical = [False] * self.n_features_idx
+        self.is_numerical = [False] * self.n_features_idx
         if (self.feature_names is not None and not
-                self.n_features_idx <= len(self.feature_names) <= (self.n_features_idx + 1)):
+                self.n_features_idx <=
+                len(self.feature_names) <=
+                (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
                               "number of elements as features in X"),)
         self.X = np.zeros(X_.shape, dtype=np.int)
@@ -111,7 +114,7 @@ class Id3Estimator(BaseEstimator):
                            range(self.n_features_idx)]
         for i in range(self.n_features_idx):
             if check_input and check_numerical_array(X_[:, i]):
-                is_numerical[i] = True
+                self.is_numerical[i] = True
                 self.X[:, i] = X_[:, i]
             else:
                 self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
@@ -120,7 +123,7 @@ class Id3Estimator(BaseEstimator):
 
         self._splitter = Splitter(self.X,
                                   self.y,
-                                  is_numerical,
+                                  self.is_numerical,
                                   self.X_encoders,
                                   self.feature_names)
         self.tree_ = self._build(np.arange(n_samples),
@@ -145,7 +148,35 @@ class Id3Estimator(BaseEstimator):
             Returns :math:`x^2` where :math:`x` is the first column of `X`.
         """
         X = check_array(X)
-        return X[:, 0]**2
+        X_ = np.zeros(X.shape)
+        ret = np.empty(X.shape[0], dtype=X.dtype)
+        for i in range(self.n_features_idx):
+            if self.is_numerical[i]:
+                X_[:, i] = X[:, i]
+            else:
+                X_[:, i] = self.X_encoders[i].transform(X[:, i])
+        for i, x in enumerate(X_):
+            node = self.tree_
+            while(node.is_feature):
+                value = x[node.details.feature_idx]
+                for child, split_record in node.children:
+                    if split_record.calc_record.split_type == CalcRecord.NOM:
+                        if split_record.value_encoded == value:
+                            node = child
+                            break
+                    elif split_record.calc_record.split_type == CalcRecord.NUM:
+                        if (split_record.value_encoded ==
+                            SplitRecord.GREATER and
+                                value >= split_record.calc_record.pivot):
+                            node = child
+                            break
+                        elif (split_record.value_encoded ==
+                              SplitRecord.LESS and
+                              value < split_record.calc_record.pivot):
+                            node = child
+                            break
+            ret[i] = node.value
+        return ret
 
 
 class TemplateClassifier(BaseEstimator, ClassifierMixin):

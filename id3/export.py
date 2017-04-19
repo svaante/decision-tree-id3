@@ -2,6 +2,7 @@ from sklearn.externals import six
 import numpy as np
 import pydotplus
 
+
 class DotTree():
 
     def __init__(self):
@@ -19,14 +20,17 @@ class DotTree():
         return self.dot_tree
 
 
-def export_pdf(decision_tree, out_file='tree.pdf', feature_names=None, class_names=None):
+def export_pdf(decision_tree, out_file='tree.pdf', feature_names=None,
+               class_names=None):
     dot_tree = export_graphviz(decision_tree)
     graph = pydotplus.graph_from_dot_data(dot_tree.to_string())
     graph.write_pdf(out_file)
 
-def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class_names=None):
+
+def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
+                    class_names=None):
     """Export a decision tree in DOT format.
-    
+
     This function generates a GraphViz representation of the decision tree,
     which is then written into `out_file`. Once exported, graphical renderings
     can be generated using, for example::
@@ -64,8 +68,8 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
     ranks = {}
     node_ids = []
     max_depth = 500
+
     def _recurse_tree(node, node_id=0, edge=None, parent=None, depth=0):
-        #DOT language can't handle ``-``, use ``_`` instead
         depth += 1
         node_ids.append(_get_next_id())
         if max_depth is None or depth <= max_depth:
@@ -78,7 +82,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
             return 0
         else:
             return node_ids[-1] + 1
-    
+
     def _node_to_dot(node, n_id=0, parent=None, edge=None, depth=0):
         """Get  a Node objects representation in dot format.
 
@@ -87,12 +91,13 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
         if str(depth) not in ranks:
             ranks[str(depth)] = []
         ranks[str(depth)].append(str(n_id))
-        
-        node_repr.append('\"{}\" [shape=box, style=filled, label=\"{}\", weight={}]\n'.format(n_id,
-                                                                                              _extract_node_info(node),
-                                                                                              depth))
-        if parent != None:
-            node_repr.append('{} -> {} [ label = "{}"];\n'.format(parent, n_id, edge, depth))
+
+        node_repr.append(('\"{}\" [shape=box, style=filled, label=\"{}\", '
+                          'weight={}]\n')
+                         .format(n_id, _extract_node_info(node), depth))
+        if parent is not None:
+            node_repr.append(('{} -> {} [ label = "{}"];\n')
+                             .format(parent, n_id,  edge.value_decoded, depth))
         res = "".join(node_repr)
         return res
 
@@ -100,14 +105,13 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
         result = ""
         result += str(node.value) + "\n"
         if node.is_feature:
+            class_counts = node.details.class_counts
+            dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
             result += "Gain info: {}\n".format(node.details.info)
             result += "Entropy: {}\n".format(node.details.entropy)
-            result += "Dominant class: {}\n".format(node.details.class_counts[np.argmax(node.details.class_counts[:,1]), :])
+            result += "Dominant class: {}\n".format(dominant_class)
         return result
 
-            
-
-    
     if not isinstance(out_file, DotTree) and six.PY3:
         out_file = open(out_file, 'w', encoding='utf8')
     elif not isinstance(out_file, DotTree):
@@ -124,4 +128,3 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
     out_file.write("}")
     out_file.close()
     return out_file
-

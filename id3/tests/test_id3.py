@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_equal
 from id3 import Id3Estimator
 from id3 import ErrorPruner
 from id3.data import load_contact_lenses, load_will_wait, load_weather
@@ -26,3 +26,12 @@ def test_fit():
     estimator = Id3Estimator()
     estimator.fit(X, y, targets, pruner=ErrorPruner())
     export_graphviz(estimator.tree_, "tree.dot")
+
+
+def test_predict():
+    X, y, targets = load_weather()
+    #bunch = load_weather()
+
+    estimator = Id3Estimator()
+    estimator.fit(X, y, targets)
+    assert_equal(estimator.predict(X), y)
