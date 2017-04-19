@@ -1,4 +1,5 @@
 from sklearn.externals import six
+import numpy as np
 import pydotplus
 
 class DotTree():
@@ -101,6 +102,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None, class
         if node.is_feature:
             result += "Gain info: {}\n".format(node.details.info)
             result += "Entropy: {}\n".format(node.details.entropy)
+            result += "Dominant class: {}\n".format(node.details.class_counts[np.argmax(node.details.class_counts[:,1]), :])
         return result
 
             

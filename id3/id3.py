@@ -6,6 +6,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances
+from sklearn.model_selection import train_test_split
 
 from .node import Node
 from .splitter import Splitter, SplitRecord, CalcRecord
@@ -95,6 +96,10 @@ class Id3Estimator(BaseEstimator):
         self.feature_names = feature_names
         self.pruner = pruner
         X_, y = check_X_y(X, y)
+        prune = isinstance(self.pruner, BasePruner)
+        if prune:
+            X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
+
         n_samples, self.n_features_idx = X.shape
         is_numerical = [False] * self.n_features_idx
         if (self.feature_names is not None and not
@@ -121,8 +126,8 @@ class Id3Estimator(BaseEstimator):
         self.tree_ = self._build(np.arange(n_samples),
                                  np.arange(self.n_features_idx))
 
-        if isinstance(self.pruner, BasePruner):
-            self.pruner.prune(self.tree_)
+        if prune:
+            self.pruner.prune(self.tree_, X_test, y_test)
 
         return self
 

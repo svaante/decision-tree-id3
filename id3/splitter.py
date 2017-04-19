@@ -18,13 +18,15 @@ class CalcRecord():
     NOM = 1
 
     def __init__(self, split_type, info, feature_idx=None, feature_name=None,
-                 entropy=None, pivot=None):
+                 entropy=None, pivot=None, attribute_counts=None, class_counts=None):
         self.split_type = split_type
         self.feature_idx = feature_idx
         self.feature_name = feature_name
         self.entropy = entropy
         self.info = info
         self.pivot = pivot
+        self.class_counts = class_counts
+        self.attribute_counts = attribute_counts 
 
     def __lt__(self, other):
         if not isinstance(other, CalcRecord):
@@ -41,8 +43,7 @@ class Splitter():
         self.encoders = encoders
         self.feature_names = feature_names
 
-
-    def _entropy(self, y):
+    def _entropy(self, y, return_class_counts=False):
         """ Entropy for the classes in the array y
         :math: \sum_{x \in X} p(x) \log_{2}(1/p(x)) :math: from
         https://en.wikipedia.org/wiki/ID3_algorithm
@@ -60,9 +61,13 @@ class Splitter():
         n = y.shape[0]
         if n <= 0:
             return 0
-        _, count = np.unique(y, return_counts=True)
+        classes, count = np.unique(y, return_counts=True)
         p = np.true_divide(count, n)
-        return np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
+        res = np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
+        if return_class_counts:
+            return res, np.stack((classes, count), axis=-1)
+        else:
+            return res
 
     def _info_nominal(self, x, y):
         """ Info for nominal feature feature_values
@@ -85,8 +90,9 @@ class Splitter():
         n = x.shape[0]
         unique, count = np.unique(x, return_counts=True)
         for value, p in zip(unique, count):
-            info += p * self._entropy(y[x == value])
-        return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n))
+            info += p * self._entropy(y[x==value])
+        return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n),
+                          attribute_counts=np.stack((unique, count), axis=-1))
 
     def _info_numerical(self, x, y):
         """ Info for numerical feature feature_values
@@ -112,16 +118,20 @@ class Splitter():
         sorted_x = x[sorted_idx]
         min_info = float('inf')
         min_info_pivot = 0
+        min_attribute_counts = np.zeros((n, 2))
         for i in range(n - 1):
             if sorted_y[i] != sorted_y[i + 1]:
-                tmp_info = i * self._entropy(sorted_y[0: i]) + \
-                           (n - i) * self._entropy(sorted_y[i:])
+                tmp_info = (i + 1) * self._entropy(sorted_y[0: i]) + \
+                           (n - (i + 1)) * self._entropy(sorted_y[i:])
                 if tmp_info < min_info:
+                    min_attribute_counts[SplitRecord.LESS, 1] = i + 1
+                    min_attribute_counts[SplitRecord.GREATER, 1] = n - i + 1
                     min_info = tmp_info
                     min_info_pivot = sorted_x[i + 1]
         return CalcRecord(CalcRecord.NUM,
                           min_info * np.true_divide(1, n),
-                          pivot=min_info_pivot)
+                          pivot=min_info_pivot,
+                          attribute_counts=min_attribute_counts)
 
     def _split_nominal(self, X_, examples_idx, calc_record):
         values = self.encoders[calc_record.feature_idx].encoded_classes_
@@ -133,7 +143,6 @@ class Splitter():
                                           value,
                                           classes[i])
         return split_records
-
 
     def _split_numerical(self, X_, examples_idx, calc_record):
         idx = calc_record.feature_idx
@@ -165,7 +174,7 @@ class Splitter():
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = ft_idx
                 calc_record.feature_name = self.feature_names[ft_idx]
-        calc_record.entropy = self._entropy(y_)
+        calc_record.entropy, calc_record.class_counts = self._entropy(y_, return_class_counts=True)
         return calc_record
 
     def split(self, examples_idx, calc_record):

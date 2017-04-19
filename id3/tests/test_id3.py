@@ -21,8 +21,8 @@ def test_entropy():
 
 def test_fit():
     X, y, targets = load_weather()
-    bunch = load_iris()
+    #bunch = load_weather()
 
     estimator = Id3Estimator()
-    estimator.fit(bunch.data, bunch.target, bunch.feature_names, pruner=ErrorPruner())
+    estimator.fit(X, y, targets, pruner=ErrorPruner())
     export_graphviz(estimator.tree_, "tree.dot")
