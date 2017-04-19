@@ -7,7 +7,4 @@ __all__ = ['Id3Estimator',
            'TemplateClassifier',
            'id3',
            'export_graphviz',
-           'export_pdf',
-           'BasePruner',
-           'ErrorPruner',
-           'CostPruner']
+           'export_pdf']
