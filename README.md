@@ -1,8 +1,8 @@
 #project-template - A template for scikit-learn extensions
 
-[![Travis Status](https://travis-ci.org/scikit-learn-contrib/project-template.svg?branch=master)](https://travis-ci.org/scikit-learn-contrib/project-template)
-[![Coveralls Status](https://coveralls.io/repos/scikit-learn-contrib/project-template/badge.svg?branch=master&service=github)](https://coveralls.io/r/scikit-learn-contrib/project-template)
-[![CircleCI Status](https://circleci.com/gh/scikit-learn-contrib/project-template.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/scikit-learn-contrib/project-template/tree/master)
+[![Travis Status](https://travis-ci.org/svaante/decision-tree-id3.svg?branch=master)](https://travis-ci.org/svaante/decision-tree-id3)
+[![Coveralls Status](https://coveralls.io/repos/svaante/decision-tree-id3/badge.svg?branch=master&service=github)](https://coveralls.io/r/svaante/decision-tree-id3)
+[![CircleCI Status](https://circleci.com/gh/svaante/decision-tree-id3.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/svaante/decision-tree-id3/tree/master)
 
 **project-template** is a template project for 
 [scikit-learn](http://scikit-learn.org/) 
@@ -25,14 +25,14 @@ $ python setup.py install
 ```
 or 
 ```
-pip install sklearn-template
+pip install decision-tree-id3
 ```
 
-If the installation is successful, and `scikit-learn` is correctly installed,
+If the installation is successful, and ` ` is correctly installed,
 you should be able to execute the following in Python:
 ```python
->>> from skltemplate import TemplateEstimator
->>> estimator = TemplateEstimator()
+>>> from  import id3
+>>> estimator = Id3()
 >>> estimator.fit(np.arange(10).reshape(10, 1), np.arange(10))
 ```
 

@@ -3,17 +3,15 @@ This is a module to be used as a reference for building other modules
 """
 import numpy as np
 import numbers
-from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import euclidean_distances, accuracy_score
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
 
 from .node import Node
 from .splitter import Splitter, SplitRecord, CalcRecord
 from .utils import check_numerical_array, ExtendedLabelEncoder
-
-np.set_printoptions(threshold=np.inf)
 
 
 # TODO(svaante): Intrinsic information
@@ -54,8 +52,8 @@ class Id3Estimator(BaseEstimator):
             self.classification_nodes.append(node)
             return node
 
-        calc_record = self._splitter.calc(examples_idx, features_idx)
-        split_records = self._splitter.split(examples_idx, calc_record)
+        calc_record = self.splitter_.calc(examples_idx, features_idx)
+        split_records = self.splitter_.split(examples_idx, calc_record)
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx ==
                                               calc_record.feature_idx))
@@ -103,6 +101,7 @@ class Id3Estimator(BaseEstimator):
         self : object
             Returns self.
         """
+        X_, y = check_X_y(X, y)
         self.feature_names = feature_names
         self.feature_nodes = []
         self.classification_nodes = []
@@ -140,7 +139,7 @@ class Id3Estimator(BaseEstimator):
                 self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = ExtendedLabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
-        self._splitter = Splitter(self.X,
+        self.splitter_ = Splitter(self.X,
                                   self.y,
                                   self.is_numerical,
                                   self.X_encoders,
@@ -166,6 +165,7 @@ class Id3Estimator(BaseEstimator):
         y : array of shape = [n_samples]
             Returns :math:`x^2` where :math:`x` is the first column of `X`.
         """
+        check_is_fitted(self, 'tree_')
         X = check_array(X)
         X_ = np.zeros(X.shape)
         ret = np.empty(X.shape[0], dtype=X.dtype)
@@ -215,70 +215,3 @@ class Id3Estimator(BaseEstimator):
                 node.is_feature = True
             else:
                 node.children = []
-
-
-class TemplateClassifier(BaseEstimator, ClassifierMixin):
-    """ An example classifier which implements a 1-NN algorithm.
-
-    Parameters
-    ----------
-    demo_param : str, optional
-        A parameter used for demonstation of how to pass and store paramters.
-
-    Attributes
-    ----------
-    X_ : array, shape = [n_samples, n_features_idx]
-        The input passed during :meth:`fit`
-    y_ : array, shape = [n_samples]
-        The labels passed during :meth:`fit`
-    """
-    def __init__(self, demo_param='demo'):
-        self.demo_param = demo_param
-
-    def fit(self, X, y):
-        """A reference implementation of a fitting function for a classifier.
-
-        Parameters
-        ----------
-        X : array-like, shape = [n_samples, n_features_idx]
-            The training input samples.
-        y : array-like, shape = [n_samples]
-            The target values. An array of int.
-
-        Returns
-        -------
-        self : object
-            Returns self.
-        """
-        # Check that X and y have correct shape
-        X, y = check_X_y(X, y)
-        # Store the classes seen during fit
-        self.classes_ = unique_labels(y)
-
-        self.X_ = X
-        self.y_ = y
-        # Return the classifier
-        return self
-
-    def predict(self, X):
-        """ A reference implementation of a prediction for a classifier.
-
-        Parameters
-        ----------
-        X : array-like of shape = [n_samples, n_features]
-            The input samples.
-
-        Returns
-        -------
-        y : array of int of shape = [n_samples]
-            The label for each sample is the label of the closest sample
-            seen udring fit.
-        """
-        # Check is fit had been called
-        check_is_fitted(self, ['X_', 'y_'])
-
-        # Input validation
-        X = check_array(X)
-
-        closest = np.argmin(euclidean_distances(X, self.X_), axis=1)
-        return self.y_[closest]

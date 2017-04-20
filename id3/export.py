@@ -1,6 +1,5 @@
 from sklearn.externals import six
 import numpy as np
-import pydotplus
 
 
 class DotTree():
@@ -18,13 +17,6 @@ class DotTree():
 
     def to_string(self):
         return self.dot_tree
-
-
-def export_pdf(decision_tree, out_file='tree.pdf', feature_names=None,
-               class_names=None):
-    dot_tree = export_graphviz(decision_tree)
-    graph = pydotplus.graph_from_dot_data(dot_tree.to_string())
-    graph.write_pdf(out_file)
 
 
 def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,

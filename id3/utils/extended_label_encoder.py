@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 class ExtendedLabelEncoder(LabelEncoder):
 
     def __init__(self):
-        super().__init__()
+        super(ExtendedLabelEncoder, self).__init__()
         self.encoded_classes_ = None
 
     def fit(self, y):

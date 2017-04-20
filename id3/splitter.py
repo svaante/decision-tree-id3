@@ -177,13 +177,14 @@ class Splitter():
                 tmp_calc_record = self._info_numerical(feature, y_)
             else:
                 tmp_calc_record = self._info_nominal(feature, y_)
-            if self.feature_names is not None:
-                tmp_calc_record.feature_name = self.feature_names[idx]
             if tmp_calc_record < calc_record:
                 ft_idx = features_idx[idx]
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = ft_idx
-                calc_record.feature_name = self.feature_names[ft_idx]
+                if self.feature_names is not None:
+                    calc_record.feature_name = self.feature_names[ft_idx]
+                else:
+                    calc_record.feature_name = str(ft_idx)
         calc_record.entropy, calc_record.class_counts = self._entropy(y_, True)
         return calc_record
 
