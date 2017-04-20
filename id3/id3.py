@@ -112,13 +112,15 @@ class Id3Estimator(BaseEstimator):
 
         max_np_int = np.iinfo(np.int32).max
         if not isinstance(self.max_depth, (numbers.Integral, np.integer)):
-            self.max_depth = max_np_int
+            max_depth = max_np_int
+        else:
+            max_depth = self.max_depth
 
         if isinstance(self.min_samples_split, (numbers.Integral, np.integer)):
-            self.min_samples_split = (1 if self.min_samples_split < 1
+            min_samples_split = (1 if self.min_samples_split < 1
                                       else self.min_samples_split)
         else:
-            self.min_samples_split = 1
+            min_samples_split = 1
 
         n_samples, self.n_features_idx = X_.shape
         self.is_numerical = [False] * self.n_features_idx

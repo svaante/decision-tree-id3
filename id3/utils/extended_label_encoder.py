@@ -8,11 +8,11 @@ class ExtendedLabelEncoder(LabelEncoder):
         self.encoded_classes_ = None
 
     def fit(self, y):
-        ret = super().fit(y)
+        ret = super(ExtendedLabelEncoder, self).fit(y)
         self.encoded_classes_ = self.transform(self.classes_)
         return ret
 
     def fit_transform(self, y):
-        ret = super().fit_transform(y)
+        ret = super(ExtendedLabelEncoder, self).fit_transform(y)
         self.encoded_classes_ = self.transform(self.classes_)
         return ret
