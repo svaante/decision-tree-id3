@@ -2,10 +2,8 @@
 This is a module to be used as a reference for building other modules
 """
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
-from sklearn.utils.multiclass import unique_labels
-from sklearn.metrics import euclidean_distances
 from sklearn.model_selection import train_test_split
 
 from .node import Node
@@ -48,8 +46,8 @@ class Id3Estimator(BaseEstimator):
         if features_idx.size == 0 or unique.size == 1:
             return Node(classification_name)
 
-        calc_record = self._splitter.calc(examples_idx, features_idx)
-        split_records = self._splitter.split(examples_idx, calc_record)
+        calc_record = self.splitter_.calc(examples_idx, features_idx)
+        split_records = self.splitter_.split(examples_idx, calc_record)
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx ==
                                               calc_record.feature_idx))
@@ -94,9 +92,9 @@ class Id3Estimator(BaseEstimator):
         self : object
             Returns self.
         """
+        X_, y = check_X_y(X, y)
         self.feature_names = feature_names
         self.pruner = pruner
-        X_, y = check_X_y(X, y)
         prune = isinstance(self.pruner, BasePruner)
         if prune:
             X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
@@ -121,7 +119,7 @@ class Id3Estimator(BaseEstimator):
         self.y_encoder = ExtendedLabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
 
-        self._splitter = Splitter(self.X,
+        self.splitter_ = Splitter(self.X,
                                   self.y,
                                   self.is_numerical,
                                   self.X_encoders,
@@ -147,6 +145,7 @@ class Id3Estimator(BaseEstimator):
         y : array of shape = [n_samples]
             Returns :math:`x^2` where :math:`x` is the first column of `X`.
         """
+        check_is_fitted(self, 'tree_')
         X = check_array(X)
         X_ = np.zeros(X.shape)
         ret = np.empty(X.shape[0], dtype=X.dtype)

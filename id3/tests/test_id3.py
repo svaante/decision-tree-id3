@@ -5,7 +5,7 @@ from id3 import ErrorPruner
 from id3.data import load_contact_lenses, load_will_wait, load_weather
 from sklearn.preprocessing import LabelEncoder
 from sklearn.datasets import load_iris
-from id3 import export_pdf, export_graphviz
+from id3 import export_graphviz
 
 id3Estimator = Id3Estimator()
 
