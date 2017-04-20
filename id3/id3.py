@@ -2,13 +2,15 @@
 This is a module to be used as a reference for building other modules
 """
 import numpy as np
-from sklearn.base import BaseEstimator
+import numbers
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.utils.multiclass import unique_labels
+from sklearn.metrics import euclidean_distances, accuracy_score
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
 
 from .node import Node
 from .splitter import Splitter, SplitRecord, CalcRecord
-from .pruner import BasePruner, ErrorPruner, CostPruner
 from .utils import check_numerical_array, ExtendedLabelEncoder
 
 
@@ -22,10 +24,12 @@ class Id3Estimator(BaseEstimator):
     demo_param : str, optional
         A parameter used for demonstation of how to pass and store paramters.
     """
-    def __init__(self, demo_param='demo_param'):
-        self.demo_param = demo_param
+    def __init__(self, max_depth=None, min_samples_split=2, pruner=None):
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.pruner = pruner
 
-    def _build(self, examples_idx, features_idx):
+    def _build(self, examples_idx, features_idx, depth=0):
         """ Builds the tree with the self.X data and self.y classes
 
         Parameters
@@ -44,7 +48,9 @@ class Id3Estimator(BaseEstimator):
         classification = unique[np.argmax(counts)]
         classification_name = self.y_encoder.inverse_transform(classification)
         if features_idx.size == 0 or unique.size == 1:
-            return Node(classification_name)
+            node = Node(classification_name)
+            self.classification_nodes.append(node)
+            return node
 
         calc_record = self.splitter_.calc(examples_idx, features_idx)
         split_records = self.splitter_.split(examples_idx, calc_record)
@@ -54,16 +60,19 @@ class Id3Estimator(BaseEstimator):
         root = Node(calc_record.feature_name,
                     is_feature=True,
                     details=calc_record)
+        self.feature_nodes.append(root)
         for record in split_records:
             if record.size == 0:
-                root.add_child(Node(classification_name), record)
+                node = Node(classification_name)
+                self.classification_nodes.append(node)
+                root.add_child(node, record)
             else:
                 root.add_child(self._build(record.bag,
-                               new_features_idx),
+                               new_features_idx, depth+1),
                                record)
         return root
 
-    def fit(self, X, y, feature_names=None, check_input=True, pruner=None):
+    def fit(self, X, y, feature_names=None, check_input=True):
         """A reference implementation of a fitting function
 
         Parameters
@@ -94,10 +103,22 @@ class Id3Estimator(BaseEstimator):
         """
         X_, y = check_X_y(X, y)
         self.feature_names = feature_names
-        self.pruner = pruner
-        prune = isinstance(self.pruner, BasePruner)
+        self.feature_nodes = []
+        self.classification_nodes = []
+        X_, y = check_X_y(X, y)
+        prune = self.pruner == 'ReducedError'
         if prune:
             X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
+
+        max_np_int = np.iinfo(np.int32).max
+        if not isinstance(self.max_depth, (numbers.Integral, np.integer)):
+            self.max_depth = max_np_int
+
+        if isinstance(self.min_samples_split, (numbers.Integral, np.integer)):
+            self.min_samples_split = (1 if self.min_samples_split < 1
+                                      else self.min_samples_split)
+        else:
+            self.min_samples_split = 1
 
         n_samples, self.n_features_idx = X_.shape
         self.is_numerical = [False] * self.n_features_idx
@@ -107,7 +128,7 @@ class Id3Estimator(BaseEstimator):
                 (self.n_features_idx + 1)):
             raise ValueError(("feature_names needs to have the same "
                               "number of elements as features in X"),)
-        self.X = np.zeros(X_.shape, dtype=np.int)
+        self.X = np.zeros(X_.shape, dtype=np.float32)
         self.X_encoders = [ExtendedLabelEncoder() for _ in
                            range(self.n_features_idx)]
         for i in range(self.n_features_idx):
@@ -118,7 +139,6 @@ class Id3Estimator(BaseEstimator):
                 self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
         self.y_encoder = ExtendedLabelEncoder()
         self.y = self.y_encoder.fit_transform(y)
-
         self.splitter_ = Splitter(self.X,
                                   self.y,
                                   self.is_numerical,
@@ -128,7 +148,7 @@ class Id3Estimator(BaseEstimator):
                                  np.arange(self.n_features_idx))
 
         if prune:
-            self.pruner.prune(self.tree_, X_test, y_test)
+            self._reduced_error_pruning(X_test, y_test)
 
         return self
 
@@ -176,3 +196,22 @@ class Id3Estimator(BaseEstimator):
                             break
             ret[i] = node.value
         return ret
+
+    def _reduced_error_pruning(self, X_test, y_test):
+        y_pred = self.predict(X_test)
+        base_score = accuracy_score(y_pred, y_test)
+        for node in self.feature_nodes:
+            if not node.is_feature:
+                continue
+            encoded_class = node.details.class_counts[0, 0]
+            decoded_class = self.y_encoder.inverse_transform(encoded_class)
+            tmp_value = node.value
+            node.value = decoded_class
+            node.is_feature = False
+            y_pred = self.predict(X_test)
+            new_score = accuracy_score(y_pred, y_test)
+            if new_score < base_score:
+                node.value = tmp_value
+                node.is_feature = True
+            else:
+                node.children = []
