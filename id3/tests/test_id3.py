@@ -1,17 +1,37 @@
-from id3 import Id3Estimator
 from sklearn.datasets import load_breast_cancer
+from numpy.testing import assert_almost_equal, assert_equal
+import numpy as np
+from id3 import Id3Estimator
 from id3 import export_graphviz
+from id3.splitter import Splitter
 
 id3Estimator = Id3Estimator(pruner="ReducedError")
 
+y = np.array([0, 1, 2, 2, 3])
+x_nominal_col = np.array(['nom', 'nom', 'nan', 'nom', 'nan'])
+x_numerical_col = np.array([1, 2, 5, 5, 1])
+test_splitter = Splitter(None, None, None, None, None)
 
-"""
+
 def test_entropy():
-    y = np.array([0, 1, 2, 2, 3])
     x = 1 / 5. * np.log2(1 / (1 / 5.)) + 1 / 5. * np.log2(1 / (1 / 5.)) + \
         2 / 5. * np.log2(1 / (2 / 5.)) + 1 / 5. * np.log2(1 / (1 / 5.))
-    assert_almost_equal(Id3Estimator()._entropy(y), x)
-"""
+    assert_almost_equal(test_splitter._entropy(y), x)
+
+
+def test_info_nominal():
+    record = test_splitter._info_nominal(x_nominal_col, y)
+    assert_equal(record.split_type, 1)
+    assert_equal(record.attribute_counts.size, 4)
+    assert_almost_equal(record.info, 1.3509775004326936)
+
+
+def test_info_numerical():
+    record = test_splitter._info_numerical(x_numerical_col, y)
+    assert_equal(record.split_type, 0)
+    assert_equal(record.attribute_counts.size, 10)
+    assert_almost_equal(record.pivot, 2)
+    assert_almost_equal(record.info, 0.9)
 
 
 def test_breast_cancer():

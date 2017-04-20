@@ -28,10 +28,10 @@ class CalcRecord():
                  attribute_counts=None,
                  class_counts=None):
         self.split_type = split_type
+        self.info = info
         self.feature_idx = feature_idx
         self.feature_name = feature_name
         self.entropy = entropy
-        self.info = info
         self.pivot = pivot
         self.class_counts = class_counts
         self.attribute_counts = attribute_counts
@@ -100,7 +100,7 @@ class Splitter():
         for value, p in zip(items, count):
             info += p * self._entropy(y[x == value])
         return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n),
-                          attribute_counts=np.stack((items, count), axis=-1))
+                          attribute_counts=np.vstack((items, count)).T)
 
     def _info_numerical(self, x, y):
         """ Info for numerical feature feature_values
