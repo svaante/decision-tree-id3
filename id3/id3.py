@@ -4,14 +4,13 @@ This is a module to be used as a reference for building other modules
 import numpy as np
 import numbers
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
-from sklearn.utils.multiclass import unique_labels
-from sklearn.metrics import euclidean_distances, accuracy_score
+from sklearn.metrics import accuracy_score
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
 
 from .node import Node
 from .splitter import Splitter, SplitRecord, CalcRecord
-from .utils import check_numerical_array, ExtendedLabelEncoder
+from .utils import check_numerical_array, ExtendedLabelEncoder, unique
 
 
 # TODO(svaante): Intrinsic information
@@ -44,10 +43,10 @@ class Id3Estimator(BaseEstimator):
         root : Node
             root node of tree
         """
-        unique, counts = np.unique(self.y[examples_idx], return_counts=True)
-        classification = unique[np.argmax(counts)]
+        items, counts = unique(self.y[examples_idx])
+        classification = items[np.argmax(counts)]
         classification_name = self.y_encoder.inverse_transform(classification)
-        if features_idx.size == 0 or unique.size == 1:
+        if features_idx.size == 0 or items.size == 1:
             node = Node(classification_name)
             self.classification_nodes.append(node)
             return node

@@ -1,4 +1,5 @@
 import numpy as np
+from .utils import unique
 
 
 class SplitRecord():
@@ -68,7 +69,7 @@ class Splitter():
         n = y.shape[0]
         if n <= 0:
             return 0
-        classes, count = np.unique(y, return_counts=True)
+        classes, count = unique(y)
         p = np.true_divide(count, n)
         res = np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
         if return_class_counts:
@@ -95,11 +96,11 @@ class Splitter():
         """
         info = 0
         n = x.shape[0]
-        unique, count = np.unique(x, return_counts=True)
-        for value, p in zip(unique, count):
+        items, count = unique(x)
+        for value, p in zip(items, count):
             info += p * self._entropy(y[x == value])
         return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n),
-                          attribute_counts=np.stack((unique, count), axis=-1))
+                          attribute_counts=np.stack((items, count), axis=-1))
 
     def _info_numerical(self, x, y):
         """ Info for numerical feature feature_values
