@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def check_numerical_array(array):
-    """ Check if all values in a 1d array are numerical. Raises error if array is more than 1d.
+    """ Check if all values in a 1d array are numerical. Raises error if array
+        is more than 1d.
 
     Parameters
     ----------
@@ -15,7 +17,8 @@ def check_numerical_array(array):
     """
     try:
         if array.ndim > 1:
-            raise ValueError("Found array with dim {}. Expected = 1.".format(array.ndim))
+            raise ArithmeticError("Found array with dim {}. Expected = 1."
+                                  .format(array.ndim))
         array.astype(np.float64)
         return True
     except ValueError:

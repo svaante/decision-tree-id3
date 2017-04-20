@@ -27,18 +27,3 @@ class Node():
         is_feature : if current node represent a feature or classification
         """
         self.children.append((node, split_record))
-
-    def print_tree(self, prefix=""):
-        if self.is_feature:
-            print(prefix + self.value, end="") 
-            try:
-                print(" - Entropy - {}".format(self.details.entropy), end="")
-                print(" - Gain - {}".format(self.details.info), end="")
-            except KeyError:
-                pass
-        else:
-            print(prefix + str(self.value), end="")
-        print(" - Feature" if self.is_feature else " - Classification")
-        for child, edge in self.children:
-            print(prefix + str(edge))
-            child.print_tree(prefix + "\t")

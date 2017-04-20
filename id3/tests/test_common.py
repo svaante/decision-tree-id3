@@ -8,5 +8,3 @@ def test_estimator():
 
 def test_classifier():
     return check_estimator(TemplateClassifier)
-
-
