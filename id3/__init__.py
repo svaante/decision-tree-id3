@@ -1,4 +1,4 @@
-from .id3 import (Id3Estimator, TemplateClassifier)
+from .id3 import Id3Estimator
 from . import id3
 from .pruner import BasePruner, ErrorPruner, CostPruner
 from .export import export_graphviz, export_pdf
