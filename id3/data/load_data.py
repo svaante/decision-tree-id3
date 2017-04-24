@@ -32,6 +32,7 @@ def load_data(path, nominal=True):
 
     """
     path = os.path.join(data_dir, path)
+    print(path)
     with open(path, 'r', encoding='utf8') as f:
         data_file = csv.reader(f)
         temp = next(data_file)
@@ -47,3 +48,7 @@ def load_data(path, nominal=True):
             target[i] = np.asarray(ir[-1], dtype=data_type)
 
     return data, target, target_names
+
+
+def load_simple():
+    return load_data("simple4.arff")

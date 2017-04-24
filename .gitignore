@@ -7,6 +7,7 @@ __pycache__/
 *.swp
 *.dot
 *.pdf
+simple4.arff
 
 # C extensions
 *.so

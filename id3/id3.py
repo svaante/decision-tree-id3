@@ -27,6 +27,7 @@ class Id3Estimator(BaseEstimator):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.pruner = pruner
+        self.index = 0
 
     def _build(self, examples_idx, features_idx, depth=0):
         """ Builds the tree with the self.X data and self.y classes
@@ -43,6 +44,9 @@ class Id3Estimator(BaseEstimator):
         root : Node
             root node of tree
         """
+        self.index += 1
+        if self.index % 10000 == 0:
+            print('10000 hundred more')
         items, counts = unique(self.y[examples_idx])
         classification = items[np.argmax(counts)]
         classification_name = self.y_encoder.inverse_transform(classification)

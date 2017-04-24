@@ -3,6 +3,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 import numpy as np
 from id3 import Id3Estimator
 from id3 import export_graphviz
+from id3.data import load_simple
 from id3.splitter import Splitter
 
 id3Estimator = Id3Estimator(pruner="ReducedError")
@@ -32,6 +33,14 @@ def test_info_numerical():
     assert_equal(record.attribute_counts.size, 10)
     assert_almost_equal(record.pivot, 2)
     assert_almost_equal(record.info, 0.9)
+
+
+"""
+def test_simple():
+    X, y, targets = load_simple()
+    id3Estimator.fit(X, y, targets)
+    export_graphviz(id3Estimator.tree_, "cancer.dot")
+"""
 
 
 def test_breast_cancer():
