@@ -8,7 +8,7 @@ from id3.splitter import Splitter
 
 
 y = np.array([0, 1, 2, 2, 3])
-x_nominal_col = np.array(['nom', 'nom', 'nan', 'nom', 'nan'])
+x_nominal_col = np.array([0, 0, 1, 0, 1])
 x_numerical_col = np.array([1, 2, 5, 5, 1])
 test_splitter = Splitter(None, None, None, None, None)
 
