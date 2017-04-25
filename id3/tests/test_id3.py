@@ -45,6 +45,6 @@ def test_simple():
 def test_breast_cancer():
     bunch = load_breast_cancer()
 
-    id3Estimator = Id3Estimator(prune=True)
+    id3Estimator = Id3Estimator(prune=True, min_samples_split=20)
     id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
     export_graphviz(id3Estimator.tree_, "cancer.dot")

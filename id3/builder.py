@@ -60,13 +60,17 @@ class TreeBuilder(BaseBuilder):
         tree.root = self._build(tree, np.arange(self.n_samples),
                                 np.arange(self.n_features))
         if self.prune:
+            if X_test is None or y_test is None:
+                raise ValueError("Can't prune tree without validation data")
             self._prune(tree, X_test, y_test)
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
         classification = items[np.argmax(counts)]
         classification_name = self.y_encoder.inverse_transform(classification)
-        if features_idx.size == 0 or items.size == 1:
+        if (features_idx.size == 0
+                or items.size == 1
+                or examples_idx.size < self.min_samples_split):
             node = Node(classification_name)
             tree.classification_nodes.append(node)
             return node
