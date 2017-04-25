@@ -6,7 +6,6 @@ from id3 import export_graphviz
 from id3.data import load_simple
 from id3.splitter import Splitter
 
-id3Estimator = Id3Estimator(pruner="ReducedError")
 
 y = np.array([0, 1, 2, 2, 3])
 x_nominal_col = np.array(['nom', 'nom', 'nan', 'nom', 'nan'])
@@ -46,5 +45,6 @@ def test_simple():
 def test_breast_cancer():
     bunch = load_breast_cancer()
 
+    id3Estimator = Id3Estimator(prune=True)
     id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
     export_graphviz(id3Estimator.tree_, "cancer.dot")

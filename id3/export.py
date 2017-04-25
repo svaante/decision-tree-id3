@@ -110,7 +110,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
         out_file = open(out_file, 'wb')
 
     out_file.write('digraph ID3_Tree {\n')
-    _recurse_tree(decision_tree)
+    _recurse_tree(decision_tree.root)
 
     for rank in sorted(ranks):
         out_file.write("{rank=same; ")
