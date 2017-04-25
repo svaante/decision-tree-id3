@@ -63,3 +63,20 @@ def test_fit():
     assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
     assert_equal(len(id3Estimator.tree_.classification_nodes), 35)
     assert_equal(len(id3Estimator.tree_.feature_nodes), 34)
+
+
+def test_prune():
+    non_pruning_estimator = Id3Estimator(prune=False)
+    pruning_estimator = Id3Estimator(prune=True)
+    bunch = load_breast_cancer()
+    non_pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+
+    class_nodes = len(non_pruning_estimator.tree_.classification_nodes)
+    feature_nodes = len(non_pruning_estimator.tree_.feature_nodes)
+
+    pruned_class_nodes = len(pruning_estimator.tree_.classification_nodes)
+    pruned_feature_nodes = len(pruning_estimator.tree_.feature_nodes)
+
+    assert_equal(class_nodes > pruned_class_nodes, True)
+    assert_equal(feature_nodes > pruned_feature_nodes, True)
