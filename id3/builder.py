@@ -114,6 +114,8 @@ class TreeBuilder(BaseBuilder):
                 node.is_feature = True
             else:
                 node.children = []
+                tree.classification_nodes.append(node)
+                tree.feature_nodes.remove(node)
 
     def _predict(self, tree, X):
         X_ = np.zeros(X.shape)
@@ -145,4 +147,3 @@ class TreeBuilder(BaseBuilder):
                             break
             ret[i] = node.value
         return ret
-        pass

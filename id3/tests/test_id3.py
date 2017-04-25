@@ -66,16 +66,9 @@ def test_fit():
 
 
 def test_prune():
-    non_pruning_estimator = Id3Estimator(prune=False)
-    pruning_estimator = Id3Estimator(prune=True)
+    estimator = Id3Estimator(prune=True)
     bunch = load_breast_cancer()
-    non_pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
-    pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
-
-    n_nodes = (len(non_pruning_estimator.tree_.classification_nodes)
-               + len(non_pruning_estimator.tree_.feature_nodes))
-
-    n_nodes_pruned = (len(pruning_estimator.tree_.classification_nodes)
-                      + len(pruning_estimator.tree_.feature_nodes))
-
-    assert_equal(n_nodes > n_nodes_pruned, True)
+    estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    assert_equal(estimator.tree_.root is not None, True)
+    assert_equal(len(estimator.tree_.classification_nodes) > 0, True)
+    assert_equal(len(estimator.tree_.feature_nodes) > 0, True)
