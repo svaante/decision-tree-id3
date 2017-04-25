@@ -42,9 +42,24 @@ def test_simple():
 """
 
 
-def test_breast_cancer():
+def test_fit():
     bunch = load_breast_cancer()
 
-    id3Estimator = Id3Estimator(prune=True, min_samples_split=20)
+    id3Estimator = Id3Estimator()
     id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    assert_equal(len(id3Estimator.tree_.classification_nodes), 64)
+    assert_equal(len(id3Estimator.tree_.feature_nodes), 63)
     export_graphviz(id3Estimator.tree_, "cancer.dot")
+
+    id3Estimator = Id3Estimator(max_depth=2)
+    id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    assert_equal(len(id3Estimator.tree_.classification_nodes), 4)
+    assert_equal(len(id3Estimator.tree_.feature_nodes), 3)
+
+    id3Estimator = Id3Estimator(min_samples_split=20)
+    id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    assert_equal(len(id3Estimator.tree_.classification_nodes), 35)
+    assert_equal(len(id3Estimator.tree_.feature_nodes), 34)

@@ -70,7 +70,8 @@ class TreeBuilder(BaseBuilder):
         classification_name = self.y_encoder.inverse_transform(classification)
         if (features_idx.size == 0
                 or items.size == 1
-                or examples_idx.size < self.min_samples_split):
+                or examples_idx.size < self.min_samples_split
+                or depth >= self.max_depth):
             node = Node(classification_name)
             tree.classification_nodes.append(node)
             return node
