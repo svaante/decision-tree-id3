@@ -72,11 +72,10 @@ def test_prune():
     non_pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
     pruning_estimator.fit(bunch.data, bunch.target, bunch.feature_names)
 
-    class_nodes = len(non_pruning_estimator.tree_.classification_nodes)
-    feature_nodes = len(non_pruning_estimator.tree_.feature_nodes)
+    n_nodes = (len(non_pruning_estimator.tree_.classification_nodes)
+               + len(non_pruning_estimator.tree_.feature_nodes))
 
-    pruned_class_nodes = len(pruning_estimator.tree_.classification_nodes)
-    pruned_feature_nodes = len(pruning_estimator.tree_.feature_nodes)
+    n_nodes_pruned = (len(pruning_estimator.tree_.classification_nodes)
+                      + len(pruning_estimator.tree_.feature_nodes))
 
-    assert_equal(class_nodes > pruned_class_nodes, True)
-    assert_equal(feature_nodes > pruned_feature_nodes, True)
+    assert_equal(n_nodes > n_nodes_pruned, True)
