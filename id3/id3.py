@@ -98,18 +98,19 @@ class Id3Estimator(BaseEstimator):
                              self.is_numerical,
                              self.X_encoders,
                              self.feature_names)
-        self.builder_ = TreeBuilder(splitter_,
-                                    self.y_encoder,
-                                    n_samples,
-                                    self.n_features,
-                                    max_depth=max_depth,
-                                    min_samples_split=min_samples_split,
-                                    prune=self.prune)
+        self.builder = TreeBuilder(splitter_,
+                                   self.y_encoder,
+                                   n_samples,
+                                   self.n_features,
+                                   self.is_numerical,
+                                   max_depth=max_depth,
+                                   min_samples_split=min_samples_split,
+                                   prune=self.prune)
         self.tree_ = Tree()
-        self.builder_.build(self.tree_, self.X, self.y)
-
         if self.prune:
-            self._reduced_error_pruning(X_test, y_test)
+            self.builder.build(self.tree_, self.X, self.y, X_test, y_test)
+        else:
+            self.builder.build(self.tree_, self.X, self.y)
 
         return self
 
@@ -128,51 +129,4 @@ class Id3Estimator(BaseEstimator):
         """
         check_is_fitted(self, 'tree_')
         X = check_array(X)
-        X_ = np.zeros(X.shape)
-        ret = np.empty(X.shape[0], dtype=X.dtype)
-        for i in range(self.n_features):
-            if self.is_numerical[i]:
-                X_[:, i] = X[:, i]
-            else:
-                X_[:, i] = self.X_encoders[i].transform(X[:, i])
-        for i, x in enumerate(X_):
-            node = self.tree_.root
-            while(node.is_feature):
-                value = x[node.details.feature_idx]
-                for child, split_record in node.children:
-                    if split_record.calc_record.split_type == CalcRecord.NOM:
-                        if split_record.value_encoded == value:
-                            node = child
-                            break
-                    elif split_record.calc_record.split_type == CalcRecord.NUM:
-                        if (split_record.value_encoded ==
-                            SplitRecord.GREATER and
-                                value >= split_record.calc_record.pivot):
-                            node = child
-                            break
-                        elif (split_record.value_encoded ==
-                              SplitRecord.LESS and
-                              value < split_record.calc_record.pivot):
-                            node = child
-                            break
-            ret[i] = node.value
-        return ret
-
-    def _reduced_error_pruning(self, X_test, y_test):
-        y_pred = self.predict(X_test)
-        base_score = accuracy_score(y_pred, y_test)
-        for node in self.tree_.feature_nodes:
-            if not node.is_feature:
-                continue
-            encoded_class = node.details.class_counts[0, 0]
-            decoded_class = self.y_encoder.inverse_transform(encoded_class)
-            tmp_value = node.value
-            node.value = decoded_class
-            node.is_feature = False
-            y_pred = self.predict(X_test)
-            new_score = accuracy_score(y_pred, y_test)
-            if new_score < base_score:
-                node.value = tmp_value
-                node.is_feature = True
-            else:
-                node.children = []
+        return self.builder._predict(self.tree_, X)
