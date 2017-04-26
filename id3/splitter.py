@@ -44,11 +44,12 @@ class CalcRecord():
 
 class Splitter():
 
-    def __init__(self, X, y, is_numerical, encoders):
+    def __init__(self, X, y, is_numerical, encoders, gain_ratio=False):
         self.X = X
         self.y = y
         self.is_numerical = is_numerical
         self.encoders = encoders
+        self.gain_ratio = gain_ratio
 
     def _entropy(self, y, return_class_counts=False):
         """ Entropy for the classes in the array y
@@ -98,8 +99,9 @@ class Splitter():
         items, count = unique(x)
         for value, p in zip(items, count):
             info += p * self._entropy(y[x == value])
-        return CalcRecord(CalcRecord.NOM, info * np.true_divide(1, n),
-                          attribute_counts=np.vstack((items, count)).T)
+        return CalcRecord(CalcRecord.NOM,
+                          info * np.true_divide(1, n),
+                          attribute_counts=count)
 
     def _info_numerical(self, x, y):
         """ Info for numerical feature feature_values
@@ -121,18 +123,18 @@ class Splitter():
         """
         sorted_idx = np.argsort(x, kind='quicksort')
         n = x.size
-        sorted_y = y[sorted_idx]
-        sorted_x = x[sorted_idx]
+        sorted_y = np.take(y, sorted_idx, axis=0)
+        sorted_x = np.take(x, sorted_idx, axis=0)
         min_info = float('inf')
         min_info_pivot = 0
-        min_attribute_counts = np.zeros((n, 2))
+        min_attribute_counts = np.empty(2)
         for i in range(n - 1):
             if sorted_y[i] != sorted_y[i + 1]:
                 tmp_info = (i + 1) * self._entropy(sorted_y[0: i]) + \
                            (n - (i + 1)) * self._entropy(sorted_y[i:])
                 if tmp_info < min_info:
-                    min_attribute_counts[SplitRecord.LESS, 1] = i + 1
-                    min_attribute_counts[SplitRecord.GREATER, 1] = n - i + 1
+                    min_attribute_counts[SplitRecord.LESS] = i + 1
+                    min_attribute_counts[SplitRecord.GREATER] = n - i + 1
                     min_info = tmp_info
                     min_info_pivot = sorted_x[i + 1]
         return CalcRecord(CalcRecord.NUM,
@@ -167,7 +169,67 @@ class Splitter():
                                        ">={}".format(calc_record.pivot))
         return split_records
 
+    def _gain_ratio(self, calc_record):
+        """ Calculates the gain ratio using CalcRecord
+        :math: - \sum_{i} \fraq{|S_i|}{|S|}\log_2 (\fraq{|S_i|}{|S|}):math:
+
+        Parameters
+        ----------
+        calc_record : CalcRecord
+
+        Returns
+        -------
+        : float
+        """
+        counts = calc_record.attribute_counts
+        s = np.true_divide(counts, np.sum(counts))
+        if (- np.sum(np.multiply(s, np.log2(s))) < 0):
+            print("nej")
+        return - np.sum(np.multiply(s, np.log2(s)))
+
+    def _is_less(self, calc_record1, calc_record2):
+        """Compairs CalcRecords
+
+        Parameters
+        ----------
+        calc_record1 : CalcRecord
+        calc_record2 : CalcRecord
+
+        Returns
+        -------
+        : bool
+            if calc_record1 > calc_record2
+        """
+        if calc_record1 is None:
+            return True
+        if calc_record2 is None:
+            return False
+        if self.gain_ratio:
+            gain_ratio1 = self._gain_ratio(calc_record1)
+            gain_ratio2 = self._gain_ratio(calc_record2)
+            return (np.true_divide(calc_record1.info, gain_ratio1)
+                    > np.true_divide(calc_record2.info, gain_ratio2))
+        else:
+            return calc_record1.info > calc_record2.info
+
     def calc(self, examples_idx, features_idx):
+        """ Calculates information regarding optimal split based on information
+        gain
+
+        Parameters
+        ----------
+        x : np.array of shape [n remaining examples]
+            containing feature values
+        y : np.array of shape [n remaining examples]
+            containing relevent class
+
+        Returns
+        -------
+        : float
+            information for remaining examples given feature
+        : float
+            pivot used set1 < pivot <= set2
+        """
         X_ = self.X[np.ix_(examples_idx, features_idx)]
         y_ = self.y[examples_idx]
         calc_record = None
@@ -177,10 +239,9 @@ class Splitter():
                 tmp_calc_record = self._info_numerical(feature, y_)
             else:
                 tmp_calc_record = self._info_nominal(feature, y_)
-            if tmp_calc_record < calc_record:
-                ft_idx = features_idx[idx]
+            if self._is_less(calc_record, tmp_calc_record):
                 calc_record = tmp_calc_record
-                calc_record.feature_idx = ft_idx
+                calc_record.feature_idx = features_idx[idx]
         calc_record.entropy, calc_record.class_counts = self._entropy(y_, True)
         return calc_record
 

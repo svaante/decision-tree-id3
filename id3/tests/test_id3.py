@@ -22,14 +22,14 @@ def test_entropy():
 def test_info_nominal():
     record = test_splitter._info_nominal(x_nominal_col, y)
     assert_equal(record.split_type, 1)
-    assert_equal(record.attribute_counts.size, 4)
+    assert_equal(record.attribute_counts.size, 2)
     assert_almost_equal(record.info, 1.3509775004326936)
 
 
 def test_info_numerical():
     record = test_splitter._info_numerical(x_numerical_col, y)
     assert_equal(record.split_type, 0)
-    assert_equal(record.attribute_counts.size, 10)
+    assert_equal(record.attribute_counts.size, 2)
     assert_almost_equal(record.pivot, 2)
     assert_almost_equal(record.info, 0.9)
 
@@ -66,6 +66,15 @@ def test_fit():
     assert_equal(id3Estimator.tree_.root.value, 22)
     assert_equal(len(id3Estimator.tree_.classification_nodes), 35)
     assert_equal(len(id3Estimator.tree_.feature_nodes), 34)
+
+
+def test_gain_ratio():
+    id3Estimator = Id3Estimator(gain_ratio=True)
+    bunch = load_breast_cancer()
+    id3Estimator.fit(bunch.data, bunch.target)
+    export_graphviz(id3Estimator.tree_,
+                    "cancer_gain_ratio.dot",
+                    feature_names=bunch.feature_names)
 
 
 def test_prune():

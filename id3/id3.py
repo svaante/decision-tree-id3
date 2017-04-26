@@ -19,13 +19,24 @@ class Id3Estimator(BaseEstimator):
 
     Parameters
     ----------
-    demo_param : str, optional
-        A parameter used for demonstation of how to pass and store paramters.
+    max_depth : int, optional
+        max depth of features
+    min_samples_split : int, optional, default=2
+        min samples to split on
+    prune : bool, optional
+        set to True to post-prune the tree
+    gain_ratio : bool, optional
+        use gain ratio on split calculations
     """
-    def __init__(self, max_depth=None, min_samples_split=2, prune=False):
+    def __init__(self,
+                 max_depth=None,
+                 min_samples_split=2,
+                 prune=False,
+                 gain_ratio=False):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.prune = prune
+        self.gain_ratio = gain_ratio
 
     def fit(self, X, y, check_input=True):
         """A reference implementation of a fitting function
@@ -88,7 +99,8 @@ class Id3Estimator(BaseEstimator):
         splitter_ = Splitter(self.X,
                              self.y,
                              self.is_numerical,
-                             self.X_encoders)
+                             self.X_encoders,
+                             self.gain_ratio)
         self.builder = TreeBuilder(splitter_,
                                    self.X_encoders,
                                    self.y_encoder,
