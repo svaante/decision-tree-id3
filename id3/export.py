@@ -1,5 +1,5 @@
 from sklearn.externals import six
-from .splitter import LESS, GREATER
+from .splitter import SplitRecord
 import numpy as np
 
 
@@ -92,16 +92,19 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
             node_repr.append(('{} -> {} [ label = "{}"];\n')
                              .format(parent,
                                      n_id,
-                                     _extract_edge_value(edge.value_encoded)))
+                                     _extract_edge_value(edge)))
         res = "".join(node_repr)
         return res
 
     def _extract_edge_value(edge):
         val = edge.value_encoded
         if isinstance(val, (int, float)):
-            if val == GREATER:
+            if val == SplitRecord.GREATER:
                 return ">={}".format(round(edge.calc_record.pivot, decimals))
-        pass
+            else:
+                return "<{}".format(round(edge.calc_record.pivot, decimals))
+        else:
+            return edge.value_decoded
 
     def _extract_node_info(node):
         result = ""
