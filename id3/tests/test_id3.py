@@ -34,13 +34,11 @@ def test_info_numerical():
     assert_almost_equal(record.info, 0.9)
 
 
-"""
 def test_simple():
     X, y, targets = load_simple()
     id3Estimator = Id3Estimator(max_depth=10, min_samples_split=500)
-    id3Estimator.fit(X, y, targets)
+    id3Estimator.fit(X, y)
     export_graphviz(id3Estimator.tree_, "simple.dot")
-"""
 
 
 def test_fit():

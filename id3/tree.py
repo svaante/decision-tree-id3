@@ -68,12 +68,13 @@ class TreeBuilder(BaseBuilder):
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
-        classification = items[np.argmax(counts)]
-        classification_name = self.y_encoder.inverse_transform(classification)
         if (features_idx.size == 0
                 or items.size == 1
                 or examples_idx.size < self.min_samples_split
                 or depth >= self.max_depth):
+            classification = items[np.argmax(counts)]
+            classification_name = (self.y_encoder
+                                       .inverse_transform(classification))
             node = Node(classification_name)
             tree.classification_nodes.append(node)
             return node
@@ -89,6 +90,9 @@ class TreeBuilder(BaseBuilder):
         tree.feature_nodes.append(root)
         for record in split_records:
             if record.size == 0:
+                classification = items[np.argmax(counts)]
+                classification_name = (self.y_encoder
+                                           .inverse_transform(classification))
                 node = Node(classification_name)
                 tree.classification_nodes.append(node)
                 root.add_child(node, record)
