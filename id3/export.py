@@ -1,4 +1,5 @@
 from sklearn.externals import six
+from .splitter import LESS, GREATER
 import numpy as np
 
 
@@ -19,8 +20,8 @@ class DotTree():
         return self.dot_tree
 
 
-def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
-                    class_names=None):
+def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
+                    feature_names=None, class_names=None):
     """Export a decision tree in DOT format.
 
     This function generates a GraphViz representation of the decision tree,
@@ -89,21 +90,34 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
                          .format(n_id, _extract_node_info(node), depth))
         if parent is not None:
             node_repr.append(('{} -> {} [ label = "{}"];\n')
-                             .format(parent, n_id,  edge.value_decoded, depth))
+                             .format(parent,
+                                     n_id,
+                                     _extract_edge_value(edge.value_encoded)))
         res = "".join(node_repr)
         return res
 
+    def _extract_edge_value(edge):
+        val = edge.value_encoded
+        if isinstance(val, (int, float)):
+            if val == GREATER:
+                return ">={}".format(round(edge.calc_record.pivot, decimals))
+        pass
+
     def _extract_node_info(node):
         result = ""
-        if feature_names is not None:
-            result += str(feature_names[node.value]) + "\n"
+        value = ""
+        if feature_names is not None and node.is_feature:
+            value = str(feature_names[node.value])
         else:
-            result += str(node.value) + "\n"
+            value = str(node.value)
+        result += value + "\n"
         if node.is_feature:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
-            result += "Gain info: {}\n".format(node.details.info)
-            result += "Entropy: {}\n".format(node.details.entropy)
+            result += ("Gain info: {}\n"
+                       .format(round(node.details.info, decimals)))
+            result += ("Entropy: {}\n"
+                       .format(round(node.details.entropy, decimals)))
             result += "Dominant class: {}\n".format(dominant_class)
         return result
 
