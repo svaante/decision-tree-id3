@@ -95,7 +95,10 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
 
     def _extract_node_info(node):
         result = ""
-        result += str(node.value) + "\n"
+        if feature_names is not None:
+            result += str(feature_names[node.value]) + "\n"
+        else:
+            result += str(node.value) + "\n"
         if node.is_feature:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]

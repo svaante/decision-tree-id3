@@ -44,12 +44,11 @@ class CalcRecord():
 
 class Splitter():
 
-    def __init__(self, X, y, is_numerical, encoders, feature_names):
+    def __init__(self, X, y, is_numerical, encoders):
         self.X = X
         self.y = y
         self.is_numerical = is_numerical
         self.encoders = encoders
-        self.feature_names = feature_names
 
     def _entropy(self, y, return_class_counts=False):
         """ Entropy for the classes in the array y
@@ -182,10 +181,6 @@ class Splitter():
                 ft_idx = features_idx[idx]
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = ft_idx
-                if self.feature_names is not None:
-                    calc_record.feature_name = self.feature_names[ft_idx]
-                else:
-                    calc_record.feature_name = str(ft_idx)
         calc_record.entropy, calc_record.class_counts = self._entropy(y_, True)
         return calc_record
 

@@ -4,12 +4,11 @@ This is a module to be used as a reference for building other modules
 import numpy as np
 import numbers
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
-from sklearn.metrics import accuracy_score
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import train_test_split
 
-from .builder import TreeBuilder, Tree
-from .splitter import Splitter, SplitRecord, CalcRecord
+from .tree import TreeBuilder, Tree
+from .splitter import Splitter
 from .utils import check_numerical_array, ExtendedLabelEncoder
 
 
@@ -28,7 +27,7 @@ class Id3Estimator(BaseEstimator):
         self.min_samples_split = min_samples_split
         self.prune = prune
 
-    def fit(self, X, y, feature_names=None, check_input=True):
+    def fit(self, X, y, check_input=True):
         """A reference implementation of a fitting function
 
         Parameters
@@ -58,7 +57,6 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         X_, y = check_X_y(X, y)
-        self.feature_names = feature_names
         if self.prune:
             X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
 
@@ -76,12 +74,6 @@ class Id3Estimator(BaseEstimator):
 
         n_samples, self.n_features = X_.shape
         self.is_numerical = [False] * self.n_features
-        if (self.feature_names is not None and not
-                self.n_features <=
-                len(self.feature_names) <=
-                (self.n_features + 1)):
-            raise ValueError(("feature_names needs to have the same "
-                              "number of elements as features in X"),)
         self.X = np.zeros(X_.shape, dtype=np.float32)
         self.X_encoders = [ExtendedLabelEncoder() for _ in
                            range(self.n_features)]
@@ -96,9 +88,9 @@ class Id3Estimator(BaseEstimator):
         splitter_ = Splitter(self.X,
                              self.y,
                              self.is_numerical,
-                             self.X_encoders,
-                             self.feature_names)
+                             self.X_encoders)
         self.builder = TreeBuilder(splitter_,
+                                   self.X_encoders,
                                    self.y_encoder,
                                    n_samples,
                                    self.n_features,

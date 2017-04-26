@@ -10,7 +10,7 @@ from id3.splitter import Splitter
 y = np.array([0, 1, 2, 2, 3])
 x_nominal_col = np.array([0, 0, 1, 0, 1])
 x_numerical_col = np.array([1, 2, 5, 5, 1])
-test_splitter = Splitter(None, None, None, None, None)
+test_splitter = Splitter(None, None, None, None)
 
 
 def test_entropy():
@@ -37,8 +37,9 @@ def test_info_numerical():
 """
 def test_simple():
     X, y, targets = load_simple()
+    id3Estimator = Id3Estimator(max_depth=10, min_samples_split=500)
     id3Estimator.fit(X, y, targets)
-    export_graphviz(id3Estimator.tree_, "cancer.dot")
+    export_graphviz(id3Estimator.tree_, "simple.dot")
 """
 
 
@@ -46,21 +47,23 @@ def test_fit():
     bunch = load_breast_cancer()
 
     id3Estimator = Id3Estimator()
-    id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
-    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    id3Estimator.fit(bunch.data, bunch.target)
+    assert_equal(id3Estimator.tree_.root.value, 22)
     assert_equal(len(id3Estimator.tree_.classification_nodes), 64)
     assert_equal(len(id3Estimator.tree_.feature_nodes), 63)
-    export_graphviz(id3Estimator.tree_, "cancer.dot")
+    export_graphviz(id3Estimator.tree_,
+                    "cancer.dot",
+                    feature_names=bunch.feature_names)
 
     id3Estimator = Id3Estimator(max_depth=2)
-    id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
-    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    id3Estimator.fit(bunch.data, bunch.target)
+    assert_equal(id3Estimator.tree_.root.value, 22)
     assert_equal(len(id3Estimator.tree_.classification_nodes), 4)
     assert_equal(len(id3Estimator.tree_.feature_nodes), 3)
 
     id3Estimator = Id3Estimator(min_samples_split=20)
-    id3Estimator.fit(bunch.data, bunch.target, bunch.feature_names)
-    assert_equal(id3Estimator.tree_.root.value, "worst perimeter")
+    id3Estimator.fit(bunch.data, bunch.target)
+    assert_equal(id3Estimator.tree_.root.value, 22)
     assert_equal(len(id3Estimator.tree_.classification_nodes), 35)
     assert_equal(len(id3Estimator.tree_.feature_nodes), 34)
 
@@ -68,7 +71,7 @@ def test_fit():
 def test_prune():
     estimator = Id3Estimator(prune=True)
     bunch = load_breast_cancer()
-    estimator.fit(bunch.data, bunch.target, bunch.feature_names)
+    estimator.fit(bunch.data, bunch.target)
     assert_equal(estimator.tree_.root is not None, True)
     assert_equal(len(estimator.tree_.classification_nodes) > 0, True)
     assert_equal(len(estimator.tree_.feature_nodes) > 0, True)
