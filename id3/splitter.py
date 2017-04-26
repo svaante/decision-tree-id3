@@ -6,7 +6,7 @@ class SplitRecord():
     LESS = 0
     GREATER = 1
 
-    def __init__(self, calc_record, bag, value_encoded, value_decoded):
+    def __init__(self, calc_record, bag, value_encoded, value_decoded=None):
         self.calc_record = calc_record
         self.bag = bag
         self.value_encoded = value_encoded
@@ -158,13 +158,11 @@ class Splitter():
         split_records[0] = SplitRecord(calc_record,
                                        examples_idx[X_[:, idx]
                                                     < calc_record.pivot],
-                                       SplitRecord.LESS,
-                                       "<{}".format(calc_record.pivot))
+                                       SplitRecord.LESS)
         split_records[1] = SplitRecord(calc_record,
                                        examples_idx[X_[:, idx]
                                                     >= calc_record.pivot],
-                                       SplitRecord.GREATER,
-                                       ">={}".format(calc_record.pivot))
+                                       SplitRecord.GREATER)
         return split_records
 
     def calc(self, examples_idx, features_idx):

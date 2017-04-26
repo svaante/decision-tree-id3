@@ -97,12 +97,13 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
         return res
 
     def _extract_edge_value(edge):
+        pivot = edge.calc_record.pivot
         val = edge.value_encoded
-        if isinstance(val, (int, float)):
+        if isinstance(pivot, (int, float)):
             if val == SplitRecord.GREATER:
-                return ">={}".format(round(edge.calc_record.pivot, decimals))
+                return ">={}".format(round(pivot, decimals))
             else:
-                return "<{}".format(round(edge.calc_record.pivot, decimals))
+                return "<{}".format(round(pivot, decimals))
         else:
             return edge.value_decoded
 
