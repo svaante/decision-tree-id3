@@ -16,6 +16,7 @@ def run():
     print(len(id3Estimator.tree_.classification_nodes))
     print(len(id3Estimator.tree_.classification_nodes) + len(id3Estimator.tree_.feature_nodes))
     export_graphviz(id3Estimator.tree_, "test.dot")
+    id3Estimator.predict(X)
 
 
 if __name__ == '__main__':
