@@ -20,7 +20,7 @@ class DotTree():
         return self.dot_tree
 
 
-def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
+def export_graphviz(decision_tree, out_file=DotTree(),
                     feature_names=None, class_names=None):
     """Export a decision tree in DOT format.
 
@@ -102,9 +102,9 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
         pivot = edge.calc_record.pivot
         if split_type is CalcRecord.NUM:
             if val == SplitRecord.GREATER:
-                return ">{}".format(round(pivot, decimals))
+                return ">{0:.2f}".format(pivot)
             else:
-                return "<={}".format(round(pivot, decimals))
+                return "<={0:.2f}".format(pivot)
         else:
             return edge.value_decoded
 
@@ -122,10 +122,10 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
         if node.is_feature:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
-            result += ("Gain info: {}\n"
-                       .format(round(node.details.info, decimals)))
-            result += ("Entropy: {}\n"
-                       .format(round(node.details.entropy, decimals)))
+            result += ("Gain info: {0:.2f}\n"
+                       .format(node.details.info))
+            result += ("Entropy: {0:.2f}\n"
+                       .format(node.details.entropy))
             result += "Dominant class: {}\n".format(dominant_class)
         return result
 
