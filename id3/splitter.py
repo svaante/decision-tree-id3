@@ -122,14 +122,10 @@ class Splitter():
             pivot used set1 < pivot <= set2
         """
         n = x.size
-        """
         if np.max(x) == np.min(x):
-#TODO
-            return CalcRecord(CalcRecord.NOM,
+            return CalcRecord(None,
                               self._entropy(y),
-                              pivot=0.0,
                               attribute_counts=np.array([n]))
-        """
         sorted_idx = np.argsort(x, kind='quicksort')
         sorted_y = np.take(y, sorted_idx, axis=0)
         sorted_x = np.take(x, sorted_idx, axis=0)
@@ -138,8 +134,8 @@ class Splitter():
         min_attribute_counts = np.empty(2)
         for i in range(1, n):
             if sorted_x[i - 1] != sorted_x[i]:
-                tmp_info = (i) * self._entropy(sorted_y[0: i]) + \
-                           (n - (i)) * self._entropy(sorted_y[i:])
+                tmp_info = i * self._entropy(sorted_y[0: i]) + \
+                           (n - i) * self._entropy(sorted_y[i:])
                 if tmp_info < min_info:
                     min_attribute_counts[SplitRecord.LESS] = n - i
                     min_attribute_counts[SplitRecord.GREATER] = i

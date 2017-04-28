@@ -49,7 +49,7 @@ class TreeBuilder(BaseBuilder):
                  prune=False):
         self.splitter = splitter
         self.y_encoder = y_encoder
-        self.X_encodoers = X_encoders
+        self.X_encoders = X_encoders
         self.n_samples = n_samples
         self.n_features = n_features
         self.is_numerical = is_numerical
@@ -74,26 +74,29 @@ class TreeBuilder(BaseBuilder):
                 or items.size == 1
                 or examples_idx.size < self.min_samples_split
                 or depth >= self.max_depth):
-            classification = items[np.argmax(counts)]
-            c_name = self.y_encoder.single_inv_transform(classification)
-            node = Node(c_name)
+            node = self._class_node(items, counts)
             tree.classification_nodes.append(node)
             return node
 
         calc_record = self.splitter.calc(examples_idx, features_idx)
+
+        if calc_record.split_type is None:
+            node = self._class_node(items, counts)
+            tree.classification_nodes.append(node)
+            return node
+
         split_records = self.splitter.split(examples_idx, calc_record)
         new_features_idx = np.delete(features_idx,
                                      np.where(features_idx ==
                                               calc_record.feature_idx))
+
         root = Node(calc_record.feature_idx,
                     is_feature=True,
                     details=calc_record)
         tree.feature_nodes.append(root)
         for record in split_records:
             if record.size == 0:
-                classification = items[np.argmax(counts)]
-                c_name = self.y_encoder.single_inv_transform(classification)
-                node = Node(c_name)
+                node = self._class_node(items, counts)
                 tree.classification_nodes.append(node)
                 root.add_child(node, record)
             else:
@@ -101,6 +104,12 @@ class TreeBuilder(BaseBuilder):
                                new_features_idx, depth+1),
                                record)
         return root
+
+    def _class_node(self, items, counts):
+        classification = items[np.argmax(counts)]
+        c_name = self.y_encoder.single_inv_transform(classification)
+        node = Node(c_name)
+        return node
 
     def _prune(self, tree, X_test, y_test):
         y_pred = self._predict(tree, X_test)

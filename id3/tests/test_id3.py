@@ -3,7 +3,6 @@ from numpy.testing import assert_almost_equal, assert_equal
 import numpy as np
 from id3 import Id3Estimator
 from id3 import export_graphviz
-from id3.data import load_simple
 from id3.splitter import Splitter
 
 
@@ -31,14 +30,7 @@ def test_info_numerical():
     assert_equal(record.split_type, 0)
     assert_equal(record.attribute_counts.size, 2)
     assert_almost_equal(record.pivot, 2)
-    assert_almost_equal(record.info, 0.9)
-
-
-def test_simple():
-    X, y, targets = load_simple()
-    id3Estimator = Id3Estimator(max_depth=10, min_samples_split=500)
-    id3Estimator.fit(X, y)
-    export_graphviz(id3Estimator.tree_, "simple.dot")
+    assert_almost_equal(record.info, 0.95, 2)
 
 
 def test_fit():
@@ -47,8 +39,8 @@ def test_fit():
     id3Estimator = Id3Estimator()
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    assert_equal(len(id3Estimator.tree_.classification_nodes), 64)
-    assert_equal(len(id3Estimator.tree_.feature_nodes), 63)
+    assert_equal(len(id3Estimator.tree_.classification_nodes), 23)
+    assert_equal(len(id3Estimator.tree_.feature_nodes), 22)
     export_graphviz(id3Estimator.tree_,
                     "cancer.dot",
                     feature_names=bunch.feature_names)
@@ -62,8 +54,14 @@ def test_fit():
     id3Estimator = Id3Estimator(min_samples_split=20)
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    assert_equal(len(id3Estimator.tree_.classification_nodes), 35)
-    assert_equal(len(id3Estimator.tree_.feature_nodes), 34)
+    assert_equal(len(id3Estimator.tree_.classification_nodes), 14)
+    assert_equal(len(id3Estimator.tree_.feature_nodes), 13)
+
+    id3Estimator = Id3Estimator(gain_ratio=True)
+    id3Estimator.fit(bunch.data, bunch.target)
+    export_graphviz(id3Estimator.tree_,
+                    "cancer.dot",
+                    feature_names=bunch.feature_names)
 
 
 def test_gain_ratio():
