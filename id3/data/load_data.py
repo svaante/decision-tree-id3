@@ -33,7 +33,7 @@ def load_data(path, nominal=True):
 
     """
     path = os.path.join(data_dir, path)
-    with io.open(path, 'r', encoding='utf8') as f:
+    with io.open(path, 'r', encoding='utf-8') as f:
         data_file = csv.reader(f)
         temp = next(data_file)
         n_samples = int(temp[0])

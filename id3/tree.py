@@ -45,6 +45,7 @@ class TreeBuilder(BaseBuilder):
                  is_numerical,
                  max_depth=None,
                  min_samples_split=1,
+                 min_entropy_decrease=0,
                  prune=False):
         self.splitter = splitter
         self.y_encoder = y_encoder
@@ -54,6 +55,7 @@ class TreeBuilder(BaseBuilder):
         self.is_numerical = is_numerical
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
+        self.min_entropy_decrease = min_entropy_decrease
         self.prune = prune
 
     def build(self, tree, X, y, X_test=None, y_test=None):
@@ -73,9 +75,8 @@ class TreeBuilder(BaseBuilder):
                 or examples_idx.size < self.min_samples_split
                 or depth >= self.max_depth):
             classification = items[np.argmax(counts)]
-            classification_name = (self.y_encoder
-                                       .inverse_transform(classification))
-            node = Node(classification_name)
+            c_name = self.y_encoder.single_inv_transform(classification)
+            node = Node(c_name)
             tree.classification_nodes.append(node)
             return node
 
@@ -91,9 +92,8 @@ class TreeBuilder(BaseBuilder):
         for record in split_records:
             if record.size == 0:
                 classification = items[np.argmax(counts)]
-                classification_name = (self.y_encoder
-                                           .inverse_transform(classification))
-                node = Node(classification_name)
+                c_name = self.y_encoder.single_inv_transform(classification)
+                node = Node(c_name)
                 tree.classification_nodes.append(node)
                 root.add_child(node, record)
             else:
@@ -109,7 +109,7 @@ class TreeBuilder(BaseBuilder):
             if not node.is_feature:
                 continue
             encoded_class = node.details.class_counts[0, 0]
-            decoded_class = self.y_encoder.inverse_transform(encoded_class)
+            decoded_class = self.y_encoder.single_inv_transform(encoded_class)
             tmp_value = node.value
             node.value = decoded_class
             node.is_feature = False
@@ -143,12 +143,12 @@ class TreeBuilder(BaseBuilder):
                     elif split_record.calc_record.split_type == CalcRecord.NUM:
                         if (split_record.value_encoded ==
                             SplitRecord.GREATER and
-                                value >= split_record.calc_record.pivot):
+                                value > split_record.calc_record.pivot):
                             node = child
                             break
                         elif (split_record.value_encoded ==
                               SplitRecord.LESS and
-                              value < split_record.calc_record.pivot):
+                              value <= split_record.calc_record.pivot):
                             node = child
                             break
             ret[i] = node.value

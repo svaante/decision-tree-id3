@@ -121,22 +121,28 @@ class Splitter():
         : float
             pivot used set1 < pivot <= set2
         """
-        sorted_idx = np.argsort(x, kind='quicksort')
         n = x.size
+        if np.max(x) == np.min(x):
+#TODO
+            return CalcRecord(CalcRecord.NOM,
+                              self._entropy(y),
+                              pivot=0.0,
+                              attribute_counts=np.array([n]))
+        sorted_idx = np.argsort(x, kind='quicksort')
         sorted_y = np.take(y, sorted_idx, axis=0)
         sorted_x = np.take(x, sorted_idx, axis=0)
         min_info = float('inf')
         min_info_pivot = 0
         min_attribute_counts = np.empty(2)
-        for i in range(n - 1):
-            if sorted_y[i] != sorted_y[i + 1]:
-                tmp_info = (i + 1) * self._entropy(sorted_y[0: i]) + \
-                           (n - (i + 1)) * self._entropy(sorted_y[i:])
+        for i in range(1, n):
+            if sorted_x[i - 1] != sorted_x[i]:
+                tmp_info = (i) * self._entropy(sorted_y[0: i]) + \
+                           (n - (i)) * self._entropy(sorted_y[i:])
                 if tmp_info < min_info:
-                    min_attribute_counts[SplitRecord.LESS] = i + 1
-                    min_attribute_counts[SplitRecord.GREATER] = n - i + 1
+                    min_attribute_counts[SplitRecord.LESS] = n - i
+                    min_attribute_counts[SplitRecord.GREATER] = i
                     min_info = tmp_info
-                    min_info_pivot = sorted_x[i + 1]
+                    min_info_pivot = sorted_x[i - 1]
         return CalcRecord(CalcRecord.NUM,
                           min_info * np.true_divide(1, n),
                           pivot=min_info_pivot,
@@ -159,11 +165,11 @@ class Splitter():
         split_records = [None] * 2
         split_records[0] = SplitRecord(calc_record,
                                        examples_idx[X_[:, idx]
-                                                    < calc_record.pivot],
+                                                    <= calc_record.pivot],
                                        SplitRecord.LESS)
         split_records[1] = SplitRecord(calc_record,
                                        examples_idx[X_[:, idx]
-                                                    >= calc_record.pivot],
+                                                    > calc_record.pivot],
                                        SplitRecord.GREATER)
         return split_records
 
@@ -181,8 +187,6 @@ class Splitter():
         """
         counts = calc_record.attribute_counts
         s = np.true_divide(counts, np.sum(counts))
-        if (- np.sum(np.multiply(s, np.log2(s))) < 0):
-            print("nej")
         return - np.sum(np.multiply(s, np.log2(s)))
 
     def _is_less(self, calc_record1, calc_record2):
@@ -231,6 +235,7 @@ class Splitter():
         X_ = self.X[np.ix_(examples_idx, features_idx)]
         y_ = self.y[examples_idx]
         calc_record = None
+        entropy, class_counts = self._entropy(y_, True)
         for idx, feature in enumerate(X_.T):
             tmp_calc_record = None
             if self.is_numerical[features_idx[idx]]:
@@ -240,7 +245,7 @@ class Splitter():
             if self._is_less(calc_record, tmp_calc_record):
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = features_idx[idx]
-        calc_record.entropy, calc_record.class_counts = self._entropy(y_, True)
+        calc_record.entropy, calc_record.class_counts = entropy, class_counts
         return calc_record
 
     def split(self, examples_idx, calc_record):

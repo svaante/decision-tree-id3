@@ -1,5 +1,5 @@
 from sklearn.externals import six
-from .splitter import SplitRecord
+from .splitter import SplitRecord, CalcRecord
 import numpy as np
 
 
@@ -97,13 +97,14 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
         return res
 
     def _extract_edge_value(edge):
-        pivot = edge.calc_record.pivot
+        split_type = edge.calc_record.split_type
         val = edge.value_encoded
-        if isinstance(pivot, (int, float)):
+        pivot = edge.calc_record.pivot
+        if split_type is CalcRecord.NUM:
             if val == SplitRecord.GREATER:
-                return ">={}".format(round(pivot, decimals))
+                return ">{}".format(round(pivot, decimals))
             else:
-                return "<{}".format(round(pivot, decimals))
+                return "<={}".format(round(pivot, decimals))
         else:
             return edge.value_decoded
 
@@ -113,7 +114,10 @@ def export_graphviz(decision_tree, out_file=DotTree(), decimals=2,
         if feature_names is not None and node.is_feature:
             value = str(feature_names[node.value])
         else:
-            value = str(node.value)
+            if isinstance(node.value, np.bytes_):
+                value = node.value.decode('UTF-8')
+            else:
+                value = str(node.value)
         result += value + "\n"
         if node.is_feature:
             class_counts = node.details.class_counts

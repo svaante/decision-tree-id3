@@ -32,11 +32,13 @@ class Id3Estimator(BaseEstimator):
                  max_depth=None,
                  min_samples_split=2,
                  prune=False,
-                 gain_ratio=False):
+                 gain_ratio=False,
+                 min_entropy_decrease=0.0):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.prune = prune
         self.gain_ratio = gain_ratio
+        self.min_entropy_decrease = min_entropy_decrease
 
     def fit(self, X, y, check_input=True):
         """A reference implementation of a fitting function
@@ -83,6 +85,13 @@ class Id3Estimator(BaseEstimator):
         else:
             min_samples_split = 1
 
+        if isinstance(self.min_entropy_decrease,
+                      (numbers.Integral, np.integer)):
+            min_entropy_decrease = (0 if self.min_entropy_decrease < 0
+                                    else self.min_entropy_decrease)
+        else:
+            min_entropy_decrease = 0
+
         n_samples, self.n_features = X_.shape
         self.is_numerical = [False] * self.n_features
         self.X = np.zeros(X_.shape, dtype=np.float32)
@@ -109,6 +118,7 @@ class Id3Estimator(BaseEstimator):
                                    self.is_numerical,
                                    max_depth=max_depth,
                                    min_samples_split=min_samples_split,
+                                   min_entropy_decrease=min_entropy_decrease,
                                    prune=self.prune)
         self.tree_ = Tree()
         if self.prune:
