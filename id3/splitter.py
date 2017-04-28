@@ -140,7 +140,7 @@ class Splitter():
                     min_attribute_counts[SplitRecord.LESS] = n - i
                     min_attribute_counts[SplitRecord.GREATER] = i
                     min_info = tmp_info
-                    min_info_pivot = (sorted_x[i - 1] + sorted_x[i]) / 2
+                    min_info_pivot = (sorted_x[i - 1] + sorted_x[i]) / 2.0
         return CalcRecord(CalcRecord.NUM,
                           min_info * np.true_divide(1, n),
                           pivot=min_info_pivot,
