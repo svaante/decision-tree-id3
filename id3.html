@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Id3 &mdash; decision-tree-id3 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="decision-tree-id3 0.1.0 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> decision-tree-id3
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">General examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">decision-tree-id3</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Id3</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/id3.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id3">
+<h1>Id3<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h1>
+<p>The documentation of the id3 module.</p>
+<span class="target" id="module-id3.id3"></span><p>This is a module to be used as a reference for building other modules</p>
+<dl class="class">
+<dt id="id3.id3.Id3Estimator">
+<em class="property">class </em><code class="descclassname">id3.id3.</code><code class="descname">Id3Estimator</code><span class="sig-paren">(</span><em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>prune=False</em>, <em>gain_ratio=False</em>, <em>min_entropy_decrease=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A template estimator to be used as a reference implementation .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>max_depth</strong> : int, optional</p>
+<blockquote>
+<div><p>max depth of features</p>
+</div></blockquote>
+<p><strong>min_samples_split</strong> : int, optional, default=2</p>
+<blockquote>
+<div><p>min samples to split on</p>
+</div></blockquote>
+<p><strong>prune</strong> : bool, optional</p>
+<blockquote>
+<div><p>set to True to post-prune the tree</p>
+</div></blockquote>
+<p><strong>gain_ratio</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>use gain ratio on split calculations</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="id3.id3.Id3Estimator.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>check_input=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>A reference implementation of a fitting function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like or sparse matrix of shape = [n_samples, n_features]</p>
+<blockquote>
+<div><p>The training input samples.</p>
+</div></blockquote>
+<p><strong>y</strong> : array-like, shape = [n_samples] or [n_samples, n_outputs]</p>
+<blockquote>
+<div><p>The target values (class labels in classification, real numbers in
+regression).</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> : object</p>
+<blockquote class="last">
+<div><p>Returns self.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="87%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>n_features: int</td>
+<td>The number of features when <code class="docutils literal"><span class="pre">fit</span></code> is performed.</td>
+</tr>
+<tr class="row-even"><td>X_encoders</td>
+<td>(list) List of LabelEncoders that transforms input from labels to binary encodings and vice versa.</td>
+</tr>
+<tr class="row-odd"><td>y_encoder</td>
+<td>(LabelEncoder) LabelEncoders that transforms output from labels to binary encodings and vice versa.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="id3.id3.Id3Estimator.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>A reference implementation of a predicting function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like of shape = [n_samples, n_features_idx]</p>
+<blockquote>
+<div><p>The input samples.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y</strong> : array of shape = [n_samples]</p>
+<blockquote class="last">
+<div><p>Returns <img class="math" src="_images/math/f6186e86be37b4263ad42603d4d7206f606e11aa.png" alt="x^2"/> where <img class="math" src="_images/math/a59f68a4202623bb859a7093f0316bf466e6f75d.png" alt="x"/> is the first column of <cite>X</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Daniel Pettersson Otto Nordander.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
