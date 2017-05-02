@@ -40,7 +40,7 @@ def test_info_numerical():
     record = test_splitter._info_numerical(x_numerical_col, y)
     assert_equal(record.split_type, 0)
     assert_equal(record.attribute_counts.size, 2)
-    assert_almost_equal(record.pivot, 3.5, 2)
+    assert_almost_equal(record.pivot, 1.5, 2)
     assert_almost_equal(record.info, 0.95, 2)
 
 
