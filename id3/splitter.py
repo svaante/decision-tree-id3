@@ -71,7 +71,7 @@ class Splitter():
             return 0
         classes, count = unique(y)
         p = np.true_divide(count, n)
-        res = np.sum(np.multiply(p, np.log2(np.reciprocal(p))))
+        res = - np.sum(np.multiply(p, np.log2(p)))
         if return_class_counts:
             return res, np.vstack((classes, count)).T
         else:
@@ -136,6 +136,9 @@ class Splitter():
             if sorted_x[i - 1] != sorted_x[i]:
                 tmp_info = i * self._entropy(sorted_y[0: i]) + \
                            (n - i) * self._entropy(sorted_y[i:])
+                print("-------------")
+                print(tmp_info)
+                print((sorted_x[i - 1] + sorted_x[i]) / 2.0)
                 if tmp_info < min_info:
                     min_attribute_counts[SplitRecord.LESS] = n - i
                     min_attribute_counts[SplitRecord.GREATER] = i
