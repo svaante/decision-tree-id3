@@ -26,7 +26,8 @@ class CalcRecord():
                  entropy=None,
                  pivot=None,
                  attribute_counts=None,
-                 class_counts=None):
+                 class_counts=None,
+                 gain_ratio=None):
         self.split_type = split_type
         self.info = info
         self.feature_idx = feature_idx
@@ -35,6 +36,7 @@ class CalcRecord():
         self.pivot = pivot
         self.class_counts = class_counts
         self.attribute_counts = attribute_counts
+        self.gain_ratio=gain_ratio
 
     def __lt__(self, other):
         if not isinstance(other, CalcRecord):
@@ -136,12 +138,9 @@ class Splitter():
             if sorted_x[i - 1] != sorted_x[i]:
                 tmp_info = i * self._entropy(sorted_y[0: i]) + \
                            (n - i) * self._entropy(sorted_y[i:])
-                print("-------------")
-                print(tmp_info)
-                print((sorted_x[i - 1] + sorted_x[i]) / 2.0)
                 if tmp_info < min_info:
-                    min_attribute_counts[SplitRecord.LESS] = n - i
-                    min_attribute_counts[SplitRecord.GREATER] = i
+                    min_attribute_counts[SplitRecord.LESS] = i
+                    min_attribute_counts[SplitRecord.GREATER] = n - i
                     min_info = tmp_info
                     min_info_pivot = (sorted_x[i - 1] + sorted_x[i]) / 2.0
         return CalcRecord(CalcRecord.NUM,
@@ -156,7 +155,8 @@ class Splitter():
         split_records = [None] * len(values)
         for val, i in enumerate(values):
             split_records[i] = SplitRecord(calc_record,
-                                           examples_idx[X_[:, ft_idx] == val],
+                                           examples_idx[X_[:, ft_idx]
+                                                        == val],
                                            val,
                                            classes[i])
         return split_records
@@ -188,11 +188,11 @@ class Splitter():
         """
         counts = calc_record.attribute_counts
         s = np.true_divide(counts, np.sum(counts))
-        if - np.sum(np.multiply(s, np.log2(s))) == 0:
-            print(calc_record.attribute_counts)
-            print(calc_record.split_type)
-            print(s)
         return - np.sum(np.multiply(s, np.log2(s)))
+
+    def _gain_ratio(self, calc_record):
+        return np.true_divide(calc_record.entropy - calc_record.info,
+                              self._intrinsic_value(calc_record))
 
     def _is_better(self, calc_record1, calc_record2):
         """Compairs CalcRecords
@@ -205,22 +205,25 @@ class Splitter():
         Returns
         -------
         : bool
-            if calc_record1 > calc_record2
+            if calc_record1 < calc_record2
         """
         if calc_record1 is None:
             return True
         if calc_record2 is None:
             return False
+        if calc_record1.split_type is None:
+            return True
         if calc_record2.split_type is None:
             return False
         if self.gain_ratio:
-            info_gain1 = np.true_divide(calc_record1.entropy
-                                        + calc_record1.info,
-                                        self._intrinsic_value(calc_record1))
-            info_gain2 = np.true_divide(calc_record2.entropy
-                                        + calc_record2.info,
-                                        self._intrinsic_value(calc_record2))
-            return info_gain1 < info_gain2
+            if calc_record1.gain_ratio is None:
+                calc_record1.gain_ratio = self._gain_ratio(calc_record1)
+            if calc_record2.gain_ratio is None:
+                calc_record2.gain_ratio = self._gain_ratio(calc_record2)
+            if np.isclose(calc_record1.gain_ratio, calc_record2.gain_ratio):
+                return calc_record1.info > calc_record2.info
+            else:
+                return calc_record1.gain_ratio < calc_record2.gain_ratio
         else:
             return calc_record1.info > calc_record2.info
 

@@ -21,22 +21,26 @@ class Id3Estimator(BaseEstimator):
         max depth of features
     min_samples_split : int, optional, default=2
         min samples to split on
-    prune : bool, optional
+    prune : bool, optional, default=False
         set to True to post-prune the tree
-    gain_ratio : bool, optional
+    gain_ratio : bool, optional, default=False
         use gain ratio on split calculations
+    is_repeating: bool, optional, default=False
+        use repeating features
     """
     def __init__(self,
                  max_depth=None,
                  min_samples_split=2,
                  prune=False,
                  gain_ratio=False,
-                 min_entropy_decrease=0.0):
+                 min_entropy_decrease=0.0,
+                 is_repeating=False):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.prune = prune
         self.gain_ratio = gain_ratio
         self.min_entropy_decrease = min_entropy_decrease
+        self.is_repeating = is_repeating
 
     def fit(self, X, y, check_input=True):
         """A reference implementation of a fitting function
@@ -79,7 +83,8 @@ class Id3Estimator(BaseEstimator):
         else:
             max_depth = self.max_depth
 
-        if isinstance(self.min_samples_split, (numbers.Integral, np.integer)):
+        if isinstance(self.min_samples_split,
+                      (numbers.Integral, np.integer)):
             min_samples_split = (1 if self.min_samples_split < 1
                                  else self.min_samples_split)
         else:
@@ -119,7 +124,8 @@ class Id3Estimator(BaseEstimator):
                                    max_depth=max_depth,
                                    min_samples_split=min_samples_split,
                                    min_entropy_decrease=min_entropy_decrease,
-                                   prune=self.prune)
+                                   prune=self.prune,
+                                   is_repeating=self.is_repeating)
         self.tree_ = Tree()
         if self.prune:
             self.builder.build(self.tree_, self.X, self.y, X_test, y_test)
