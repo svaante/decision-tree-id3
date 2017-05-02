@@ -194,6 +194,9 @@ class Splitter():
         return np.true_divide(calc_record.entropy - calc_record.info,
                               self._intrinsic_value(calc_record))
 
+    def _is_close(self, a, b):
+        return np.abs(a + b) <= (1e-08 + 1e-05 * np.abs(b))
+
     def _is_better(self, calc_record1, calc_record2):
         """Compairs CalcRecords
 
@@ -220,7 +223,8 @@ class Splitter():
                 calc_record1.gain_ratio = self._gain_ratio(calc_record1)
             if calc_record2.gain_ratio is None:
                 calc_record2.gain_ratio = self._gain_ratio(calc_record2)
-            if np.isclose(calc_record1.gain_ratio, calc_record2.gain_ratio):
+            if self._is_close(calc_record1.gain_ratio,
+                              calc_record2.gain_ratio):
                 return calc_record1.info > calc_record2.info
             else:
                 return calc_record1.gain_ratio < calc_record2.gain_ratio
