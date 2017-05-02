@@ -171,7 +171,7 @@ class Splitter():
                                        SplitRecord.GREATER)
         return split_records
 
-    def _gain_ratio(self, calc_record):
+    def _intrinsic_value(self, calc_record):
         """ Calculates the gain ratio using CalcRecord
         :math: - \sum_{i} \fraq{|S_i|}{|S|}\log_2 (\fraq{|S_i|}{|S|}):math:
 
@@ -205,10 +205,13 @@ class Splitter():
         if calc_record2 is None:
             return False
         if self.gain_ratio:
-            gain_ratio1 = self._gain_ratio(calc_record1)
-            gain_ratio2 = self._gain_ratio(calc_record2)
-            return (np.true_divide(calc_record1.info, gain_ratio1)
-                    > np.true_divide(calc_record2.info, gain_ratio2))
+            info_gain1 = np.true_divide(calc_record1.entropy
+                                        + calc_record1.info,
+                                        self._intrinsic_value(calc_record1))
+            info_gain2 = np.true_divide(calc_record2.entropy
+                                        + calc_record2.info,
+                                        self._intrinsic_value(calc_record2))
+            return info_gain1 > info_gain2
         else:
             return calc_record1.info > calc_record2.info
 
@@ -240,10 +243,11 @@ class Splitter():
                 tmp_calc_record = self._info_numerical(feature, y_)
             else:
                 tmp_calc_record = self._info_nominal(feature, y_)
+            tmp_calc_record.entropy = entropy
+            tmp_calc_record.class_counts = class_counts
             if self._is_less(calc_record, tmp_calc_record):
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = features_idx[idx]
-        calc_record.entropy, calc_record.class_counts = entropy, class_counts
         return calc_record
 
     def split(self, examples_idx, calc_record):

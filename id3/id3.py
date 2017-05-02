@@ -12,10 +12,8 @@ from .splitter import Splitter
 from .utils import check_numerical_array, ExtendedLabelEncoder
 
 
-# TODO(svaante): Intrinsic information
-# http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf
 class Id3Estimator(BaseEstimator):
-    """ A template estimator to be used as a reference implementation .
+    """ A template estimator for calculating ID3 decision trees.
 
     Parameters
     ----------
@@ -50,6 +48,8 @@ class Id3Estimator(BaseEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target values (class labels in classification, real numbers in
             regression).
+        check_input : bool
+            check if the input for numerical features
 
         Attributes
         ----------
@@ -129,7 +129,7 @@ class Id3Estimator(BaseEstimator):
         return self
 
     def predict(self, X):
-        """ A reference implementation of a predicting function.
+        """ A predicting examples based on the previous fit.
 
         Parameters
         ----------

@@ -3,13 +3,24 @@ from numpy.testing import assert_almost_equal, assert_equal
 import numpy as np
 from id3 import Id3Estimator
 from id3 import export_graphviz
-from id3.splitter import Splitter
+from id3.splitter import Splitter, CalcRecord
 
 
 y = np.array([0, 1, 2, 2, 3])
 x_nominal_col = np.array([0, 0, 1, 0, 1])
 x_numerical_col = np.array([1, 2, 5, 5, 1])
 test_splitter = Splitter(None, None, None, None)
+
+
+def test_intrinsic_value():
+    c1 = CalcRecord(None, None, attribute_counts=np.array([5, 4, 5]))
+    c2 = CalcRecord(None, None, attribute_counts=np.array([7, 7]))
+    c3 = CalcRecord(None, None, attribute_counts=np.array([8, 6]))
+    c4 = CalcRecord(None, None, attribute_counts=np.array([4, 6, 4]))
+    assert_almost_equal(test_splitter._intrinsic_value(c1), 1.577, 3)
+    assert_almost_equal(test_splitter._intrinsic_value(c2), 1.000, 3)
+    assert_almost_equal(test_splitter._intrinsic_value(c3), 0.985, 3)
+    assert_almost_equal(test_splitter._intrinsic_value(c4), 1.557, 3)
 
 
 def test_entropy():
