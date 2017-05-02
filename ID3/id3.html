@@ -162,7 +162,7 @@
 <span class="target" id="module-id3.id3"></span><p>This is a module to be used as a reference for building other modules</p>
 <dl class="class">
 <dt id="id3.id3.Id3Estimator">
-<em class="property">class </em><code class="descclassname">id3.id3.</code><code class="descname">Id3Estimator</code><span class="sig-paren">(</span><em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>prune=False</em>, <em>gain_ratio=False</em>, <em>min_entropy_decrease=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">id3.id3.</code><code class="descname">Id3Estimator</code><span class="sig-paren">(</span><em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>prune=False</em>, <em>gain_ratio=False</em>, <em>min_entropy_decrease=0.0</em>, <em>is_repeating=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>A template estimator for calculating ID3 decision trees.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -176,13 +176,17 @@
 <blockquote>
 <div><p>min samples to split on</p>
 </div></blockquote>
-<p><strong>prune</strong> : bool, optional</p>
+<p><strong>prune</strong> : bool, optional, default=False</p>
 <blockquote>
 <div><p>set to True to post-prune the tree</p>
 </div></blockquote>
-<p><strong>gain_ratio</strong> : bool, optional</p>
-<blockquote class="last">
+<p><strong>gain_ratio</strong> : bool, optional, default=False</p>
+<blockquote>
 <div><p>use gain ratio on split calculations</p>
+</div></blockquote>
+<p><strong>is_repeating: bool, optional, default=False</strong></p>
+<blockquote class="last">
+<div><p>use repeating features</p>
 </div></blockquote>
 </td>
 </tr>

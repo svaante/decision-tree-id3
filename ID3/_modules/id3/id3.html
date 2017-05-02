@@ -181,22 +181,26 @@
 <span class="sd">        max depth of features</span>
 <span class="sd">    min_samples_split : int, optional, default=2</span>
 <span class="sd">        min samples to split on</span>
-<span class="sd">    prune : bool, optional</span>
+<span class="sd">    prune : bool, optional, default=False</span>
 <span class="sd">        set to True to post-prune the tree</span>
-<span class="sd">    gain_ratio : bool, optional</span>
+<span class="sd">    gain_ratio : bool, optional, default=False</span>
 <span class="sd">        use gain ratio on split calculations</span>
+<span class="sd">    is_repeating: bool, optional, default=False</span>
+<span class="sd">        use repeating features</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                  <span class="n">prune</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">gain_ratio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">min_entropy_decrease</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+                 <span class="n">min_entropy_decrease</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">is_repeating</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="o">=</span> <span class="n">max_depth</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span> <span class="o">=</span> <span class="n">min_samples_split</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prune</span> <span class="o">=</span> <span class="n">prune</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gain_ratio</span> <span class="o">=</span> <span class="n">gain_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_entropy_decrease</span> <span class="o">=</span> <span class="n">min_entropy_decrease</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span> <span class="o">=</span> <span class="n">is_repeating</span>
 
 <div class="viewcode-block" id="Id3Estimator.fit"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;A reference implementation of a fitting function</span>
@@ -239,7 +243,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">max_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span><span class="p">,</span> <span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
             <span class="n">min_samples_split</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span> <span class="o">&lt;</span> <span class="mi">1</span>
                                  <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -279,7 +284,8 @@
                                    <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
                                    <span class="n">min_samples_split</span><span class="o">=</span><span class="n">min_samples_split</span><span class="p">,</span>
                                    <span class="n">min_entropy_decrease</span><span class="o">=</span><span class="n">min_entropy_decrease</span><span class="p">,</span>
-                                   <span class="n">prune</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">)</span>
+                                   <span class="n">prune</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">,</span>
+                                   <span class="n">is_repeating</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tree_</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
