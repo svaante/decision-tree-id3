@@ -185,10 +185,6 @@ class Splitter():
         """
         counts = calc_record.attribute_counts
         s = np.true_divide(counts, np.sum(counts))
-        if - np.sum(np.multiply(s, np.log2(s))) == 0:
-            print(calc_record.attribute_counts)
-            print(calc_record.split_type)
-            print(s)
         return - np.sum(np.multiply(s, np.log2(s)))
 
     def _is_better(self, calc_record1, calc_record2):
