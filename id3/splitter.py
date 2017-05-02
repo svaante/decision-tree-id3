@@ -185,9 +185,13 @@ class Splitter():
         """
         counts = calc_record.attribute_counts
         s = np.true_divide(counts, np.sum(counts))
+        if - np.sum(np.multiply(s, np.log2(s))) == 0:
+            print(calc_record.attribute_counts)
+            print(calc_record.split_type)
+            print(s)
         return - np.sum(np.multiply(s, np.log2(s)))
 
-    def _is_less(self, calc_record1, calc_record2):
+    def _is_better(self, calc_record1, calc_record2):
         """Compairs CalcRecords
 
         Parameters
@@ -204,6 +208,8 @@ class Splitter():
             return True
         if calc_record2 is None:
             return False
+        if calc_record2.split_type is None:
+            return False
         if self.gain_ratio:
             info_gain1 = np.true_divide(calc_record1.entropy
                                         + calc_record1.info,
@@ -211,7 +217,7 @@ class Splitter():
             info_gain2 = np.true_divide(calc_record2.entropy
                                         + calc_record2.info,
                                         self._intrinsic_value(calc_record2))
-            return info_gain1 > info_gain2
+            return info_gain1 < info_gain2
         else:
             return calc_record1.info > calc_record2.info
 
@@ -245,7 +251,7 @@ class Splitter():
                 tmp_calc_record = self._info_nominal(feature, y_)
             tmp_calc_record.entropy = entropy
             tmp_calc_record.class_counts = class_counts
-            if self._is_less(calc_record, tmp_calc_record):
+            if self._is_better(calc_record, tmp_calc_record):
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = features_idx[idx]
         return calc_record
