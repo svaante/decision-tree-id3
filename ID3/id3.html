@@ -163,7 +163,7 @@
 <dl class="class">
 <dt id="id3.id3.Id3Estimator">
 <em class="property">class </em><code class="descclassname">id3.id3.</code><code class="descname">Id3Estimator</code><span class="sig-paren">(</span><em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>prune=False</em>, <em>gain_ratio=False</em>, <em>min_entropy_decrease=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator" title="Permalink to this definition">¶</a></dt>
-<dd><p>A template estimator to be used as a reference implementation .</p>
+<dd><p>A template estimator for calculating ID3 decision trees.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -206,6 +206,10 @@
 <div><p>The target values (class labels in classification, real numbers in
 regression).</p>
 </div></blockquote>
+<p><strong>check_input</strong> : bool</p>
+<blockquote>
+<div><p>check if the input for numerical features</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> : object</p>
@@ -239,7 +243,7 @@ regression).</p>
 <dl class="method">
 <dt id="id3.id3.Id3Estimator.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>A reference implementation of a predicting function.</p>
+<dd><p>A predicting examples based on the previous fit.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

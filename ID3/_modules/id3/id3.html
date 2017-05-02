@@ -172,10 +172,8 @@
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">check_numerical_array</span><span class="p">,</span> <span class="n">ExtendedLabelEncoder</span>
 
 
-<span class="c1"># TODO(svaante): Intrinsic information</span>
-<span class="c1"># http://www.ke.tu-darmstadt.de/lehre/archiv/ws0809/mldm/dt.pdf</span>
 <div class="viewcode-block" id="Id3Estimator"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator">[docs]</a><span class="k">class</span> <span class="nc">Id3Estimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A template estimator to be used as a reference implementation .</span>
+    <span class="sd">&quot;&quot;&quot; A template estimator for calculating ID3 decision trees.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -210,6 +208,8 @@
 <span class="sd">        y : array-like, shape = [n_samples] or [n_samples, n_outputs]</span>
 <span class="sd">            The target values (class labels in classification, real numbers in</span>
 <span class="sd">            regression).</span>
+<span class="sd">        check_input : bool</span>
+<span class="sd">            check if the input for numerical features</span>
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
@@ -289,7 +289,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Id3Estimator.predict"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; A reference implementation of a predicting function.</span>
+        <span class="sd">&quot;&quot;&quot; A predicting examples based on the previous fit.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
