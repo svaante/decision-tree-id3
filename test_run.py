@@ -1,6 +1,6 @@
 from id3 import Id3Estimator
 from id3.data.load_data import load_data
-from id3.export import export_graphviz
+from id3.export import export_graphviz, export_text
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
@@ -9,7 +9,7 @@ import time
 
 
 def run():
-    X, y, targets = load_data("simple4.arff")
+    X, y, targets = load_data("glass.arff")
     id3Estimator = Id3Estimator(prune=True, gain_ratio=True, is_repeating=True)
     t = time.time()
     id3Estimator.fit(X, y)
@@ -21,7 +21,8 @@ def run():
     """
 
     print("Model done: {}".format(time.time() - t))
-    export_graphviz(id3Estimator.tree_, "test.dot", feature_names=None)
+    s = export_text(id3Estimator.tree_, feature_names=None)
+    print(s)
     print(len(id3Estimator.tree_.classification_nodes))
     print(len(id3Estimator.tree_.classification_nodes) + len(id3Estimator.tree_.feature_nodes))
 

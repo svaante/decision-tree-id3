@@ -20,19 +20,59 @@ class DotTree():
         return self.dot_tree
 
 
+def _extract_edge_value(edge):
+    split_type = edge.calc_record.split_type
+    val = edge.value_encoded
+    pivot = edge.calc_record.pivot
+    if split_type is CalcRecord.NUM:
+        if val == SplitRecord.GREATER:
+            return ">{0:.2f}".format(pivot)
+        else:
+            return "<={0:.2f}".format(pivot)
+    elif isinstance(edge.value_decoded, np.bytes_):
+        return edge.value_decoded.decode('UTF-8')
+    else:
+        return edge.value_decoded
+
+
+def export_text(decision_tree, feature_names=None, class_names=None):
+    """
+    """
+    def build_string(node, indent):
+        ret = ''
+        if node is None:
+            return ''
+        if node.is_feature:
+            ret += '\n'
+            template = '|   ' * indent
+            if feature_names is None:
+                template += str(node.details.feature_idx)
+            else:
+                template += feature_names[node.details.feature_idx]
+            template += ' {}'
+            for child in node.children:
+                edge_value = _extract_edge_value(child[1])
+                ret += template.format(edge_value)
+                ret += build_string(child[0], indent + 1)
+        else:
+            ret += ': {} \n'.format(node.value)
+        return ret
+    return build_string(decision_tree.root, 0)
+
+
 def export_graphviz(decision_tree, out_file=DotTree(),
                     feature_names=None, class_names=None):
     """Export a decision tree in DOT format.
 
     This function generates a GraphViz representation of the decision tree,
-    which is then written into `out_file`. Once exported, graphical renderings
-    can be generated using, for example::
+    which is then written into `out_file`. Once exported,
+    graphical renderings can be generated using, for example::
 
         $ dot -Tps tree.dot -o tree.ps      (PostScript format)
         $ dot -Tpng tree.dot -o tree.png    (PNG format)
 
-    The sample counts that are shown are weighted with any sample_weights that
-    might be present.
+    The sample counts that are shown are weighted with any
+    sample_weights that might be present.
 
     Read more in the :ref:`User Guide <tree>`.
 
@@ -95,20 +135,6 @@ def export_graphviz(decision_tree, out_file=DotTree(),
                                      _extract_edge_value(edge)))
         res = "".join(node_repr)
         return res
-
-    def _extract_edge_value(edge):
-        split_type = edge.calc_record.split_type
-        val = edge.value_encoded
-        pivot = edge.calc_record.pivot
-        if split_type is CalcRecord.NUM:
-            if val == SplitRecord.GREATER:
-                return ">{0:.2f}".format(pivot)
-            else:
-                return "<={0:.2f}".format(pivot)
-        elif isinstance(edge.value_decoded, np.bytes_):
-            return edge.value_decoded.decode('UTF-8')
-        else:
-            return edge.value_decoded
 
     def _extract_node_info(node):
         result = ""

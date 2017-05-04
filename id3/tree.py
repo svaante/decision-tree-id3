@@ -68,7 +68,9 @@ class TreeBuilder(BaseBuilder):
         if self.prune:
             if X_test is None or y_test is None:
                 raise ValueError("Can't prune tree without validation data")
-            self._prune(tree.root, tree, X_test, y_test)
+            print(accuracy_score(self._predict(tree, X_test, y_test), y_test))
+            print(self._prune(tree.root, tree, X_test, y_test))
+            print(accuracy_score(self._predict(tree, X_test), y_test))
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
@@ -115,14 +117,12 @@ class TreeBuilder(BaseBuilder):
         node = Node(c_name)
         return node
 
-    def _prune(self, node, tree, X_test, y_test, score=None):
-        if score is None:
-            score = accuracy_score(self._predict(tree, X_test), y_test)
+    def _prune(self, node, tree, X_test, y_test):
         if node.is_feature:
             predicts = []
             n_children_incorrect = 0
             for n, _ in node.children:
-                self._prune(n, tree, X_test, y_test, score)
+                self._prune(n, tree, X_test, y_test)
                 predicts += n.correct_predicts
                 predicts += n.incorrect_predicts
                 n_children_incorrect += len(n.incorrect_predicts)
