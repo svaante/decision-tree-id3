@@ -82,12 +82,14 @@ class TreeBuilder(BaseBuilder):
 
         calc_record = self.splitter.calc(examples_idx, features_idx)
 
-        if calc_record.split_type is None:
+        if calc_record is None:
             node = self._class_node(items, counts)
             tree.classification_nodes.append(node)
             return node
 
         split_records = self.splitter.split(examples_idx, calc_record)
+
+        features_idx = np.compress(calc_record.alive_features, features_idx)
         if not self.is_repeating:
             features_idx = np.delete(features_idx,
                                      np.where(features_idx ==
