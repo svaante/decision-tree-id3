@@ -68,7 +68,7 @@ class TreeBuilder(BaseBuilder):
         if self.prune:
             if X_test is None or y_test is None:
                 raise ValueError("Can't prune tree without validation data")
-            self._prune(tree, X_test, y_test)
+            self._prune(tree.root, tree, X_test, y_test)
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
@@ -115,28 +115,42 @@ class TreeBuilder(BaseBuilder):
         node = Node(c_name)
         return node
 
-    def _prune(self, tree, X_test, y_test):
-        y_pred = self._predict(tree, X_test)
-        base_score = accuracy_score(y_pred, y_test)
-        for node in tree.feature_nodes:
-            if not node.is_feature:
-                continue
-            encoded_class = node.details.class_counts[0, 0]
-            decoded_class = self.y_encoder.single_inv_transform(encoded_class)
-            tmp_value = node.value
-            node.value = decoded_class
-            node.is_feature = False
-            y_pred = self._predict(tree, X_test)
-            new_score = accuracy_score(y_pred, y_test)
-            if new_score < base_score:
-                node.value = tmp_value
-                node.is_feature = True
-            else:
-                node.children = []
-                tree.classification_nodes.append(node)
-                tree.feature_nodes.remove(node)
+    def _prune(self, node, tree, X_test, y_test, score=None):
+        if score is None:
+            score = accuracy_score(self._predict(tree, X_test), y_test)
+        if node.is_feature:
+            predicts = []
+            n_children_incorrect = 0
+            for n, _ in node.children:
+                self._prune(n, tree, X_test, y_test, score)
+                predicts += n.correct_predicts
+                predicts += n.incorrect_predicts
+                n_children_incorrect += len(n.incorrect_predicts)
+                n.correct_predicts = []
+                n.incorrect_predicts = []
+            children_error_rate = 0
+            node_error_rate = 0
+            if len(predicts) != 0:
+                children_error_rate = n_children_incorrect / float(len(predicts))
+                max_predict_class = max(predicts, key=predicts.count)
+                for predict in predicts:
+                    if predict == max_predict_class:
+                        node.correct_predicts.append(predict)
+                    else:
+                        node.incorrect_predicts.append(predict)
 
-    def _predict(self, tree, X):
+                node_error_rate = (len(node.incorrect_predicts)
+                                   / float(len(predicts)))
+
+            if len(predicts) != 0 and node_error_rate <= children_error_rate:
+                decoded_class = (self
+                                 .y_encoder
+                                 .single_inv_transform(max_predict_class))
+                node.is_feature = False
+                node.value = decoded_class
+                node.children = []
+
+    def _predict(self, tree, X, y=None):
         X_ = np.zeros(X.shape)
         ret = np.empty(X.shape[0], dtype=X.dtype)
         for i in range(self.n_features):
@@ -165,4 +179,6 @@ class TreeBuilder(BaseBuilder):
                             node = child
                             break
             ret[i] = node.value
+            if y is not None:
+                node.add_predict_result(y[i])
         return ret

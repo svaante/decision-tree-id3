@@ -16,6 +16,14 @@ class Node():
         self.is_feature = is_feature
         self.details = details
         self.children = list()
+        self.correct_predicts = []
+        self.incorrect_predicts = []
+
+    def add_predict_result(self, val):
+        if self.value == val:
+            self.correct_predicts.append(val)
+        else:
+            self.incorrect_predicts.append(val)
 
     def add_child(self, node, split_record):
         """ Add a child to node
