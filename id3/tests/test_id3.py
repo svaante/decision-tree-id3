@@ -51,8 +51,8 @@ def test_numerical_split():
     id3Estimator = Id3Estimator()
     id3Estimator.fit(bunch.data, bunch.target)
     splitter = id3Estimator.builder.splitter
-    record = splitter.calc(list(range(bunch.target.shape[0])),
-                           list(range(bunch.data.shape[1])))
+    record = splitter.calc(np.array(list(range(bunch.target.shape[0]))),
+                           np.array(list(range(bunch.data.shape[1]))))
     less = np.sum(bunch.data[:, record.feature_idx] <= record.pivot)
     more = bunch.data[:, record.feature_idx].shape[0] - less
     split = splitter.split(np.array(list(range(bunch.target.shape[0]))),

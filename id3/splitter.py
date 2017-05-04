@@ -27,7 +27,8 @@ class CalcRecord():
                  pivot=None,
                  attribute_counts=None,
                  class_counts=None,
-                 gain_ratio=None):
+                 gain_ratio=None,
+                 alive_features=None):
         self.split_type = split_type
         self.info = info
         self.feature_idx = feature_idx
@@ -36,7 +37,8 @@ class CalcRecord():
         self.pivot = pivot
         self.class_counts = class_counts
         self.attribute_counts = attribute_counts
-        self.gain_ratio=gain_ratio
+        self.gain_ratio = gain_ratio
+        self.alive_features = alive_features
 
     def __lt__(self, other):
         if not isinstance(other, CalcRecord):
@@ -124,10 +126,6 @@ class Splitter():
             pivot used set1 < pivot <= set2
         """
         n = x.size
-        if np.max(x) == np.min(x):
-            return CalcRecord(None,
-                              self._entropy(y),
-                              attribute_counts=np.array([n]))
         sorted_idx = np.argsort(x, kind='quicksort')
         sorted_y = np.take(y, sorted_idx, axis=0)
         sorted_x = np.take(x, sorted_idx, axis=0)
@@ -214,10 +212,6 @@ class Splitter():
             return True
         if calc_record2 is None:
             return False
-        if calc_record1.split_type is None:
-            return True
-        if calc_record2.split_type is None:
-            return False
         if self.gain_ratio:
             if calc_record1.gain_ratio is None:
                 calc_record1.gain_ratio = self._gain_ratio(calc_record1)
@@ -232,8 +226,8 @@ class Splitter():
             return calc_record1.info > calc_record2.info
 
     def calc(self, examples_idx, features_idx):
-        """ Calculates information regarding optimal split based on information
-        gain
+        """ Calculates information regarding optimal split based on
+        information gain
 
         Parameters
         ----------
@@ -252,8 +246,12 @@ class Splitter():
         X_ = self.X[np.ix_(examples_idx, features_idx)]
         y_ = self.y[examples_idx]
         calc_record = None
+        alive_features = [True] * features_idx.shape[0]
         entropy, class_counts = self._entropy(y_, True)
         for idx, feature in enumerate(X_.T):
+            if np.max(feature) == np.min(feature):
+                alive_features[idx] = False
+                continue
             tmp_calc_record = None
             if self.is_numerical[features_idx[idx]]:
                 tmp_calc_record = self._info_numerical(feature, y_)
@@ -264,6 +262,7 @@ class Splitter():
             if self._is_better(calc_record, tmp_calc_record):
                 calc_record = tmp_calc_record
                 calc_record.feature_idx = features_idx[idx]
+                calc_record.alive_features = alive_features
         return calc_record
 
     def split(self, examples_idx, calc_record):
