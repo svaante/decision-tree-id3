@@ -105,6 +105,8 @@ def export_graphviz(decision_tree, out_file=DotTree(),
                 return ">{0:.2f}".format(pivot)
             else:
                 return "<={0:.2f}".format(pivot)
+        elif isinstance(edge.value_decoded, np.bytes_):
+            return edge.value_decoded.decode('UTF-8')
         else:
             return edge.value_decoded
 

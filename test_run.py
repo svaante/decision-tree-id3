@@ -7,15 +7,12 @@ import time
 
 
 def run():
-    X, y, targets = load_data("cpu.arff")
+    X, y, targets = load_data("test.arff")
     id3Estimator = Id3Estimator(gain_ratio=True, is_repeating=True)
-    ftr_names = np.array(['vendor',
-                          'MYCT',
-                          'MMIN',
-                          'MMAX',
-                          'CACH',
-                          'CHMIN',
-                          'CHMAX'])
+    ftr_names = np.array(['age',
+                          'spectacle-prescrip',
+                          'astigmatism',
+                          'tear-prod-rate'])
     t = time.time()
     id3Estimator.fit(X, y)
     print("Model done: {}".format(time.time() - t))
