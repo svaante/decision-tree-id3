@@ -46,7 +46,8 @@ class TreeBuilder(BaseBuilder):
                  max_depth=None,
                  min_samples_split=1,
                  min_entropy_decrease=0,
-                 prune=False):
+                 prune=False,
+                 is_repeating=False):
         self.splitter = splitter
         self.y_encoder = y_encoder
         self.X_encoders = X_encoders
@@ -57,6 +58,7 @@ class TreeBuilder(BaseBuilder):
         self.min_samples_split = min_samples_split
         self.min_entropy_decrease = min_entropy_decrease
         self.prune = prune
+        self.is_repeating = is_repeating
 
     def build(self, tree, X, y, X_test=None, y_test=None):
         self.X = X
@@ -86,10 +88,10 @@ class TreeBuilder(BaseBuilder):
             return node
 
         split_records = self.splitter.split(examples_idx, calc_record)
-        new_features_idx = np.delete(features_idx,
+        if not self.is_repeating:
+            features_idx = np.delete(features_idx,
                                      np.where(features_idx ==
                                               calc_record.feature_idx))
-
         root = Node(calc_record.feature_idx,
                     is_feature=True,
                     details=calc_record)
@@ -101,7 +103,7 @@ class TreeBuilder(BaseBuilder):
                 root.add_child(node, record)
             else:
                 root.add_child(self._build(tree, record.bag,
-                               new_features_idx, depth+1),
+                               features_idx, depth+1),
                                record)
         return root
 

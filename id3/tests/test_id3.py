@@ -42,6 +42,23 @@ def test_info_numerical():
     assert_equal(record.attribute_counts.size, 2)
     assert_almost_equal(record.pivot, 1.5, 2)
     assert_almost_equal(record.info, 0.95, 2)
+    assert_almost_equal(record.attribute_counts, [2, 3])
+
+
+def test_numerical_split():
+    bunch = load_breast_cancer()
+
+    id3Estimator = Id3Estimator()
+    id3Estimator.fit(bunch.data, bunch.target)
+    splitter = id3Estimator.builder.splitter
+    record = splitter.calc(list(range(bunch.target.shape[0])),
+                           list(range(bunch.data.shape[1])))
+    less = np.sum(bunch.data[:, record.feature_idx] <= record.pivot)
+    more = bunch.data[:, record.feature_idx].shape[0] - less
+    split = splitter.split(np.array(list(range(bunch.target.shape[0]))),
+                           record)
+    assert_almost_equal(len(split[0].bag), less)
+    assert_almost_equal(len(split[1].bag), more)
 
 
 def test_fit():
