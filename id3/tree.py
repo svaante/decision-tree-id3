@@ -68,9 +68,6 @@ class TreeBuilder(BaseBuilder):
         if self.prune:
             if X_test is None or y_test is None:
                 raise ValueError("Can't prune tree without validation data")
-            print(accuracy_score(self._predict(tree, X_test, y_test), y_test))
-            print(self._prune(tree.root, tree, X_test, y_test))
-            print(accuracy_score(self._predict(tree, X_test), y_test))
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
@@ -84,7 +81,8 @@ class TreeBuilder(BaseBuilder):
 
         calc_record = self.splitter.calc(examples_idx, features_idx)
 
-        if calc_record is None:
+        if (calc_record is None
+                or calc_record.info < self.min_entropy_decrease):
             node = self._class_node(items, counts)
             tree.classification_nodes.append(node)
             return node

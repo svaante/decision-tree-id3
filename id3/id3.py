@@ -91,7 +91,7 @@ class Id3Estimator(BaseEstimator):
             min_samples_split = 1
 
         if isinstance(self.min_entropy_decrease,
-                      (numbers.Integral, np.integer)):
+                      (np.float, np.integer)):
             min_entropy_decrease = (0 if self.min_entropy_decrease < 0
                                     else self.min_entropy_decrease)
         else:
