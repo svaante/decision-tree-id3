@@ -38,9 +38,11 @@ def _extract_edge_value(edge):
 def export_text(decision_tree, feature_names=None, class_names=None):
     """
     """
-    def build_string(node, indent):
+    max_depth = 500
+
+    def build_string(node, indent, depth):
         ret = ''
-        if node is None:
+        if node is None or depth > max_depth:
             return ''
         if node.is_feature:
             ret += '\n'
@@ -53,11 +55,11 @@ def export_text(decision_tree, feature_names=None, class_names=None):
             for child in node.children:
                 edge_value = _extract_edge_value(child[1])
                 ret += template.format(edge_value)
-                ret += build_string(child[0], indent + 1)
+                ret += build_string(child[0], indent + 1, depth + 1)
         else:
-            ret += ': {} \n'.format(node.value)
+            ret += ': {} {}\n'.format(node.value, node.counts)
         return ret
-    return build_string(decision_tree.root, 0)
+    return build_string(decision_tree.root, 0, 0)
 
 
 def export_graphviz(decision_tree, out_file=DotTree(),

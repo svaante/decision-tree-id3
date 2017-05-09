@@ -53,6 +53,7 @@ class TreeBuilder(BaseBuilder):
         self.X_encoders = X_encoders
         self.n_samples = n_samples
         self.n_features = n_features
+        self.n_classes = y_encoder.classes_.size
         self.is_numerical = is_numerical
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -68,9 +69,10 @@ class TreeBuilder(BaseBuilder):
         if self.prune:
             if X_test is None or y_test is None:
                 raise ValueError("Can't prune tree without validation data")
-            print(accuracy_score(self._predict(tree, X_test, y_test), y_test))
-            print(self._prune(tree.root, tree, X_test, y_test))
-            print(accuracy_score(self._predict(tree, X_test), y_test))
+            first = accuracy_score(self._predict(tree, X_test, y_test), y_test)
+            self._prune(tree.root, tree, X_test, y_test)
+            second = accuracy_score(self._predict(tree, X_test), y_test)
+            print("first {} second {}".format(first, second))
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
@@ -114,7 +116,7 @@ class TreeBuilder(BaseBuilder):
     def _class_node(self, items, counts):
         classification = items[np.argmax(counts)]
         c_name = self.y_encoder.single_inv_transform(classification)
-        node = Node(c_name)
+        node = Node(c_name, counts=counts)
         return node
 
     def _prune(self, node, tree, X_test, y_test):
@@ -130,8 +132,8 @@ class TreeBuilder(BaseBuilder):
                 n.incorrect_predicts = []
             children_error_rate = 0
             node_error_rate = 0
-            if len(predicts) != 0:
-                children_error_rate = n_children_incorrect / float(len(predicts))
+            if len(predicts) > 0:
+                children_error_rate = n_children_incorrect / float(y_test.shape[0])
                 max_predict_class = max(predicts, key=predicts.count)
                 for predict in predicts:
                     if predict == max_predict_class:
@@ -140,14 +142,12 @@ class TreeBuilder(BaseBuilder):
                         node.incorrect_predicts.append(predict)
 
                 node_error_rate = (len(node.incorrect_predicts)
-                                   / float(len(predicts)))
+                                   / float(y_test.shape[0]))
 
-            if len(predicts) != 0 and node_error_rate <= children_error_rate:
-                decoded_class = (self
-                                 .y_encoder
-                                 .single_inv_transform(max_predict_class))
+            if len(predicts) > 0 and node_error_rate < children_error_rate:
+                print("node ee {} child ee {}".format(node_error_rate, children_error_rate))
                 node.is_feature = False
-                node.value = decoded_class
+                node.value = max_predict_class
                 node.children = []
 
     def _predict(self, tree, X, y=None):

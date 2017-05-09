@@ -11,10 +11,14 @@ class Node():
     def __init__(self,
                  value,
                  is_feature=False,
-                 details={}):
+                 details={},
+                 counts=None,
+                 items=None):
         self.value = value
         self.is_feature = is_feature
         self.details = details
+        self.counts = counts
+        self.items = items
         self.children = list()
         self.correct_predicts = []
         self.incorrect_predicts = []
