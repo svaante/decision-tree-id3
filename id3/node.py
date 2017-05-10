@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Node():
     """ A node class for used to build trees
 
@@ -12,22 +15,21 @@ class Node():
                  value,
                  is_feature=False,
                  details={},
-                 counts=None,
-                 items=None):
+                 counts=None):
         self.value = value
         self.is_feature = is_feature
         self.details = details
         self.counts = counts
-        self.items = items
         self.children = list()
-        self.correct_predicts = []
-        self.incorrect_predicts = []
+        self.predicts = None
+        self.n_correct_predicts = 0
 
-    def add_predict_result(self, val):
+    def add_predict_result(self, val, n_classes):
+        if self.predicts is None:
+            self.predicts = np.zeros(n_classes)
+        self.predicts[val] += 1
         if self.value == val:
-            self.correct_predicts.append(val)
-        else:
-            self.incorrect_predicts.append(val)
+            self.n_correct_predicts += 1
 
     def add_child(self, node, split_record):
         """ Add a child to node

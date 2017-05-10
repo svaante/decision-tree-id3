@@ -20,7 +20,8 @@ class DotTree():
         return self.dot_tree
 
 
-def _extract_edge_value(edge):
+def _extract_edge_value(tree, edge):
+    ft_idx = edge.calc_record.feature_idx
     split_type = edge.calc_record.split_type
     val = edge.value_encoded
     pivot = edge.calc_record.pivot
@@ -29,10 +30,14 @@ def _extract_edge_value(edge):
             return ">{0:.2f}".format(pivot)
         else:
             return "<={0:.2f}".format(pivot)
-    elif isinstance(edge.value_decoded, np.bytes_):
-        return edge.value_decoded.decode('UTF-8')
+    elif tree.X_encoders is not None:
+        value = tree.X_encoders[ft_idx].single_inv_transform(val)
+        if isinstance(value, np.bytes_):
+            return value.decode('UTF-8')
+        else:
+            return value
     else:
-        return edge.value_decoded
+        return val
 
 
 def export_text(decision_tree, feature_names=None, class_names=None):
@@ -53,11 +58,12 @@ def export_text(decision_tree, feature_names=None, class_names=None):
                 template += feature_names[node.details.feature_idx]
             template += ' {}'
             for child in node.children:
-                edge_value = _extract_edge_value(child[1])
+                edge_value = _extract_edge_value(decision_tree, child[1])
                 ret += template.format(edge_value)
                 ret += build_string(child[0], indent + 1, depth + 1)
         else:
-            ret += ': {} {}\n'.format(node.value, node.counts)
+            value = decision_tree.y_encoder.single_inv_transform(node.value)
+            ret += ': {} \n'.format(value)
         return ret
     return build_string(decision_tree.root, 0, 0)
 
@@ -134,7 +140,7 @@ def export_graphviz(decision_tree, out_file=DotTree(),
             node_repr.append(('{} -> {} [ label = "{}"];\n')
                              .format(parent,
                                      n_id,
-                                     _extract_edge_value(edge)))
+                                     _extract_edge_value(decision_tree, edge)))
         res = "".join(node_repr)
         return res
 
@@ -143,12 +149,14 @@ def export_graphviz(decision_tree, out_file=DotTree(),
         value = ""
         if feature_names is not None and node.is_feature:
             value = str(feature_names[node.value])
+        elif decision_tree.y_encoder is not None and not node.is_feature:
+            value = str(decision_tree.y_encoder
+                        .single_inv_transform(node.value))
+            if isinstance(value, np.bytes_):
+                value = value.decode('UTF-8')
         else:
-            if isinstance(node.value, np.bytes_):
-                value = node.value.decode('UTF-8')
-            else:
-                value = str(node.value)
-        result += value + "\n"
+            value = str(node.value)
+        result += str(value) + "\n"
         if node.is_feature:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]

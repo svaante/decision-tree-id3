@@ -41,7 +41,7 @@ def load_data(path, nominal=True):
         target_names = np.array(temp[2:])
         data_type = 'a25' if nominal else np.int
         data = np.empty((n_samples, n_features), data_type)
-        target = np.empty((n_samples, 1), dtype=data_type)
+        target = np.empty((n_samples, ), dtype=data_type)
 
         for i, ir in enumerate(data_file):
             data[i] = np.asarray(ir[:-1], dtype=data_type)

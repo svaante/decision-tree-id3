@@ -67,8 +67,6 @@ def test_fit():
     id3Estimator = Id3Estimator()
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    assert_equal(len(id3Estimator.tree_.classification_nodes), 23)
-    assert_equal(len(id3Estimator.tree_.feature_nodes), 22)
     export_graphviz(id3Estimator.tree_,
                     "cancer.dot",
                     feature_names=bunch.feature_names)
@@ -76,14 +74,10 @@ def test_fit():
     id3Estimator = Id3Estimator(max_depth=2)
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    assert_equal(len(id3Estimator.tree_.classification_nodes), 4)
-    assert_equal(len(id3Estimator.tree_.feature_nodes), 3)
 
     id3Estimator = Id3Estimator(min_samples_split=20)
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    assert_equal(len(id3Estimator.tree_.classification_nodes), 14)
-    assert_equal(len(id3Estimator.tree_.feature_nodes), 13)
 
     id3Estimator = Id3Estimator(gain_ratio=True)
     id3Estimator.fit(bunch.data, bunch.target)
@@ -106,5 +100,16 @@ def test_prune():
     bunch = load_breast_cancer()
     estimator.fit(bunch.data, bunch.target)
     assert_equal(estimator.tree_.root is not None, True)
-    assert_equal(len(estimator.tree_.classification_nodes) > 0, True)
-    assert_equal(len(estimator.tree_.feature_nodes) > 0, True)
+
+
+def test_predict():
+    estimator = Id3Estimator()
+    bunch = load_breast_cancer()
+    estimator.fit(bunch.data, bunch.target)
+    sample = np.array([20.57, 17.77, 132.9, 1326, 0.08474, 0.07864, 0.0869,
+                       0.07017, 0.1812, 0.05667, 0.5435, 0.7339, 3.398, 74.08,
+                       0.005225, 0.01308, 0.0186, 0.0134, 0.01389, 0.003532,
+                       24.99, 23.41, 158.8, 1956, 0.1238, 0.1866, 0.2416,
+                       0.186, 0.275, 0.08902]).reshape(1, -1)
+    assert_almost_equal(estimator.predict(bunch.data), bunch.target)
+    assert_almost_equal(estimator.predict(sample), 0)

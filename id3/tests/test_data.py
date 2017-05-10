@@ -4,7 +4,7 @@ from id3.data import load_data
 import uuid
 
 X = np.arange(20).reshape(10, 2)
-y = np.arange(10).reshape(10, 1)
+y = np.arange(10).reshape(10, )
 
 
 def test_load_data():

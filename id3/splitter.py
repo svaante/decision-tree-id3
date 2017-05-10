@@ -6,11 +6,10 @@ class SplitRecord():
     LESS = 0
     GREATER = 1
 
-    def __init__(self, calc_record, bag, value_encoded, value_decoded=None):
+    def __init__(self, calc_record, bag, value_encoded):
         self.calc_record = calc_record
         self.bag = bag
         self.value_encoded = value_encoded
-        self.value_decoded = value_decoded
         self.size = len(bag) if bag is not None else 0
 
 
@@ -149,14 +148,12 @@ class Splitter():
     def _split_nominal(self, X_, examples_idx, calc_record):
         ft_idx = calc_record.feature_idx
         values = self.encoders[ft_idx].encoded_classes_
-        classes = self.encoders[ft_idx].classes_
         split_records = [None] * len(values)
         for val, i in enumerate(values):
             split_records[i] = SplitRecord(calc_record,
                                            examples_idx[X_[:, ft_idx]
                                                         == val],
-                                           val,
-                                           classes[i])
+                                           val)
         return split_records
 
     def _split_numerical(self, X_, examples_idx, calc_record):

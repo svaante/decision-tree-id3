@@ -43,7 +43,7 @@ class Id3Estimator(BaseEstimator):
         self.is_repeating = is_repeating
 
     def fit(self, X, y, check_input=True):
-        """A reference implementation of a fitting function
+        """Build an decision tree based on X and y
 
         Parameters
         ----------
@@ -74,8 +74,8 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         X_, y = check_X_y(X, y)
-        if self.prune:
-            X_, X_test, y, y_test = train_test_split(X_, y, test_size=0.2)
+        self.y_encoder = ExtendedLabelEncoder()
+        self.y = self.y_encoder.fit_transform(y)
 
         max_np_int = np.iinfo(np.int32).max
         if not isinstance(self.max_depth, (numbers.Integral, np.integer)):
@@ -91,13 +91,13 @@ class Id3Estimator(BaseEstimator):
             min_samples_split = 1
 
         if isinstance(self.min_entropy_decrease,
-                      (numbers.Integral, np.integer)):
+                      (np.float, np.integer)):
             min_entropy_decrease = (0 if self.min_entropy_decrease < 0
                                     else self.min_entropy_decrease)
         else:
             min_entropy_decrease = 0
 
-        n_samples, self.n_features = X_.shape
+        _, self.n_features = X_.shape
         self.is_numerical = [False] * self.n_features
         self.X = np.zeros(X_.shape, dtype=np.float32)
         self.X_encoders = [ExtendedLabelEncoder() for _ in
@@ -108,8 +108,10 @@ class Id3Estimator(BaseEstimator):
                 self.X[:, i] = X_[:, i]
             else:
                 self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
-        self.y_encoder = ExtendedLabelEncoder()
-        self.y = self.y_encoder.fit_transform(y)
+        if self.prune:
+            self.X, X_test, self.y, y_test = train_test_split(self.X,
+                                                              self.y,
+                                                              test_size=0.3)
         splitter_ = Splitter(self.X,
                              self.y,
                              self.is_numerical,
@@ -118,7 +120,7 @@ class Id3Estimator(BaseEstimator):
         self.builder = TreeBuilder(splitter_,
                                    self.X_encoders,
                                    self.y_encoder,
-                                   n_samples,
+                                   self.X.shape[0],
                                    self.n_features,
                                    self.is_numerical,
                                    max_depth=max_depth,
@@ -126,7 +128,8 @@ class Id3Estimator(BaseEstimator):
                                    min_entropy_decrease=min_entropy_decrease,
                                    prune=self.prune,
                                    is_repeating=self.is_repeating)
-        self.tree_ = Tree()
+        self.tree_ = Tree(X_encoders=self.X_encoders,
+                          y_encoder=self.y_encoder)
         if self.prune:
             self.builder.build(self.tree_, self.X, self.y, X_test, y_test)
         else:
@@ -149,4 +152,23 @@ class Id3Estimator(BaseEstimator):
         """
         check_is_fitted(self, 'tree_')
         X = check_array(X)
-        return self.builder._predict(self.tree_, X)
+        n_features = X.shape[1]
+        if n_features != self.n_features:
+            raise ValueError("Number of features of the model must "
+                             "match the input. Model n_features is {} and "
+                             "input n_features is {}."
+                             .format(self.n_features, n_features))
+
+        X_ = np.empty(X.shape)
+        for i in range(self.n_features):
+            if self.is_numerical[i]:
+                X_[:, i] = X[:, i]
+            else:
+                try:
+                    X_[:, i] = self.X_encoders[i].transform(X[:, i])
+                except Exception as e:
+                    raise ValueError('New attribute value not found in '
+                                     'train data')
+        y = self.builder._predict(self.tree_, X_)
+        y_ = self.y_encoder.inverse_transform(y)
+        return y_
