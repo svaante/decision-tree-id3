@@ -116,7 +116,6 @@ class Id3Estimator(BaseEstimator):
                              self.X_encoders,
                              self.gain_ratio)
         self.builder = TreeBuilder(splitter_,
-                                   self.X_encoders,
                                    self.y_encoder,
                                    n_samples,
                                    self.n_features,

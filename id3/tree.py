@@ -42,7 +42,6 @@ class TreeBuilder(BaseBuilder):
 
     def __init__(self,
                  splitter,
-                 X_encoders,
                  y_encoder,
                  n_samples,
                  n_features,
@@ -54,7 +53,6 @@ class TreeBuilder(BaseBuilder):
                  is_repeating=False):
         self.splitter = splitter
         self.y_encoder = y_encoder
-        self.X_encoders = X_encoders
         self.n_samples = n_samples
         self.n_features = n_features
         self.is_numerical = is_numerical
