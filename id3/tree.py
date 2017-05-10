@@ -12,7 +12,9 @@ class Tree():
     def __init__(self,
                  root=None,
                  classification_nodes=None,
-                 feature_nodes=None):
+                 feature_nodes=None,
+                 X_encoders=None,
+                 y_encoder=None):
         self.root = root
         if classification_nodes is None:
             classification_nodes = []
@@ -20,6 +22,8 @@ class Tree():
             feature_nodes = []
         self.classification_nodes = classification_nodes
         self.feature_nodes = feature_nodes
+        self.X_encoders = X_encoders
+        self.y_encoder = y_encoder
 
 
 class BaseBuilder():
@@ -111,8 +115,7 @@ class TreeBuilder(BaseBuilder):
 
     def _class_node(self, items, counts):
         classification = items[np.argmax(counts)]
-        c_name = self.y_encoder.single_inv_transform(classification)
-        node = Node(c_name)
+        node = Node(classification)
         return node
 
     def _prune(self, node, tree, X_test, y_test):
@@ -149,14 +152,8 @@ class TreeBuilder(BaseBuilder):
                 node.children = []
 
     def _predict(self, tree, X, y=None):
-        X_ = np.zeros(X.shape)
-        ret = np.empty(X.shape[0], dtype=X.dtype)
-        for i in range(self.n_features):
-            if self.is_numerical[i]:
-                X_[:, i] = X[:, i]
-            else:
-                X_[:, i] = self.X_encoders[i].transform(X[:, i])
-        for i, x in enumerate(X_):
+        ret = np.empty(X.shape[0], dtype=np.int64)
+        for i, x in enumerate(X):
             node = tree.root
             while(node.is_feature):
                 value = x[node.details.feature_idx]

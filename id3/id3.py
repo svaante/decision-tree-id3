@@ -126,7 +126,7 @@ class Id3Estimator(BaseEstimator):
                                    min_entropy_decrease=min_entropy_decrease,
                                    prune=self.prune,
                                    is_repeating=self.is_repeating)
-        self.tree_ = Tree()
+        self.tree_ = Tree(X_encoders=self.X_encoders, y_encoder=self.y_encoder)
         if self.prune:
             self.builder.build(self.tree_, self.X, self.y, X_test, y_test)
         else:
@@ -149,4 +149,19 @@ class Id3Estimator(BaseEstimator):
         """
         check_is_fitted(self, 'tree_')
         X = check_array(X)
-        return self.builder._predict(self.tree_, X)
+        n_features = X.shape[1]
+        if n_features != self.n_features:
+            raise ValueError("Number of features of the model must "
+                             "match the input. Model n_features is {} and "
+                             "input n_features is {}."
+                             .format(self.n_features, n_features))
+
+        X_ = np.empty(X.shape)
+        for i in range(self.n_features):
+            if self.is_numerical[i]:
+                X_[:, i] = X[:, i]
+            else:
+                X_[:, i] = self.X_encoders[i].transform(X[:, i])
+        y = self.builder._predict(self.tree_, X_)
+        y_ = self.y_encoder.inverse_transform(y)
+        return y_
