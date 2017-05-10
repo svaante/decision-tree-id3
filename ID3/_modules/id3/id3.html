@@ -203,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span> <span class="o">=</span> <span class="n">is_repeating</span>
 
 <div class="viewcode-block" id="Id3Estimator.fit"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;A reference implementation of a fitting function</span>
+        <span class="sd">&quot;&quot;&quot;Build an decision tree based on X and y</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -234,8 +234,8 @@
 <span class="sd">            Returns self.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X_</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">check_X_y</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
-            <span class="n">X_</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span> <span class="o">=</span> <span class="n">ExtendedLabelEncoder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
         <span class="n">max_np_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">,</span> <span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
@@ -257,7 +257,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">min_entropy_decrease</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">n_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="n">X_</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="n">X_</span><span class="o">.</span><span class="n">shape</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X_</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span> <span class="o">=</span> <span class="p">[</span><span class="n">ExtendedLabelEncoder</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span>
@@ -268,8 +268,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span> <span class="o">=</span> <span class="n">ExtendedLabelEncoder</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                                                              <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
         <span class="n">splitter_</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">,</span>
@@ -278,7 +280,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">builder</span> <span class="o">=</span> <span class="n">TreeBuilder</span><span class="p">(</span><span class="n">splitter_</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">,</span>
-                                   <span class="n">n_samples</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">,</span>
                                    <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
@@ -286,7 +288,8 @@
                                    <span class="n">min_entropy_decrease</span><span class="o">=</span><span class="n">min_entropy_decrease</span><span class="p">,</span>
                                    <span class="n">prune</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">,</span>
                                    <span class="n">is_repeating</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tree_</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">X_encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span> <span class="n">y_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">X_encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
+                          <span class="n">y_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -321,7 +324,11 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;New attribute value not found in &#39;</span>
+                                     <span class="s1">&#39;train data&#39;</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="n">X_</span><span class="p">)</span>
         <span class="n">y_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y_</span></div></div>
