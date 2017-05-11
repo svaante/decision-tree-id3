@@ -144,7 +144,8 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
             node_repr.append(('{} -> {} [ label = "{}"];\n')
                              .format(parent,
                                      n_id,
-                                     _extract_edge_value(decision_tree, edge)))
+                                     _extract_edge_value(decision_tree,
+                                                         edge)))
         res = "".join(node_repr)
         return res
 
@@ -164,7 +165,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
         if node.is_feature:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
-            result += ("Gain info: {0:.2f}\n"
+            result += ("Info: {0:.2f}\n"
                        .format(node.details.info))
             result += ("Entropy: {0:.2f}\n"
                        .format(node.details.entropy))
