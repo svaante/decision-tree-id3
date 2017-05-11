@@ -7,9 +7,6 @@ machine:
     # The repository where the documentation will be hosted
     DOC_REPO: "decision-tree-id3"
 
-    # The base URL for the Github page where the documentation will be hosted
-    DOC_URL: "ID3"
-
     # The email is to be used for commits in the Github Page
     EMAIL: "otto.nordander@gmail.com"
 

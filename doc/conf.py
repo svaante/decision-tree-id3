@@ -212,7 +212,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'project-templatedoc'
+htmlhelp_basename = 'decision-tree-id3-doc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -233,7 +233,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'project-template.tex', u'project-template Documentation',
-   u'Vighnesh Birodkar', 'manual'),
+   u'Otto Nordander Daniel Pettersson', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
