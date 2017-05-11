@@ -36,12 +36,6 @@ class Id3Estimator(BaseEstimator):
     gain_ratio : bool
     min_entropy_decrease : float
     is_repeating : bool
-    builder_ : TreeBuilder
-    tree_ : Tree
-    n_features : int
-    is_numerical : bool array of size [n_features]
-    y_encoder : ExtendedLabelEncoder
-    X_encoders : ExtendedLabelEncoder array of size [n_features]
     """
     def __init__(self,
                  max_depth=None,
@@ -82,6 +76,15 @@ class Id3Estimator(BaseEstimator):
         y_encoder : LabelEncoder
             LabelEncoders that transforms output from labels to binary
             encodings and vice versa.
+
+        is_numerical : bool array of size [n_features]
+            Array flagging which features that are asumed to be numerical
+
+        builder_ : TreeBuilder
+            Instance of the tree builder
+
+        tree_ : Tree
+            Instance of the build tree
 
         Returns
         -------

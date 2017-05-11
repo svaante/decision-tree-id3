@@ -46,11 +46,12 @@ def export_text(decision_tree, feature_names=None):
     Parameters
     ----------
     decision_tree : decision tree classifier
+
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
 
     Returns
-    ------
+    -------
     ret : string
     """
     max_depth = 500
