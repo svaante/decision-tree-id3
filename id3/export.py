@@ -40,8 +40,18 @@ def _extract_edge_value(tree, edge):
         return val
 
 
-def export_text(decision_tree, feature_names=None, class_names=None):
-    """
+def export_text(decision_tree, feature_names=None):
+    """Export a decision tree in WEKA like string format.
+
+    Parameters
+    ----------
+    decision_tree : decision tree classifier
+    feature_names : list of strings, optional (default=None)
+        Names of each of the features.
+
+    Returns
+    ------
+    ret : string
     """
     max_depth = 500
 
@@ -68,8 +78,7 @@ def export_text(decision_tree, feature_names=None, class_names=None):
     return build_string(decision_tree.root, 0, 0)
 
 
-def export_graphviz(decision_tree, out_file=DotTree(),
-                    feature_names=None, class_names=None):
+def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
     """Export a decision tree in DOT format.
 
     This function generates a GraphViz representation of the decision tree,
@@ -95,11 +104,6 @@ def export_graphviz(decision_tree, out_file=DotTree(),
 
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
-
-    class_names : list of strings, bool or None, optional (default=None)
-        Names of each of the target classes in ascending numerical order.
-        Only relevant for classification and not supported for multi-output.
-        If ``True``, shows a symbolic representation of the class name.
 
     Returns
     -------

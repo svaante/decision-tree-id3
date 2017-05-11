@@ -18,15 +18,30 @@ class Id3Estimator(BaseEstimator):
     Parameters
     ----------
     max_depth : int, optional
-        max depth of features
-    min_samples_split : int, optional, default=2
-        min samples to split on
-    prune : bool, optional, default=False
-        set to True to post-prune the tree
-    gain_ratio : bool, optional, default=False
-        use gain ratio on split calculations
-    is_repeating: bool, optional, default=False
-        use repeating features
+        max depth of features.
+    min_samples_split : int, optional (default=2)
+        min samples to split on.
+    prune : bool, optional (default=False)
+        set to True to prune the tree.
+    gain_ratio : bool, optional (default=False)
+        use gain ratio on split calculations.
+    is_repeating: bool, optional (default=False)
+        use repeating features.
+
+    Attributes
+    ----------
+    max_depth : int
+    min_samples_split : int
+    prune : bool
+    gain_ratio : bool
+    min_entropy_decrease : float
+    is_repeating : bool
+    builder_ : TreeBuilder
+    tree_ : Tree
+    n_features : int
+    is_numerical : bool array of size [n_features]
+    y_encoder : ExtendedLabelEncoder
+    X_encoders : ExtendedLabelEncoder array of size [n_features]
     """
     def __init__(self,
                  max_depth=None,
@@ -52,7 +67,7 @@ class Id3Estimator(BaseEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target values (class labels in classification, real numbers in
             regression).
-        check_input : bool
+        check_input : bool (default=True)
             check if the input for numerical features
 
         Attributes
@@ -73,9 +88,9 @@ class Id3Estimator(BaseEstimator):
         self : object
             Returns self.
         """
-        X_, y = check_X_y(X, y)
+        X_, y_ = check_X_y(X, y)
         self.y_encoder = ExtendedLabelEncoder()
-        self.y = self.y_encoder.fit_transform(y)
+        y_ = self.y_encoder.fit_transform(y_)
 
         max_np_int = np.iinfo(np.int32).max
         if not isinstance(self.max_depth, (numbers.Integral, np.integer)):
@@ -99,41 +114,42 @@ class Id3Estimator(BaseEstimator):
 
         _, self.n_features = X_.shape
         self.is_numerical = [False] * self.n_features
-        self.X = np.zeros(X_.shape, dtype=np.float32)
+        X_tmp = np.zeros(X_.shape, dtype=np.float32)
         self.X_encoders = [ExtendedLabelEncoder() for _ in
                            range(self.n_features)]
         for i in range(self.n_features):
             if check_input and check_numerical_array(X_[:, i]):
                 self.is_numerical[i] = True
-                self.X[:, i] = X_[:, i]
+                X_tmp[:, i] = X_[:, i]
             else:
-                self.X[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+                X_tmp[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+        X_ = X_tmp
         if self.prune:
-            self.X, X_test, self.y, y_test = train_test_split(self.X,
-                                                              self.y,
-                                                              test_size=0.3)
-        splitter_ = Splitter(self.X,
-                             self.y,
-                             self.is_numerical,
-                             self.X_encoders,
-                             self.gain_ratio)
-        self.builder = TreeBuilder(splitter_,
-                                   self.X_encoders,
-                                   self.y_encoder,
-                                   self.X.shape[0],
-                                   self.n_features,
-                                   self.is_numerical,
-                                   max_depth=max_depth,
-                                   min_samples_split=min_samples_split,
-                                   min_entropy_decrease=min_entropy_decrease,
-                                   prune=self.prune,
-                                   is_repeating=self.is_repeating)
+            X_, X_test, y_, y_test = train_test_split(X_,
+                                                      y_,
+                                                      test_size=0.3)
+        splitter = Splitter(X_,
+                            y_,
+                            self.is_numerical,
+                            self.X_encoders,
+                            self.gain_ratio)
+        self.builder_ = TreeBuilder(splitter,
+                                    self.X_encoders,
+                                    self.y_encoder,
+                                    X_.shape[0],
+                                    self.n_features,
+                                    self.is_numerical,
+                                    max_depth=max_depth,
+                                    min_samples_split=min_samples_split,
+                                    min_entropy_decrease=min_entropy_decrease,
+                                    prune=self.prune,
+                                    is_repeating=self.is_repeating)
         self.tree_ = Tree(X_encoders=self.X_encoders,
                           y_encoder=self.y_encoder)
         if self.prune:
-            self.builder.build(self.tree_, self.X, self.y, X_test, y_test)
+            self.builder_.build(self.tree_, X_, y_, X_test, y_test)
         else:
-            self.builder.build(self.tree_, self.X, self.y)
+            self.builder_.build(self.tree_, X_, y_)
 
         return self
 
@@ -148,7 +164,6 @@ class Id3Estimator(BaseEstimator):
         Returns
         -------
         y : array of shape = [n_samples]
-            Returns :math:`x^2` where :math:`x` is the first column of `X`.
         """
         check_is_fitted(self, 'tree_')
         X = check_array(X)
@@ -169,6 +184,5 @@ class Id3Estimator(BaseEstimator):
                 except Exception as e:
                     raise ValueError('New attribute value not found in '
                                      'train data')
-        y = self.builder._predict(self.tree_, X_)
-        y_ = self.y_encoder.inverse_transform(y)
-        return y_
+        y = self.builder_._predict(self.tree_, X_)
+        return self.y_encoder.inverse_transform(y)
