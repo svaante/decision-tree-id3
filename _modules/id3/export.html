@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>id3.export &mdash; decision-tree-id3 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="decision-tree-id3 0.1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> decision-tree-id3
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">General examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">decision-tree-id3</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>id3.export</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for id3.export</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.externals</span> <span class="k">import</span> <span class="n">six</span>
+<span class="kn">from</span> <span class="nn">.splitter</span> <span class="k">import</span> <span class="n">SplitRecord</span><span class="p">,</span> <span class="n">CalcRecord</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">DotTree</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dot_tree</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dot_tree</span> <span class="o">+=</span> <span class="n">content</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot_tree</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_edge_value</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
+    <span class="n">ft_idx</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">calc_record</span><span class="o">.</span><span class="n">feature_idx</span>
+    <span class="n">split_type</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">calc_record</span><span class="o">.</span><span class="n">split_type</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">value_encoded</span>
+    <span class="n">pivot</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">calc_record</span><span class="o">.</span><span class="n">pivot</span>
+    <span class="k">if</span> <span class="n">split_type</span> <span class="ow">is</span> <span class="n">CalcRecord</span><span class="o">.</span><span class="n">NUM</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">SplitRecord</span><span class="o">.</span><span class="n">GREATER</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&gt;</span><span class="si">{0:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pivot</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&lt;=</span><span class="si">{0:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pivot</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">X_encoders</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">ft_idx</span><span class="p">]</span><span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">val</span>
+
+
+<div class="viewcode-block" id="export_text"><a class="viewcode-back" href="../../export.html#id3.export.export_text">[docs]</a><span class="k">def</span> <span class="nf">export_text</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Export a decision tree in WEKA like string format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    decision_tree : decision tree classifier</span>
+<span class="sd">    feature_names : list of strings, optional (default=None)</span>
+<span class="sd">        Names of each of the features.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ------</span>
+<span class="sd">    ret : string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">max_depth</span> <span class="o">=</span> <span class="mi">500</span>
+
+    <span class="k">def</span> <span class="nf">build_string</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">indent</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">max_depth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="s1">&#39;|   &#39;</span> <span class="o">*</span> <span class="n">indent</span>
+            <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">template</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">feature_idx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">template</span> <span class="o">+=</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">feature_idx</span><span class="p">]</span>
+            <span class="n">template</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">edge_value</span> <span class="o">=</span> <span class="n">_extract_edge_value</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">child</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">ret</span> <span class="o">+=</span> <span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">edge_value</span><span class="p">)</span>
+                <span class="n">ret</span> <span class="o">+=</span> <span class="n">build_string</span><span class="p">(</span><span class="n">child</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;: </span><span class="si">{}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">build_string</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="export_graphviz"><a class="viewcode-back" href="../../export.html#id3.export.export_graphviz">[docs]</a><span class="k">def</span> <span class="nf">export_graphviz</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">DotTree</span><span class="p">(),</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Export a decision tree in DOT format.</span>
+
+<span class="sd">    This function generates a GraphViz representation of the decision tree,</span>
+<span class="sd">    which is then written into `out_file`. Once exported,</span>
+<span class="sd">    graphical renderings can be generated using, for example::</span>
+
+<span class="sd">        $ dot -Tps tree.dot -o tree.ps      (PostScript format)</span>
+<span class="sd">        $ dot -Tpng tree.dot -o tree.png    (PNG format)</span>
+
+<span class="sd">    The sample counts that are shown are weighted with any</span>
+<span class="sd">    sample_weights that might be present.</span>
+
+<span class="sd">    Read more in the :ref:`User Guide &lt;tree&gt;`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    decision_tree : decision tree classifier</span>
+<span class="sd">        The decision tree to be exported to GraphViz.</span>
+
+<span class="sd">    out_file : file object or string, optional (default=&#39;tree.dot&#39;)</span>
+<span class="sd">        Handle or name of the output file. If ``None``, the result is</span>
+<span class="sd">        returned as a string. This will the default from version 0.20.</span>
+
+<span class="sd">    feature_names : list of strings, optional (default=None)</span>
+<span class="sd">        Names of each of the features.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dot_data : string</span>
+<span class="sd">        String representation of the input tree in GraphViz dot format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">node_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">max_depth</span> <span class="o">=</span> <span class="mi">500</span>
+
+    <span class="k">def</span> <span class="nf">_recurse_tree</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">node_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_get_next_id</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">max_depth</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="n">max_depth</span><span class="p">:</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">_recurse_tree</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">_get_next_id</span><span class="p">(),</span> <span class="n">edge</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_next_id</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node_ids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">n_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get  a Node objects representation in dot format.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node_repr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ranks</span><span class="p">:</span>
+            <span class="n">ranks</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">depth</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ranks</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">depth</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n_id</span><span class="p">))</span>
+
+        <span class="n">node_repr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s1"> [shape=box, style=filled, label=</span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s1">, &#39;</span>
+                          <span class="s1">&#39;weight=</span><span class="si">{}</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_id</span><span class="p">,</span> <span class="n">_extract_node_info</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">depth</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">node_repr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> [ label = &quot;</span><span class="si">{}</span><span class="s1">&quot;];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span>
+                                     <span class="n">n_id</span><span class="p">,</span>
+                                     <span class="n">_extract_edge_value</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span>
+                                                         <span class="n">edge</span><span class="p">)))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">node_repr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span> <span class="nf">_extract_node_info</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature_names</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span>
+                        <span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">class_counts</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">class_counts</span>
+            <span class="n">dominant_class</span> <span class="o">=</span> <span class="n">class_counts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">class_counts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="p">:]</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Info: </span><span class="si">{0:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Entropy: </span><span class="si">{0:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">entropy</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;Dominant class: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dominant_class</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">DotTree</span><span class="p">)</span> <span class="ow">and</span> <span class="n">six</span><span class="o">.</span><span class="n">PY3</span><span class="p">:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">DotTree</span><span class="p">):</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+
+    <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;digraph ID3_Tree {</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">_recurse_tree</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ranks</span><span class="p">):</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;{rank=same; &quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ranks</span><span class="p">[</span><span class="n">rank</span><span class="p">]:</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span><span class="p">)</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;};</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">out_file</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Daniel Pettersson Otto Nordander.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
