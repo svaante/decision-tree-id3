@@ -48,7 +48,3 @@ def load_data(path, nominal=True):
             target[i] = np.asarray(ir[-1], dtype=data_type)
 
     return data, target, target_names
-
-
-def load_simple():
-    return load_data("simple4.arff")

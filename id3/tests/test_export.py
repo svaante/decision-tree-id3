@@ -2,6 +2,7 @@ from ..data.load_data import load_data
 from .. import export_graphviz, export_text
 from .. import Id3Estimator
 from numpy.testing import assert_equal
+import difflib
 
 
 test_tree = ('digraph ID3_Tree {\n'
@@ -54,7 +55,9 @@ def test_export_graphviz():
     estimator.fit(X, y)
 
     tree = export_graphviz(estimator.tree_)
-    assert_equal(test_tree, tree.to_string())
+    actual = "".join(tree.to_string().split())
+    desired = "".join(test_tree.split())
+    assert_equal(actual, desired)
 
 
 def test_export_text():
@@ -64,4 +67,6 @@ def test_export_text():
     estimator.fit(X, y)
 
     tree = export_text(estimator.tree_)
-    assert_equal(test_tree_text, tree)
+    actual = "".join(tree.split())
+    desired = "".join(test_tree_text.split())
+    assert_equal(actual, desired)

@@ -73,6 +73,8 @@ def export_text(decision_tree, feature_names=None):
                 ret += build_string(child[0], indent + 1, depth + 1)
         else:
             value = decision_tree.y_encoder.single_inv_transform(node.value)
+            if isinstance(value, np.bytes_):
+                value = value.decode('UTF-8')
             ret += ': {} \n'.format(value)
         return ret
     return build_string(decision_tree.root, 0, 0)
@@ -153,13 +155,14 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
         value = ""
         if feature_names is not None and node.is_feature:
             value = str(feature_names[node.value])
-        elif decision_tree.y_encoder is not None and not node.is_feature:
-            value = str(decision_tree.y_encoder
-                        .single_inv_transform(node.value))
-            if isinstance(value, np.bytes_):
-                value = value.decode('UTF-8')
+        elif not node.is_feature:
+            value = (decision_tree.y_encoder
+                     .single_inv_transform(node.value))
         else:
-            value = str(node.value)
+            value = node.value
+
+        if isinstance(value, np.bytes_):
+            value = value.decode('UTF-8')
         result += str(value) + "\n"
         if node.is_feature:
             class_counts = node.details.class_counts
