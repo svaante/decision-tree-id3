@@ -131,13 +131,14 @@ class Id3Estimator(BaseEstimator):
             X_, X_test, y_, y_test = train_test_split(X_,
                                                       y_,
                                                       test_size=0.3)
+
         splitter = Splitter(X_,
                             y_,
                             self.is_numerical,
                             self.X_encoders,
                             self.gain_ratio)
+
         self.builder_ = TreeBuilder(splitter,
-                                    self.X_encoders,
                                     self.y_encoder,
                                     X_.shape[0],
                                     self.n_features,

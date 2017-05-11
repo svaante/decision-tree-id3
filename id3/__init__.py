@@ -3,5 +3,4 @@ from . import id3
 from .export import export_graphviz
 from .export import export_text
 
-__all__ = ['Id3Estimator', 'id3', 'export_graphviz', 'export_text',
-           'splitter']
+__all__ = ['Id3Estimator', 'export_graphviz', 'export_text']

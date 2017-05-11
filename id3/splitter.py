@@ -21,7 +21,6 @@ class CalcRecord():
                  split_type,
                  info,
                  feature_idx=None,
-                 feature_name=None,
                  entropy=None,
                  pivot=None,
                  attribute_counts=None,
@@ -31,7 +30,6 @@ class CalcRecord():
         self.split_type = split_type
         self.info = info
         self.feature_idx = feature_idx
-        self.feature_name = feature_name
         self.entropy = entropy
         self.pivot = pivot
         self.class_counts = class_counts
