@@ -67,9 +67,6 @@ def test_fit():
     id3Estimator = Id3Estimator()
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
-    export_graphviz(id3Estimator.tree_,
-                    "cancer.dot",
-                    feature_names=bunch.feature_names)
 
     id3Estimator = Id3Estimator(max_depth=2)
     id3Estimator.fit(bunch.data, bunch.target)
@@ -81,18 +78,12 @@ def test_fit():
 
     id3Estimator = Id3Estimator(gain_ratio=True)
     id3Estimator.fit(bunch.data, bunch.target)
-    export_graphviz(id3Estimator.tree_,
-                    "cancer.dot",
-                    feature_names=bunch.feature_names)
 
 
 def test_gain_ratio():
     id3Estimator = Id3Estimator(gain_ratio=True)
     bunch = load_breast_cancer()
     id3Estimator.fit(bunch.data, bunch.target)
-    export_graphviz(id3Estimator.tree_,
-                    "cancer_gain_ratio.dot",
-                    feature_names=bunch.feature_names)
 
 
 def test_prune():
