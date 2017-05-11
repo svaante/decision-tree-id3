@@ -11,17 +11,9 @@ class Tree():
 
     def __init__(self,
                  root=None,
-                 classification_nodes=None,
-                 feature_nodes=None,
                  X_encoders=None,
                  y_encoder=None):
         self.root = root
-        if classification_nodes is None:
-            classification_nodes = []
-        if feature_nodes is None:
-            feature_nodes = []
-        self.classification_nodes = classification_nodes
-        self.feature_nodes = feature_nodes
         self.X_encoders = X_encoders
         self.y_encoder = y_encoder
 
@@ -55,6 +47,7 @@ class TreeBuilder(BaseBuilder):
         self.y_encoder = y_encoder
         self.n_samples = n_samples
         self.n_features = n_features
+        self.n_classes = y_encoder.classes_.size
         self.is_numerical = is_numerical
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -70,6 +63,8 @@ class TreeBuilder(BaseBuilder):
         if self.prune:
             if X_test is None or y_test is None:
                 raise ValueError("Can't prune tree without validation data")
+            self._predict(tree, X_test, y_test)
+            self._prune(tree.root, tree)
 
     def _build(self, tree, examples_idx, features_idx, depth=0):
         items, counts = unique(self.y[examples_idx])
@@ -78,7 +73,6 @@ class TreeBuilder(BaseBuilder):
                 or examples_idx.size < self.min_samples_split
                 or depth >= self.max_depth):
             node = self._class_node(items, counts)
-            tree.classification_nodes.append(node)
             return node
 
         calc_record = self.splitter.calc(examples_idx, features_idx)
@@ -86,7 +80,6 @@ class TreeBuilder(BaseBuilder):
         if (calc_record is None
                 or calc_record.info < self.min_entropy_decrease):
             node = self._class_node(items, counts)
-            tree.classification_nodes.append(node)
             return node
 
         split_records = self.splitter.split(examples_idx, calc_record)
@@ -99,11 +92,9 @@ class TreeBuilder(BaseBuilder):
         root = Node(calc_record.feature_idx,
                     is_feature=True,
                     details=calc_record)
-        tree.feature_nodes.append(root)
         for record in split_records:
             if record.size == 0:
                 node = self._class_node(items, counts)
-                tree.classification_nodes.append(node)
                 root.add_child(node, record)
             else:
                 root.add_child(self._build(tree, record.bag,
@@ -116,38 +107,34 @@ class TreeBuilder(BaseBuilder):
         node = Node(classification)
         return node
 
-    def _prune(self, node, tree, X_test, y_test):
+    def _prune(self, node, tree):
         if node.is_feature:
-            predicts = []
-            n_children_incorrect = 0
-            for n, _ in node.children:
-                self._prune(n, tree, X_test, y_test)
-                predicts += n.correct_predicts
-                predicts += n.incorrect_predicts
-                n_children_incorrect += len(n.incorrect_predicts)
-                n.correct_predicts = []
-                n.incorrect_predicts = []
-            children_error_rate = 0
-            node_error_rate = 0
-            if len(predicts) != 0:
-                children_error_rate = n_children_incorrect / float(len(predicts))
-                max_predict_class = max(predicts, key=predicts.count)
-                for predict in predicts:
-                    if predict == max_predict_class:
-                        node.correct_predicts.append(predict)
-                    else:
-                        node.incorrect_predicts.append(predict)
+            node.predicts = np.zeros(self.n_classes)
+            n_children_correct = 0
+            for child, _ in node.children:
+                self._prune(child, tree)
+                if child.predicts is not None:
+                    node.predicts += child.predicts
+                    n_children_correct += child.n_correct_predicts
+                    child.predicts = None
+                    child.n_correct_predicts = 0
+            n_predicts = np.sum(node.predicts)
+            if n_predicts > 0:
+                max_class = np.argmax(node.predicts)
+                children_error_rate = np.true_divide(n_predicts
+                                                     - n_children_correct,
+                                                     n_predicts)
+                node_error_rate = np.true_divide(n_predicts
+                                                 - node.predicts[max_class],
+                                                 n_predicts)
 
-                node_error_rate = (len(node.incorrect_predicts)
-                                   / float(len(predicts)))
-
-            if len(predicts) != 0 and node_error_rate <= children_error_rate:
-                decoded_class = (self
-                                 .y_encoder
-                                 .single_inv_transform(max_predict_class))
-                node.is_feature = False
-                node.value = decoded_class
-                node.children = []
+                if node_error_rate < children_error_rate:
+                    node.is_feature = False
+                    node.value = max_class
+                    node.n_correct_predicts = node.predicts[max_class]
+                    node.children = []
+                else:
+                    node.n_correct_predicts = n_children_correct
 
     def _predict(self, tree, X, y=None):
         ret = np.empty(X.shape[0], dtype=np.int64)
@@ -160,7 +147,8 @@ class TreeBuilder(BaseBuilder):
                         if split_record.value_encoded == value:
                             node = child
                             break
-                    elif split_record.calc_record.split_type == CalcRecord.NUM:
+                    elif (split_record.calc_record.split_type
+                          == CalcRecord.NUM):
                         if (split_record.value_encoded ==
                             SplitRecord.GREATER and
                                 value > split_record.calc_record.pivot):
@@ -173,5 +161,5 @@ class TreeBuilder(BaseBuilder):
                             break
             ret[i] = node.value
             if y is not None:
-                node.add_predict_result(y[i])
+                node.add_predict_result(y[i], self.n_classes)
         return ret

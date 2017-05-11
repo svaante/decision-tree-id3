@@ -40,12 +40,24 @@ def _extract_edge_value(tree, edge):
         return val
 
 
-def export_text(decision_tree, feature_names=None, class_names=None):
+def export_text(decision_tree, feature_names=None):
+    """Export a decision tree in WEKA like string format.
+
+    Parameters
+    ----------
+    decision_tree : decision tree classifier
+    feature_names : list of strings, optional (default=None)
+        Names of each of the features.
+
+    Returns
+    ------
+    ret : string
     """
-    """
-    def build_string(node, indent):
+    max_depth = 500
+
+    def build_string(node, indent, depth):
         ret = ''
-        if node is None:
+        if node is None or depth > max_depth:
             return ''
         if node.is_feature:
             ret += '\n'
@@ -58,15 +70,15 @@ def export_text(decision_tree, feature_names=None, class_names=None):
             for child in node.children:
                 edge_value = _extract_edge_value(decision_tree, child[1])
                 ret += template.format(edge_value)
-                ret += build_string(child[0], indent + 1)
-            else:
-                ret += ': {} \n'.format(node.value)
-            return ret
-        return build_string(decision_tree.root, 0)
+                ret += build_string(child[0], indent + 1, depth + 1)
+        else:
+            value = decision_tree.y_encoder.single_inv_transform(node.value)
+            ret += ': {} \n'.format(value)
+        return ret
+    return build_string(decision_tree.root, 0, 0)
 
 
-def export_graphviz(decision_tree, out_file=DotTree(),
-                    feature_names=None, class_names=None):
+def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
     """Export a decision tree in DOT format.
 
     This function generates a GraphViz representation of the decision tree,
@@ -92,11 +104,6 @@ def export_graphviz(decision_tree, out_file=DotTree(),
 
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
-
-    class_names : list of strings, bool or None, optional (default=None)
-        Names of each of the target classes in ascending numerical order.
-        Only relevant for classification and not supported for multi-output.
-        If ``True``, shows a symbolic representation of the class name.
 
     Returns
     -------
