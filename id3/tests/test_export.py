@@ -2,17 +2,16 @@ from ..data.load_data import load_data
 from .. import export_graphviz, export_text
 from .. import Id3Estimator
 from numpy.testing import assert_equal
-import difflib
 
 
 test_tree = ('digraph ID3_Tree {\n'
              '"0" [shape=box, style=filled, label="0\n'
-             'Gain info: 2.32\n'
+             'Info: 2.32\n'
              'Entropy: 3.32\n'
              'Dominant class: [0 1]\n'
              '", weight=1]\n'
              '"1" [shape=box, style=filled, label="1\n'
-             'Gain info: 1.35\n'
+             'Info: 1.35\n'
              'Entropy: 2.32\n'
              'Dominant class: [0 1]\n'
              '", weight=2]\n'
@@ -24,7 +23,7 @@ test_tree = ('digraph ID3_Tree {\n'
              '", weight=3]\n'
              '1 -> 3 [ label = ">4.00"];\n'
              '"4" [shape=box, style=filled, label="1\n'
-             'Gain info: 1.35\n'
+             'Info: 1.35\n'
              'Entropy: 2.32\n'
              'Dominant class: [5 1]\n'
              '", weight=2]\n'
