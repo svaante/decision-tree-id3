@@ -202,14 +202,11 @@
 
 <div class="viewcode-block" id="export_text"><a class="viewcode-back" href="../../export.html#id3.export.export_text">[docs]</a><span class="k">def</span> <span class="nf">export_text</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export a decision tree in WEKA like string format.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    decision_tree : decision tree classifier</span>
-
 <span class="sd">    feature_names : list of strings, optional (default=None)</span>
 <span class="sd">        Names of each of the features.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ret : string</span>
@@ -243,26 +240,20 @@
 
 <div class="viewcode-block" id="export_graphviz"><a class="viewcode-back" href="../../export.html#id3.export.export_graphviz">[docs]</a><span class="k">def</span> <span class="nf">export_graphviz</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">DotTree</span><span class="p">(),</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export a decision tree in DOT format.</span>
-
 <span class="sd">    This function generates a GraphViz representation of the decision tree,</span>
 <span class="sd">    which is then written into `out_file`. Once exported,</span>
 <span class="sd">    graphical renderings can be generated using, for example:</span>
-
 <span class="sd">        $ dot -Tpdf tree.dot -o tree.pdf    (PDF format)</span>
 <span class="sd">        $ dot -Tpng tree.dot -o tree.png    (PNG format)</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    decision_tree : decision tree classifier</span>
 <span class="sd">        The decision tree to be exported to GraphViz.</span>
-
 <span class="sd">    out_file : string, optional (default=DotTree)</span>
 <span class="sd">        Name of the output file. If ``None``, the result is</span>
 <span class="sd">        returned as a string.</span>
-
 <span class="sd">    feature_names : list of strings, optional (default=None)</span>
 <span class="sd">        Names of each of the features.</span>
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dot_data : string</span>
@@ -290,7 +281,6 @@
 
     <span class="k">def</span> <span class="nf">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">n_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get a Node objects representation in dot format.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">node_repr</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ranks</span><span class="p">:</span>

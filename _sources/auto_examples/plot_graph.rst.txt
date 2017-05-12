@@ -77,7 +77,7 @@ An example graph export of :class:`id3.id3.Id3Estimator` with
        :align:   center
     """
 
-**Total running time of the script:** ( 0 minutes  0.244 seconds)
+**Total running time of the script:** ( 0 minutes  0.243 seconds)
 
 
 

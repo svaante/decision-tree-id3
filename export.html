@@ -162,62 +162,39 @@
 <span class="target" id="module-id3.export"></span><dl class="function">
 <dt id="id3.export.export_graphviz">
 <code class="descclassname">id3.export.</code><code class="descname">export_graphviz</code><span class="sig-paren">(</span><em>decision_tree</em>, <em>out_file=&lt;id3.export.DotTree instance&gt;</em>, <em>feature_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/export.html#export_graphviz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.export.export_graphviz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export a decision tree in DOT format.</p>
-<p>This function generates a GraphViz representation of the decision tree,
+<dd><p>Export a decision tree in DOT format.
+This function generates a GraphViz representation of the decision tree,
 which is then written into <cite>out_file</cite>. Once exported,
 graphical renderings can be generated using, for example:</p>
 <blockquote>
 <div>$ dot -Tpdf tree.dot -o tree.pdf    (PDF format)
 $ dot -Tpng tree.dot -o tree.png    (PNG format)</div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>decision_tree</strong> : decision tree classifier</p>
-<blockquote>
-<div><p>The decision tree to be exported to GraphViz.</p>
-</div></blockquote>
-<p><strong>out_file</strong> : string, optional (default=DotTree)</p>
-<blockquote>
-<div><p>Name of the output file. If <code class="docutils literal"><span class="pre">None</span></code>, the result is
-returned as a string.</p>
-</div></blockquote>
-<p><strong>feature_names</strong> : list of strings, optional (default=None)</p>
-<blockquote>
-<div><p>Names of each of the features.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dot_data</strong> : string</p>
-<blockquote class="last">
-<div><p>String representation of the input tree in GraphViz dot format.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>decision_tree <span class="classifier-delimiter">:</span> <span class="classifier">decision tree classifier</span></dt>
+<dd>The decision tree to be exported to GraphViz.</dd>
+<dt>out_file <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (default=DotTree)</span></dt>
+<dd>Name of the output file. If <code class="docutils literal"><span class="pre">None</span></code>, the result is
+returned as a string.</dd>
+<dt>feature_names <span class="classifier-delimiter">:</span> <span class="classifier">list of strings, optional (default=None)</span></dt>
+<dd>Names of each of the features.</dd>
+</dl>
+<dl class="docutils">
+<dt>dot_data <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd>String representation of the input tree in GraphViz dot format.</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="id3.export.export_text">
 <code class="descclassname">id3.export.</code><code class="descname">export_text</code><span class="sig-paren">(</span><em>decision_tree</em>, <em>feature_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/export.html#export_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.export.export_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export a decision tree in WEKA like string format.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>decision_tree</strong> : decision tree classifier</p>
-<p><strong>feature_names</strong> : list of strings, optional (default=None)</p>
+<dd><p>Export a decision tree in WEKA like string format.
+Parameters
+&#8212;&#8212;&#8212;-
+decision_tree : decision tree classifier
+feature_names : list of strings, optional (default=None)</p>
 <blockquote>
-<div><p>Names of each of the features.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ret</strong> : string</p>
-</td>
-</tr>
-</tbody>
-</table>
+<div>Names of each of the features.</div></blockquote>
+<p>ret : string</p>
 </dd></dl>
 
 </div>
