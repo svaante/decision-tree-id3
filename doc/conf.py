@@ -232,7 +232,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'project-template.tex', u'project-template Documentation',
+  ('index', 'decision-tree-id3.tex', u'decision-tree-id3 Documentation',
    u'Otto Nordander Daniel Pettersson', 'manual'),
 ]
 
@@ -262,8 +262,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'project-template', u'project-template Documentation',
-     [u'Vighnesh Birodkar'], 1)
+    ('index', 'decision-tree-id3', u'decision-tree-id3 Documentation',
+     [u'Otto Nordander Daniel Pettersson'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -276,8 +276,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'project-template', u'project-template Documentation',
-   u'Vighnesh Birodkar', 'project-template', 'One line description of project.',
+  ('index', 'decision-tree-id3', u'decision-tree-id3 Documentation',
+   u'Otto Nordander Daniel Pettersson', 'decision-tree-id3', 'A module for deriving decision trees using the ID3 algorithm.',
    'Miscellaneous'),
 ]
 

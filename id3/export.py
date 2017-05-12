@@ -168,9 +168,9 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
             result += ("Info: {0:.2f}\n"
-                       .format(node.details.info))
+                       .format(float(node.details.info)))
             result += ("Entropy: {0:.2f}\n"
-                       .format(node.details.entropy))
+                       .format(float(node.details.entropy)))
             result += "Dominant class: {}\n".format(dominant_class)
         return result
 
