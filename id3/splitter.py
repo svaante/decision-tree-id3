@@ -191,7 +191,8 @@ class Splitter():
         return np.abs(a + b) <= (1e-08 + 1e-05 * np.abs(b))
 
     def _is_better(self, calc_record1, calc_record2):
-        """Compairs CalcRecords
+        """Compares CalcRecords using gain ratio if present otherwise
+           using the  information.
 
         Parameters
         ----------
