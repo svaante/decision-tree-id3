@@ -61,7 +61,7 @@ def test_numerical_split():
     assert_almost_equal(len(split[1].bag), more)
 
 
-def test_fit():
+def test_numerical_fit():
     bunch = load_breast_cancer()
 
     id3Estimator = Id3Estimator()
@@ -76,8 +76,9 @@ def test_fit():
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
 
-    id3Estimator = Id3Estimator(gain_ratio=True)
-    id3Estimator.fit(bunch.data, bunch.target)
+
+def test_nominal_fit():
+    pass
 
 
 def test_gain_ratio():
