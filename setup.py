@@ -19,10 +19,12 @@ except ImportError:
     sys.exit(1)
 
 setup(name='decision-tree-id3',
-      version='0.0.2',
+      version='0.1',
       description='A scikit-learn compatible package for id3 decision tree',
       author='Daniel Pettersson, Otto Nordander',
       packages=find_packages(),
       install_requires=INSTALL_REQUIRES,
       author_email='svaante@gmail.com, otto.nordander@gmail.com',
+      license='new BSD',
+      url='https://github.com/svaante/decision-tree-id3'
       )
