@@ -61,3 +61,5 @@ There are a number of different default parameters to control the growth of the 
   - gain_ratio, if the algorithm should use gain ratio when splitting the data.
   - min_entropy_decrease, the minimum decrease in entropy to consider a split.
   - is_repeating, repeat the use of features.
+  
+  For more in depth information see the documentation https://svaante.github.io/decision-tree-id3
