@@ -158,10 +158,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for id3.id3</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This is a module to be used as a reference for building other modules</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="k">import</span> <span class="n">check_X_y</span><span class="p">,</span> <span class="n">check_array</span><span class="p">,</span> <span class="n">check_is_fitted</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="k">import</span> <span class="n">BaseEstimator</span>
@@ -173,7 +170,7 @@
 
 
 <div class="viewcode-block" id="Id3Estimator"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator">[docs]</a><span class="k">class</span> <span class="nc">Id3Estimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A template estimator for calculating ID3 decision trees.</span>
+    <span class="sd">&quot;&quot;&quot;A decision tree estimator for deriving ID3 decision trees.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -196,12 +193,6 @@
 <span class="sd">    gain_ratio : bool</span>
 <span class="sd">    min_entropy_decrease : float</span>
 <span class="sd">    is_repeating : bool</span>
-<span class="sd">    builder_ : TreeBuilder</span>
-<span class="sd">    tree_ : Tree</span>
-<span class="sd">    n_features : int</span>
-<span class="sd">    is_numerical : bool array of size [n_features]</span>
-<span class="sd">    y_encoder : ExtendedLabelEncoder</span>
-<span class="sd">    X_encoders : ExtendedLabelEncoder array of size [n_features]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">max_depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -218,7 +209,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span> <span class="o">=</span> <span class="n">is_repeating</span>
 
 <div class="viewcode-block" id="Id3Estimator.fit"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build an decision tree based on X and y</span>
+        <span class="sd">&quot;&quot;&quot;Build a decision tree based on samples X and</span>
+<span class="sd">        corresponding classifications y.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -242,6 +234,15 @@
 <span class="sd">        y_encoder : LabelEncoder</span>
 <span class="sd">            LabelEncoders that transforms output from labels to binary</span>
 <span class="sd">            encodings and vice versa.</span>
+
+<span class="sd">        is_numerical : bool array of size [n_features]</span>
+<span class="sd">            Array flagging which features that are asumed to be numerical</span>
+
+<span class="sd">        builder_ : TreeBuilder</span>
+<span class="sd">            Instance of the tree builder</span>
+
+<span class="sd">        tree_ : Tree</span>
+<span class="sd">            Instance of the build tree</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -288,13 +289,14 @@
             <span class="n">X_</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span>
                                                       <span class="n">y_</span><span class="p">,</span>
                                                       <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span>
                             <span class="n">y_</span><span class="p">,</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">,</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">gain_ratio</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">builder_</span> <span class="o">=</span> <span class="n">TreeBuilder</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">,</span>
                                     <span class="n">X_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">,</span>
@@ -314,7 +316,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Id3Estimator.predict"><a class="viewcode-back" href="../../id3.html#id3.id3.Id3Estimator.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; A predicting examples based on the previous fit.</span>
+        <span class="sd">&quot;&quot;&quot;Predict class for every sample in X.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -341,9 +343,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;New attribute value not found in &#39;</span>
-                                     <span class="s1">&#39;train data&#39;</span><span class="p">)</span>
+                                     <span class="s1">&#39;train data.&#39;</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">builder_</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="n">X_</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div></div>
 </pre></div>

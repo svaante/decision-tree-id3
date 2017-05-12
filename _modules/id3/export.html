@@ -206,11 +206,12 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    decision_tree : decision tree classifier</span>
+
 <span class="sd">    feature_names : list of strings, optional (default=None)</span>
 <span class="sd">        Names of each of the features.</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">    ------</span>
+<span class="sd">    -------</span>
 <span class="sd">    ret : string</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">max_depth</span> <span class="o">=</span> <span class="mi">500</span>
@@ -233,6 +234,8 @@
                 <span class="n">ret</span> <span class="o">+=</span> <span class="n">build_string</span><span class="p">(</span><span class="n">child</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
             <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;: </span><span class="si">{}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">return</span> <span class="n">build_string</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
@@ -243,24 +246,19 @@
 
 <span class="sd">    This function generates a GraphViz representation of the decision tree,</span>
 <span class="sd">    which is then written into `out_file`. Once exported,</span>
-<span class="sd">    graphical renderings can be generated using, for example::</span>
+<span class="sd">    graphical renderings can be generated using, for example:</span>
 
-<span class="sd">        $ dot -Tps tree.dot -o tree.ps      (PostScript format)</span>
+<span class="sd">        $ dot -Tpdf tree.dot -o tree.pdf    (PDF format)</span>
 <span class="sd">        $ dot -Tpng tree.dot -o tree.png    (PNG format)</span>
-
-<span class="sd">    The sample counts that are shown are weighted with any</span>
-<span class="sd">    sample_weights that might be present.</span>
-
-<span class="sd">    Read more in the :ref:`User Guide &lt;tree&gt;`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    decision_tree : decision tree classifier</span>
 <span class="sd">        The decision tree to be exported to GraphViz.</span>
 
-<span class="sd">    out_file : file object or string, optional (default=&#39;tree.dot&#39;)</span>
-<span class="sd">        Handle or name of the output file. If ``None``, the result is</span>
-<span class="sd">        returned as a string. This will the default from version 0.20.</span>
+<span class="sd">    out_file : string, optional (default=DotTree)</span>
+<span class="sd">        Name of the output file. If ``None``, the result is</span>
+<span class="sd">        returned as a string.</span>
 
 <span class="sd">    feature_names : list of strings, optional (default=None)</span>
 <span class="sd">        Names of each of the features.</span>
@@ -276,11 +274,13 @@
 
     <span class="k">def</span> <span class="nf">_recurse_tree</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">max_depth</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="n">node_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_get_next_id</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">max_depth</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="n">max_depth</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-                <span class="n">_recurse_tree</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">_get_next_id</span><span class="p">(),</span> <span class="n">edge</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">depth</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">_recurse_tree</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">_get_next_id</span><span class="p">(),</span> <span class="n">edge</span><span class="p">,</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_next_id</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -289,7 +289,7 @@
             <span class="k">return</span> <span class="n">node_ids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">_node_to_dot</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">n_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get  a Node objects representation in dot format.</span>
+        <span class="sd">&quot;&quot;&quot;Get a Node objects representation in dot format.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">node_repr</span> <span class="o">=</span> <span class="p">[]</span>
@@ -312,15 +312,17 @@
     <span class="k">def</span> <span class="nf">_extract_node_info</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">feature_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature_names</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span>
-                        <span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span>
+                     <span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
             <span class="n">class_counts</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">class_counts</span>

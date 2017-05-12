@@ -159,11 +159,10 @@
   <div class="section" id="id3">
 <h1>Id3<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h1>
 <p>The documentation of the id3 module.</p>
-<span class="target" id="module-id3.id3"></span><p>This is a module to be used as a reference for building other modules</p>
-<dl class="class">
+<span class="target" id="module-id3.id3"></span><dl class="class">
 <dt id="id3.id3.Id3Estimator">
 <em class="property">class </em><code class="descclassname">id3.id3.</code><code class="descname">Id3Estimator</code><span class="sig-paren">(</span><em>max_depth=None</em>, <em>min_samples_split=2</em>, <em>prune=False</em>, <em>gain_ratio=False</em>, <em>min_entropy_decrease=0.0</em>, <em>is_repeating=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator" title="Permalink to this definition">¶</a></dt>
-<dd><p>A template estimator for calculating ID3 decision trees.</p>
+<dd><p>A decision tree estimator for deriving ID3 decision trees.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -195,8 +194,8 @@
 <p class="rubric">Attributes</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="29%" />
-<col width="71%" />
+<col width="67%" />
+<col width="33%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td>max_depth</td>
@@ -217,31 +216,14 @@
 <tr class="row-even"><td>is_repeating</td>
 <td>(bool)</td>
 </tr>
-<tr class="row-odd"><td><a href="#id1"><span class="problematic" id="id2">builder_</span></a></td>
-<td>(TreeBuilder)</td>
-</tr>
-<tr class="row-even"><td><a href="#id4"><span class="problematic" id="id5">tree_</span></a></td>
-<td>(Tree)</td>
-</tr>
-<tr class="row-odd"><td>n_features</td>
-<td>(int)</td>
-</tr>
-<tr class="row-even"><td>is_numerical</td>
-<td>(bool array of size [n_features])</td>
-</tr>
-<tr class="row-odd"><td>y_encoder</td>
-<td>(ExtendedLabelEncoder)</td>
-</tr>
-<tr class="row-even"><td>X_encoders</td>
-<td>(ExtendedLabelEncoder array of size [n_features])</td>
-</tr>
 </tbody>
 </table>
 <p class="rubric">Methods</p>
 <dl class="method">
 <dt id="id3.id3.Id3Estimator.fit">
 <code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>check_input=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build an decision tree based on X and y</p>
+<dd><p>Build a decision tree based on samples X and
+corresponding classifications y.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -285,6 +267,15 @@ regression).</p>
 <tr class="row-odd"><td>y_encoder</td>
 <td>(LabelEncoder) LabelEncoders that transforms output from labels to binary encodings and vice versa.</td>
 </tr>
+<tr class="row-even"><td>is_numerical</td>
+<td>(bool array of size [n_features]) Array flagging which features that are asumed to be numerical</td>
+</tr>
+<tr class="row-odd"><td><a href="#id1"><span class="problematic" id="id2">builder_</span></a></td>
+<td>(TreeBuilder) Instance of the tree builder</td>
+</tr>
+<tr class="row-even"><td><a href="#id4"><span class="problematic" id="id5">tree_</span></a></td>
+<td>(Tree) Instance of the build tree</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -292,7 +283,7 @@ regression).</p>
 <dl class="method">
 <dt id="id3.id3.Id3Estimator.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/id3/id3.html#Id3Estimator.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#id3.id3.Id3Estimator.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>A predicting examples based on the previous fit.</p>
+<dd><p>Predict class for every sample in X.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

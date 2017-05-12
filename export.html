@@ -166,13 +166,9 @@
 <p>This function generates a GraphViz representation of the decision tree,
 which is then written into <cite>out_file</cite>. Once exported,
 graphical renderings can be generated using, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ dot -Tps tree.dot -o tree.ps      (PostScript format)
-$ dot -Tpng tree.dot -o tree.png    (PNG format)
-</pre></div>
-</div>
-<p>The sample counts that are shown are weighted with any
-sample_weights that might be present.</p>
-<p>Read more in the <span class="xref std std-ref">User Guide</span>.</p>
+<blockquote>
+<div>$ dot -Tpdf tree.dot -o tree.pdf    (PDF format)
+$ dot -Tpng tree.dot -o tree.png    (PNG format)</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -181,10 +177,10 @@ sample_weights that might be present.</p>
 <blockquote>
 <div><p>The decision tree to be exported to GraphViz.</p>
 </div></blockquote>
-<p><strong>out_file</strong> : file object or string, optional (default=&#8217;tree.dot&#8217;)</p>
+<p><strong>out_file</strong> : string, optional (default=DotTree)</p>
 <blockquote>
-<div><p>Handle or name of the output file. If <code class="docutils literal"><span class="pre">None</span></code>, the result is
-returned as a string. This will the default from version 0.20.</p>
+<div><p>Name of the output file. If <code class="docutils literal"><span class="pre">None</span></code>, the result is
+returned as a string.</p>
 </div></blockquote>
 <p><strong>feature_names</strong> : list of strings, optional (default=None)</p>
 <blockquote>
@@ -215,9 +211,9 @@ returned as a string. This will the default from version 0.20.</p>
 <blockquote>
 <div><p>Names of each of the features.</p>
 </div></blockquote>
-<p><strong>Returns</strong></p>
-<p><strong>&#8212;&#8212;</strong></p>
-<p class="last"><strong>ret</strong> : string</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ret</strong> : string</p>
 </td>
 </tr>
 </tbody>
