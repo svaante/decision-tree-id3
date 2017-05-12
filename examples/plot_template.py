@@ -5,6 +5,7 @@ Plotting Template Estimator
 
 An example plot of :class:`skltemplate.template.TemplateEstimator`
 """
+"""
 from id3 import Id3Estimator
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
@@ -23,3 +24,4 @@ plt.plot(X_test, clf.predict(X_test), label="predict")
 plt.xlabel("data")
 plt.ylabel("target")
 plt.show()
+"""

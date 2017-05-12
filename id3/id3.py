@@ -1,6 +1,3 @@
-"""
-This is a module to be used as a reference for building other modules
-"""
 import numpy as np
 import numbers
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
@@ -13,7 +10,7 @@ from .utils import check_numerical_array, ExtendedLabelEncoder
 
 
 class Id3Estimator(BaseEstimator):
-    """ A template estimator for calculating ID3 decision trees.
+    """A decision tree estimator for deriving ID3 decision trees.
 
     Parameters
     ----------
@@ -52,7 +49,8 @@ class Id3Estimator(BaseEstimator):
         self.is_repeating = is_repeating
 
     def fit(self, X, y, check_input=True):
-        """Build an decision tree based on X and y
+        """Build a decision tree based on samples X and
+        corresponding classifications y.
 
         Parameters
         ----------
@@ -158,7 +156,7 @@ class Id3Estimator(BaseEstimator):
         return self
 
     def predict(self, X):
-        """ A predicting examples based on the previous fit.
+        """Predict class for every sample in X.
 
         Parameters
         ----------
@@ -185,8 +183,8 @@ class Id3Estimator(BaseEstimator):
             else:
                 try:
                     X_[:, i] = self.X_encoders[i].transform(X[:, i])
-                except Exception as e:
+                except ValueError as e:
                     raise ValueError('New attribute value not found in '
-                                     'train data')
+                                     'train data.')
         y = self.builder_._predict(self.tree_, X_)
         return self.y_encoder.inverse_transform(y)

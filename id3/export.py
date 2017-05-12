@@ -86,24 +86,19 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
 
     This function generates a GraphViz representation of the decision tree,
     which is then written into `out_file`. Once exported,
-    graphical renderings can be generated using, for example::
+    graphical renderings can be generated using, for example:
 
-        $ dot -Tps tree.dot -o tree.ps      (PostScript format)
+        $ dot -Tpdf tree.dot -o tree.pdf    (PDF format)
         $ dot -Tpng tree.dot -o tree.png    (PNG format)
-
-    The sample counts that are shown are weighted with any
-    sample_weights that might be present.
-
-    Read more in the :ref:`User Guide <tree>`.
 
     Parameters
     ----------
     decision_tree : decision tree classifier
         The decision tree to be exported to GraphViz.
 
-    out_file : file object or string, optional (default='tree.dot')
-        Handle or name of the output file. If ``None``, the result is
-        returned as a string. This will the default from version 0.20.
+    out_file : string, optional (default=DotTree)
+        Name of the output file. If ``None``, the result is
+        returned as a string.
 
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
@@ -119,11 +114,13 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
 
     def _recurse_tree(node, node_id=0, edge=None, parent=None, depth=0):
         depth += 1
+        if depth > max_depth:
+            return
+
         node_ids.append(_get_next_id())
-        if max_depth is None or depth <= max_depth:
-            out_file.write(_node_to_dot(node, node_id, parent, edge, depth))
-            for child, edge in node.children:
-                _recurse_tree(child, _get_next_id(), edge, node_id, depth)
+        out_file.write(_node_to_dot(node, node_id, parent, edge, depth))
+        for child, edge in node.children:
+            _recurse_tree(child, _get_next_id(), edge, node_id, depth)
 
     def _get_next_id():
         if len(node_ids) == 0:
@@ -132,7 +129,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
             return node_ids[-1] + 1
 
     def _node_to_dot(node, n_id=0, parent=None, edge=None, depth=0):
-        """Get  a Node objects representation in dot format.
+        """Get a Node objects representation in dot format.
 
         """
         node_repr = []
@@ -155,6 +152,7 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
     def _extract_node_info(node):
         result = ""
         value = ""
+
         if feature_names is not None and node.is_feature:
             value = str(feature_names[node.value])
         elif not node.is_feature:

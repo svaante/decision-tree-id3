@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.metrics import accuracy_score
 
 from .node import Node
 from .utils import unique
@@ -25,7 +24,10 @@ class BaseBuilder():
         """Build a decision tree from data X and classifications y."""
         pass
 
-    def prune(self, tree):
+    def _predict(self, tree, X, y=None):
+        pass
+
+    def _prune(self, tree, node):
         pass
 
 
