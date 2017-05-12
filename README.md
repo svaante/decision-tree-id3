@@ -4,12 +4,8 @@
 [![Coveralls Status](https://coveralls.io/repos/svaante/decision-tree-id3/badge.svg?branch=master&service=github)](https://coveralls.io/r/svaante/decision-tree-id3)
 [![CircleCI Status](https://circleci.com/gh/svaante/decision-tree-id3.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/svaante/decision-tree-id3/tree/master)
 
-**decision-tree-id3**
+#decision-tree-id3
 decision-tree-id3 is a module created to derive decision trees using the ID3 algorithm. It is written to be compatible with Scikit-learn's API using the guidelines for Scikit-learn-contrib. It is licensed under the 3-clause BSD license.
-
-[scikit-learn](http://scikit-learn.org/) 
-compatible extensions.
-
 
 It aids development of estimators that can be used in scikit-learn pipelines
 and (hyper)parameter search, while facilitating testing (including some API
