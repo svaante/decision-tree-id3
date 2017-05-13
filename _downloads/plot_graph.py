@@ -57,7 +57,9 @@ clf.fit(X, y, check_input=True)
 export_graphviz(clf.tree_, "out.dot", feature_names)
 
 """
-To convert the dotfile to
+Convert to png
+--------------
+
 $ dot -T png out.dot -o out.png
 
 .. figure::  /out.png

@@ -180,6 +180,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot_tree</span>
 
 
+<span class="k">def</span> <span class="nf">_extract_class_count</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">item_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">items</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">item_count</span>
+        <span class="k">if</span> <span class="n">counts</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;(0)&quot;</span>
+        <span class="k">elif</span> <span class="n">counts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+            <span class="n">incorrect_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_count</span>
+            <span class="k">return</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_count</span><span class="p">,</span> <span class="n">incorrect_count</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
 <span class="k">def</span> <span class="nf">_extract_edge_value</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
     <span class="n">ft_idx</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">calc_record</span><span class="o">.</span><span class="n">feature_idx</span>
     <span class="n">split_type</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">calc_record</span><span class="o">.</span><span class="n">split_type</span>
@@ -233,12 +248,13 @@
             <span class="n">value</span> <span class="o">=</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">single_inv_transform</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
-            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;: </span><span class="si">{}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;: </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_extract_class_count</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">return</span> <span class="n">build_string</span><span class="p">(</span><span class="n">decision_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="export_graphviz"><a class="viewcode-back" href="../../export.html#id3.export.export_graphviz">[docs]</a><span class="k">def</span> <span class="nf">export_graphviz</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">DotTree</span><span class="p">(),</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="export_graphviz"><a class="viewcode-back" href="../../export.html#id3.export.export_graphviz">[docs]</a><span class="k">def</span> <span class="nf">export_graphviz</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">DotTree</span><span class="p">(),</span> <span class="n">feature_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">extensive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export a decision tree in DOT format.</span>
 <span class="sd">    This function generates a GraphViz representation of the decision tree,</span>
 <span class="sd">    which is then written into `out_file`. Once exported,</span>
@@ -254,6 +270,8 @@
 <span class="sd">        returned as a string.</span>
 <span class="sd">    feature_names : list of strings, optional (default=None)</span>
 <span class="sd">        Names of each of the features.</span>
+<span class="sd">    extensive : displays aditional information, optional (default=False)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dot_data : string</span>
@@ -314,14 +332,16 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bytes_</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span> <span class="ow">and</span> <span class="n">extensive</span><span class="p">:</span>
             <span class="n">class_counts</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">class_counts</span>
             <span class="n">dominant_class</span> <span class="o">=</span> <span class="n">class_counts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">class_counts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="p">:]</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Info: </span><span class="si">{0:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
-                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">info</span><span class="p">)))</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;Entropy: </span><span class="si">{0:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
-                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">entropy</span><span class="p">)))</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">entropy</span><span class="p">))</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;Dominant class: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dominant_class</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">is_feature</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">_extract_class_count</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">DotTree</span><span class="p">)</span> <span class="ow">and</span> <span class="n">six</span><span class="o">.</span><span class="n">PY3</span><span class="p">:</span>
