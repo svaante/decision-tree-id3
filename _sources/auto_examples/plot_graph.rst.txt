@@ -75,11 +75,11 @@ An example graph export of :class:`id3.id3.Id3Estimator` with
 
     $ dot -T png out.dot -o out.png
 
-    .. figure::  /out.png
+    .. figure::  _static/out.png
        :align:   center
     """
 
-**Total running time of the script:** ( 0 minutes  0.261 seconds)
+**Total running time of the script:** ( 0 minutes  0.255 seconds)
 
 
 
