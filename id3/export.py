@@ -57,14 +57,11 @@ def _extract_edge_value(tree, edge):
 
 def export_text(decision_tree, feature_names=None):
     """Export a decision tree in WEKA like string format.
-
     Parameters
     ----------
     decision_tree : decision tree classifier
-
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
-
     Returns
     -------
     ret : string
@@ -99,26 +96,20 @@ def export_text(decision_tree, feature_names=None):
 def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
                     extensive=False):
     """Export a decision tree in DOT format.
-
     This function generates a GraphViz representation of the decision tree,
     which is then written into `out_file`. Once exported,
     graphical renderings can be generated using, for example:
-
         $ dot -Tpdf tree.dot -o tree.pdf    (PDF format)
         $ dot -Tpng tree.dot -o tree.png    (PNG format)
-
     Parameters
     ----------
     decision_tree : decision tree classifier
         The decision tree to be exported to GraphViz.
-
     out_file : string, optional (default=DotTree)
         Name of the output file. If ``None``, the result is
         returned as a string.
-
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
-
     extensive : displays aditional information, optional (default=False)
 
     Returns
@@ -148,7 +139,6 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
 
     def _node_to_dot(node, n_id=0, parent=None, edge=None, depth=0):
         """Get a Node objects representation in dot format.
-
         """
         node_repr = []
         if str(depth) not in ranks:

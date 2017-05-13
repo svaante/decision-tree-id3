@@ -2,13 +2,59 @@ from sklearn.datasets import load_breast_cancer
 from numpy.testing import assert_almost_equal, assert_equal
 import numpy as np
 from id3 import Id3Estimator
-from id3 import export_graphviz
 from id3.splitter import Splitter, CalcRecord
 
 
 y = np.array([0, 1, 2, 2, 3])
 x_nominal_col = np.array([0, 0, 1, 0, 1])
 x_numerical_col = np.array([1, 2, 5, 5, 1])
+
+X = np.array([[45, "male", "private", "m"],
+              [50, "female", "private", "m"],
+              [61, "other", "public", "b"],
+              [40, "male", "private", "none"],
+              [34, "female", "private", "none"],
+              [33, "male", "public", "none"],
+              [43, "other", "private", "m"],
+              [35, "male", "private", "m"],
+              [34, "female", "private", "m"],
+              [35, "male", "public", "m"],
+              [34, "other", "public", "m"],
+              [34, "other", "public", "b"],
+              [34, "female", "public", "b"],
+              [34, "male", "public", "b"],
+              [34, "female", "private", "b"],
+              [34, "male", "private", "b"],
+              [34, "other", "private", "b"]])
+
+X_test = np.array([[25, "male", "private", "m"],
+                   [30, "female", "private", "b"],
+                   [71, "other", "public", "none"],
+                   [19, "female", "private", "m"]])
+
+y_test = np.array(['(23k,30k)',
+                   '(23k,30k)',
+                   '(13k,15k)',
+                   '(23k,30k)'])
+
+y = np.array(["(30k,38k)",
+              "(30k,38k)",
+              "(30k,38k)",
+              "(13k,15k)",
+              "(13k,15k)",
+              "(13k,15k)",
+              "(23k,30k)",
+              "(23k,30k)",
+              "(23k,30k)",
+              "(15k,23k)",
+              "(15k,23k)",
+              "(15k,23k)",
+              "(15k,23k)",
+              "(15k,23k)",
+              "(23k,30k)",
+              "(23k,30k)",
+              "(23k,30k)"])
+
 test_splitter = Splitter(None, None, None, None)
 
 
@@ -61,7 +107,7 @@ def test_numerical_split():
     assert_almost_equal(len(split[1].bag), more)
 
 
-def test_fit():
+def test_numerical():
     bunch = load_breast_cancer()
 
     id3Estimator = Id3Estimator()
@@ -76,8 +122,14 @@ def test_fit():
     id3Estimator.fit(bunch.data, bunch.target)
     assert_equal(id3Estimator.tree_.root.value, 22)
 
-    id3Estimator = Id3Estimator(gain_ratio=True)
-    id3Estimator.fit(bunch.data, bunch.target)
+
+def test_nominal():
+    id3Estimator = Id3Estimator()
+    id3Estimator.fit(X, y)
+
+    assert_equal(id3Estimator.tree_.root.value, 3)
+    predict = id3Estimator.predict(X_test)
+    assert_equal(predict, y_test)
 
 
 def test_gain_ratio():
