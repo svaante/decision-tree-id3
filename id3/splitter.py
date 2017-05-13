@@ -181,7 +181,7 @@ class Splitter():
         """
         counts = calc_record.attribute_counts
         s = np.true_divide(counts, np.sum(counts))
-        return - np.sum(np.multiply(s, np.log2(s)))
+        return np.abs(np.sum(np.multiply(s, np.log2(s))))
 
     def _gain_ratio(self, calc_record):
         return np.true_divide(calc_record.entropy - calc_record.info,

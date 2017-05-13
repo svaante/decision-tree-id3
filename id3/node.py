@@ -13,6 +13,7 @@ class Node():
     """
     def __init__(self,
                  value,
+                 item_count=None,
                  is_feature=False,
                  details={},
                  counts=None):
@@ -23,6 +24,7 @@ class Node():
         self.children = list()
         self.predicts = None
         self.n_correct_predicts = 0
+        self.item_count = item_count
 
     def add_predict_result(self, val, n_classes):
         if self.predicts is None:
