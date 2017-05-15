@@ -107,7 +107,7 @@ def test_numerical_split():
     assert_almost_equal(len(split[1].bag), more)
 
 
-def test_numerical():
+def test_fit():
     bunch = load_breast_cancer()
 
     id3Estimator = Id3Estimator()
@@ -137,12 +137,13 @@ def test_gain_ratio():
     bunch = load_breast_cancer()
     id3Estimator.fit(bunch.data, bunch.target)
 
+    assert_equal(id3Estimator.tree_.root.value, 23)
+
 
 def test_prune():
-    estimator = Id3Estimator(prune=True)
+    id3estimator = Id3Estimator(prune=True)
     bunch = load_breast_cancer()
-    estimator.fit(bunch.data, bunch.target)
-    assert_equal(estimator.tree_.root is not None, True)
+    id3estimator.fit(bunch.data, bunch.target)
 
 
 def test_predict():
