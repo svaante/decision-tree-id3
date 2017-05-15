@@ -20,6 +20,21 @@ class DotTree():
         return self.dot_tree
 
 
+def _extract_class_count(node):
+    if node.item_count is not None:
+        items, counts = node.item_count
+        if counts.size == 0:
+            return "(0)"
+        elif counts.shape[0] == 1:
+            return "({})".format(counts[0])
+        else:
+            max_count = np.max(counts)
+            incorrect_count = np.sum(counts) - max_count
+            return "({}/{})".format(max_count, incorrect_count)
+    else:
+        return ""
+
+
 def _extract_edge_value(tree, edge):
     ft_idx = edge.calc_record.feature_idx
     split_type = edge.calc_record.split_type
@@ -73,12 +88,13 @@ def export_text(decision_tree, feature_names=None):
             value = decision_tree.y_encoder.single_inv_transform(node.value)
             if isinstance(value, np.bytes_):
                 value = value.decode('UTF-8')
-            ret += ': {} \n'.format(value)
+            ret += ': {} {} \n'.format(value, _extract_class_count(node))
         return ret
     return build_string(decision_tree.root, 0, 0)
 
 
-def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
+def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None,
+                    extensive=False):
     """Export a decision tree in DOT format.
     This function generates a GraphViz representation of the decision tree,
     which is then written into `out_file`. Once exported,
@@ -94,6 +110,8 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
         returned as a string.
     feature_names : list of strings, optional (default=None)
         Names of each of the features.
+    extensive : displays aditional information, optional (default=False)
+
     Returns
     -------
     dot_data : string
@@ -154,14 +172,16 @@ def export_graphviz(decision_tree, out_file=DotTree(), feature_names=None):
         if isinstance(value, np.bytes_):
             value = value.decode('UTF-8')
         result += str(value) + "\n"
-        if node.is_feature:
+        if node.is_feature and extensive:
             class_counts = node.details.class_counts
             dominant_class = class_counts[np.argmax(class_counts[:, 1]), :]
             result += ("Info: {0:.2f}\n"
-                       .format(float(node.details.info)))
+                       .format(node.details.info))
             result += ("Entropy: {0:.2f}\n"
-                       .format(float(node.details.entropy)))
+                       .format(node.details.entropy))
             result += "Dominant class: {}\n".format(dominant_class)
+        if not node.is_feature:
+            result += _extract_class_count(node) + "\n"
         return result
 
     if not isinstance(out_file, DotTree) and six.PY3:

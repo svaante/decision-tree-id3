@@ -27,33 +27,33 @@ X = np.array([[45, "male", "private", "m"],
               [34, "male", "private", "b"],
               [34, "other", "private", "b"]])
 
-X_test = np.array([[25, "male", "private", "m"],
-                   [30, "female", "private", "b"],
-                   [71, "other", "public", "none"],
-                   [19, "female", "private", "m"]])
+X_nom_test = np.array([[25, "male", "private", "m"],
+                       [30, "female", "private", "b"],
+                       [71, "other", "public", "none"],
+                       [19, "female", "private", "m"]])
 
-y_test = np.array(['(23k,30k)',
-                   '(23k,30k)',
-                   '(13k,15k)',
-                   '(23k,30k)'])
+y_nom_test = np.array(['(23k,30k)',
+                       '(23k,30k)',
+                       '(13k,15k)',
+                       '(23k,30k)'])
 
-y = np.array(["(30k,38k)",
-              "(30k,38k)",
-              "(30k,38k)",
-              "(13k,15k)",
-              "(13k,15k)",
-              "(13k,15k)",
-              "(23k,30k)",
-              "(23k,30k)",
-              "(23k,30k)",
-              "(15k,23k)",
-              "(15k,23k)",
-              "(15k,23k)",
-              "(15k,23k)",
-              "(15k,23k)",
-              "(23k,30k)",
-              "(23k,30k)",
-              "(23k,30k)"])
+y_nom = np.array(["(30k,38k)",
+                  "(30k,38k)",
+                  "(30k,38k)",
+                  "(13k,15k)",
+                  "(13k,15k)",
+                  "(13k,15k)",
+                  "(23k,30k)",
+                  "(23k,30k)",
+                  "(23k,30k)",
+                  "(15k,23k)",
+                  "(15k,23k)",
+                  "(15k,23k)",
+                  "(15k,23k)",
+                  "(15k,23k)",
+                  "(23k,30k)",
+                  "(23k,30k)",
+                  "(23k,30k)"])
 
 test_splitter = Splitter(None, None, None, None)
 
@@ -125,11 +125,11 @@ def test_fit():
 
 def test_nominal():
     id3Estimator = Id3Estimator()
-    id3Estimator.fit(X, y)
+    id3Estimator.fit(X, y_nom)
 
     assert_equal(id3Estimator.tree_.root.value, 3)
-    predict = id3Estimator.predict(X_test)
-    assert_equal(predict, y_test)
+    predict = id3Estimator.predict(X_nom_test)
+    assert_equal(predict, y_nom_test)
 
 
 def test_gain_ratio():

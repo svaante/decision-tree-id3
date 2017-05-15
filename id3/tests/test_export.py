@@ -17,9 +17,11 @@ test_tree = ('digraph ID3_Tree {\n'
              '", weight=2]\n'
              '0 -> 1 [ label = "<=9.00"];\n'
              '"2" [shape=box, style=filled, label="0\n'
+             '(1/1) \n'
              '", weight=3]\n'
              '1 -> 2 [ label = "<=4.00"];\n'
              '"3" [shape=box, style=filled, label="2\n'
+             '(1/2) \n'
              '", weight=3]\n'
              '1 -> 3 [ label = ">4.00"];\n'
              '"4" [shape=box, style=filled, label="1\n'
@@ -29,9 +31,11 @@ test_tree = ('digraph ID3_Tree {\n'
              '", weight=2]\n'
              '0 -> 4 [ label = ">9.00"];\n'
              '"5" [shape=box, style=filled, label="5\n'
+             '(1/1) \n'
              '", weight=3]\n'
              '4 -> 5 [ label = "<=14.00"];\n'
              '"6" [shape=box, style=filled, label="7\n'
+             '(1/2) \n'
              '", weight=3]\n'
              '4 -> 6 [ label = ">14.00"];\n'
              '{rank=same; 0;};\n'
@@ -40,11 +44,11 @@ test_tree = ('digraph ID3_Tree {\n'
              '}')
 
 test_tree_text = ('\n0 <=9.00\n'
-                  '|   1 <=4.00: 0 \n'
-                  '|   1 >4.00: 2 \n'
+                  '|   1 <=4.00: 0  (1/1)\n'
+                  '|   1 >4.00: 2 (1/2)\n'
                   '0 >9.00\n'
-                  '|   1 <=14.00: 5 \n'
-                  '|   1 >14.00: 7 \n')
+                  '|   1 <=14.00: 5 (1/1)\n'
+                  '|   1 >14.00: 7 (1/2)\n')
 
 
 def test_export_graphviz():
@@ -53,7 +57,7 @@ def test_export_graphviz():
     estimator = Id3Estimator()
     estimator.fit(X, y)
 
-    tree = export_graphviz(estimator.tree_)
+    tree = export_graphviz(estimator.tree_, extensive=True)
     actual = "".join(tree.to_string().split())
     desired = "".join(test_tree.split())
     assert_equal(actual, desired)

@@ -93,7 +93,8 @@ class TreeBuilder(BaseBuilder):
                                               calc_record.feature_idx))
         root = Node(calc_record.feature_idx,
                     is_feature=True,
-                    details=calc_record)
+                    details=calc_record,
+                    item_count=(items, counts))
         for record in split_records:
             if record.size == 0:
                 node = self._class_node(items, counts)
@@ -106,7 +107,7 @@ class TreeBuilder(BaseBuilder):
 
     def _class_node(self, items, counts):
         classification = items[np.argmax(counts)]
-        node = Node(classification)
+        node = Node(classification, item_count=(items, counts))
         return node
 
     def _prune(self, node, tree):
