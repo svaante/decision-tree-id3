@@ -9,7 +9,7 @@ An example graph export of :class:`id3.id3.Id3Estimator` with
 
 $ dot -T png out.dot -o out.png
 
-.. figure::  _static/out.png
+.. figure::  /_static/out.png
    :align:   center
 
 """
