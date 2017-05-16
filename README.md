@@ -1,5 +1,5 @@
 [![Travis Status](https://travis-ci.org/svaante/decision-tree-id3.svg?branch=master)](https://travis-ci.org/svaante/decision-tree-id3)
-[![Coveralls Status](https://coveralls.io/repos/svaante/decision-tree-id3/badge.svg?branch=master&service=github)](https://coveralls.io/r/svaante/decision-tree-id3)
+[![Coveralls Status](https://coveralls.io/repos/github/svaante/decision-tree-id3/badge.svg?branch=master)](https://coveralls.io/github/svaante/decision-tree-id3?branch=master)
 [![CircleCI Status](https://circleci.com/gh/svaante/decision-tree-id3.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/svaante/decision-tree-id3/tree/master)
 
 # decision-tree-id3
