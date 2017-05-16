@@ -13,7 +13,7 @@ An example graph export of :class:`id3.id3.Id3Estimator` with
 
 $ dot -T png out.dot -o out.png
 
-.. figure::  _static/out.png
+.. figure::  /_static/out.png
    :align:   center
 
 
@@ -76,7 +76,7 @@ $ dot -T png out.dot -o out.png
 
     export_graphviz(clf.tree_, "out.dot", feature_names)
 
-**Total running time of the script:** ( 0 minutes  0.374 seconds)
+**Total running time of the script:** ( 0 minutes  0.254 seconds)
 
 
 

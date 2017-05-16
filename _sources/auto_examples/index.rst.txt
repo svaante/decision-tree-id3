@@ -11,26 +11,6 @@ Introductory examples.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="An example plot of :class:`skltemplate.template.TemplateEstimator` ">
-
-.. only:: html
-
-    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_template_thumb.png
-
-        :ref:`sphx_glr_auto_examples_plot_template.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/plot_template
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="An example text export of :class:`id3.id3.Id3Estimator` with :file:`id3.export.export_text` ">
 
 .. only:: html
