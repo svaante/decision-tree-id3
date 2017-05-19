@@ -5,6 +5,13 @@ Graph export from Estimator
 
 An example graph export of :class:`id3.id3.Id3Estimator` with
 :file:`id3.export.export_graphviz`
+
+
+$ dot -T png out.dot -o out.png
+
+.. figure::  /_static/out.png
+   :align:   center
+
 """
 
 from id3 import Id3Estimator, export_graphviz
@@ -55,13 +62,3 @@ clf = Id3Estimator()
 clf.fit(X, y, check_input=True)
 
 export_graphviz(clf.tree_, "out.dot", feature_names)
-
-"""
-Convert to png
---------------
-
-$ dot -T png out.dot -o out.png
-
-.. figure::  _static/out.png
-   :align:   center
-"""
