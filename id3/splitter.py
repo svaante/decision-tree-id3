@@ -72,7 +72,7 @@ class Splitter():
             return 0
         classes, count = unique(y)
         p = np.true_divide(count, n)
-        res = - np.sum(np.multiply(p, np.log2(p)))
+        res = np.abs(np.sum(np.multiply(p, np.log2(p))))
         if return_class_counts:
             return res, np.vstack((classes, count)).T
         else:
