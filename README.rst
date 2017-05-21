@@ -75,7 +75,7 @@ https://svaante.github.io/decision-tree-id3
 
 .. |Travis Status| image:: https://travis-ci.org/svaante/decision-tree-id3.svg?branch=master
    :target: https://travis-ci.org/svaante/decision-tree-id3
-.. |Coveralls Status| image:: https://coveralls.io/repos/svaante/decision-tree-id3/badge.svg?branch=master&service=github
+.. |Coveralls Status| image:: https://coveralls.io/repos/svaante/decision-tree-id3/badge.svg?branch=master
    :target: https://coveralls.io/r/svaante/decision-tree-id3
 .. |CircleCI Status| image:: https://circleci.com/gh/svaante/decision-tree-id3.svg?style=shield&circle-token=:circle-token
    :target: https://circleci.com/gh/svaante/decision-tree-id3/tree/master
