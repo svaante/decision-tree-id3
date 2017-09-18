@@ -224,18 +224,18 @@
 
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
-<span class="sd">        n_features: int</span>
+<span class="sd">        n_features_ : int</span>
 <span class="sd">            The number of features when ``fit`` is performed.</span>
 
-<span class="sd">        X_encoders : list</span>
+<span class="sd">        X_encoders_ : list</span>
 <span class="sd">            List of LabelEncoders that transforms input from labels to binary</span>
 <span class="sd">            encodings and vice versa.</span>
 
-<span class="sd">        y_encoder : LabelEncoder</span>
+<span class="sd">        y_encoder_ : LabelEncoder</span>
 <span class="sd">            LabelEncoders that transforms output from labels to binary</span>
 <span class="sd">            encodings and vice versa.</span>
 
-<span class="sd">        is_numerical : bool array of size [n_features]</span>
+<span class="sd">        is_numerical_ : bool array of size [n_features]</span>
 <span class="sd">            Array flagging which features that are asumed to be numerical</span>
 
 <span class="sd">        builder_ : TreeBuilder</span>
@@ -250,8 +250,8 @@
 <span class="sd">            Returns self.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X_</span><span class="p">,</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">check_X_y</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span> <span class="o">=</span> <span class="n">ExtendedLabelEncoder</span><span class="p">()</span>
-        <span class="n">y_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder_</span> <span class="o">=</span> <span class="n">ExtendedLabelEncoder</span><span class="p">()</span>
+        <span class="n">y_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder_</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y_</span><span class="p">)</span>
 
         <span class="n">max_np_int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">,</span> <span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
@@ -273,17 +273,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">min_entropy_decrease</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span> <span class="o">=</span> <span class="n">X_</span><span class="o">.</span><span class="n">shape</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span>
+        <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span> <span class="o">=</span> <span class="n">X_</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical_</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span>
         <span class="n">X_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X_</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span> <span class="o">=</span> <span class="p">[</span><span class="n">ExtendedLabelEncoder</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span>
-                           <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">)]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders_</span> <span class="o">=</span> <span class="p">[</span><span class="n">ExtendedLabelEncoder</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span>
+                           <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">check_input</span> <span class="ow">and</span> <span class="n">check_numerical_array</span><span class="p">(</span><span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">X_tmp</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">X_tmp</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="n">X_tmp</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
         <span class="n">X_</span> <span class="o">=</span> <span class="n">X_tmp</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
             <span class="n">X_</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span>
@@ -292,22 +292,22 @@
 
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">Splitter</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span>
                             <span class="n">y_</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical_</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders_</span><span class="p">,</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">gain_ratio</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">builder_</span> <span class="o">=</span> <span class="n">TreeBuilder</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder_</span><span class="p">,</span>
                                     <span class="n">X_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical_</span><span class="p">,</span>
                                     <span class="n">max_depth</span><span class="o">=</span><span class="n">max_depth</span><span class="p">,</span>
                                     <span class="n">min_samples_split</span><span class="o">=</span><span class="n">min_samples_split</span><span class="p">,</span>
                                     <span class="n">min_entropy_decrease</span><span class="o">=</span><span class="n">min_entropy_decrease</span><span class="p">,</span>
                                     <span class="n">prune</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">,</span>
                                     <span class="n">is_repeating</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_repeating</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tree_</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">X_encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">,</span>
-                          <span class="n">y_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">X_encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X_encoders_</span><span class="p">,</span>
+                          <span class="n">y_encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_encoder_</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">builder_</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="n">X_</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -330,24 +330,24 @@
         <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tree_&#39;</span><span class="p">)</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="n">n_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">n_features</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_features</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of features of the model must &quot;</span>
                              <span class="s2">&quot;match the input. Model n_features is </span><span class="si">{}</span><span class="s2"> and &quot;</span>
                              <span class="s2">&quot;input n_features is </span><span class="si">{}</span><span class="s2">.&quot;</span>
-                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
+                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">,</span> <span class="n">n_features</span><span class="p">))</span>
 
         <span class="n">X_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_numerical_</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                 <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                    <span class="n">X_</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_encoders_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;New attribute value not found in &#39;</span>
                                      <span class="s1">&#39;train data.&#39;</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">builder_</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="n">X_</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_encoder_</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
