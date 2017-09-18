@@ -52,8 +52,9 @@ following in Python:
 
     >>> bunch = load_breast_cancer()
     >>> estimator = Id3Estimator()
-    >>> estimator.fit(bunch.data, bunch.target)
-    >>> export_graphviz(estimator.tree_, 'tree.dot', bunch.feature_names)
+    >>> estimator = estimator.fit(bunch.data, bunch.target)
+    >>> tree = export_graphviz(estimator.tree_, 'tree.dot', bunch.feature_names)
+
 
 And to generate a PDF of the decision tree using GraphViz:
 

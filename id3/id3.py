@@ -64,18 +64,18 @@ class Id3Estimator(BaseEstimator):
 
         Attributes
         ----------
-        n_features: int
+        n_features_ : int
             The number of features when ``fit`` is performed.
 
-        X_encoders : list
+        X_encoders_ : list
             List of LabelEncoders that transforms input from labels to binary
             encodings and vice versa.
 
-        y_encoder : LabelEncoder
+        y_encoder_ : LabelEncoder
             LabelEncoders that transforms output from labels to binary
             encodings and vice versa.
 
-        is_numerical : bool array of size [n_features]
+        is_numerical_ : bool array of size [n_features]
             Array flagging which features that are asumed to be numerical
 
         builder_ : TreeBuilder
@@ -90,8 +90,8 @@ class Id3Estimator(BaseEstimator):
             Returns self.
         """
         X_, y_ = check_X_y(X, y)
-        self.y_encoder = ExtendedLabelEncoder()
-        y_ = self.y_encoder.fit_transform(y_)
+        self.y_encoder_ = ExtendedLabelEncoder()
+        y_ = self.y_encoder_.fit_transform(y_)
 
         max_np_int = np.iinfo(np.int32).max
         if not isinstance(self.max_depth, (numbers.Integral, np.integer)):
@@ -113,17 +113,17 @@ class Id3Estimator(BaseEstimator):
         else:
             min_entropy_decrease = 0
 
-        _, self.n_features = X_.shape
-        self.is_numerical = [False] * self.n_features
+        _, self.n_features_ = X_.shape
+        self.is_numerical_ = [False] * self.n_features_
         X_tmp = np.zeros(X_.shape, dtype=np.float32)
-        self.X_encoders = [ExtendedLabelEncoder() for _ in
-                           range(self.n_features)]
-        for i in range(self.n_features):
+        self.X_encoders_ = [ExtendedLabelEncoder() for _ in
+                           range(self.n_features_)]
+        for i in range(self.n_features_):
             if check_input and check_numerical_array(X_[:, i]):
-                self.is_numerical[i] = True
+                self.is_numerical_[i] = True
                 X_tmp[:, i] = X_[:, i]
             else:
-                X_tmp[:, i] = self.X_encoders[i].fit_transform(X_[:, i])
+                X_tmp[:, i] = self.X_encoders_[i].fit_transform(X_[:, i])
         X_ = X_tmp
         if self.prune:
             X_, X_test, y_, y_test = train_test_split(X_,
@@ -132,22 +132,22 @@ class Id3Estimator(BaseEstimator):
 
         splitter = Splitter(X_,
                             y_,
-                            self.is_numerical,
-                            self.X_encoders,
+                            self.is_numerical_,
+                            self.X_encoders_,
                             self.gain_ratio)
 
         self.builder_ = TreeBuilder(splitter,
-                                    self.y_encoder,
+                                    self.y_encoder_,
                                     X_.shape[0],
-                                    self.n_features,
-                                    self.is_numerical,
+                                    self.n_features_,
+                                    self.is_numerical_,
                                     max_depth=max_depth,
                                     min_samples_split=min_samples_split,
                                     min_entropy_decrease=min_entropy_decrease,
                                     prune=self.prune,
                                     is_repeating=self.is_repeating)
-        self.tree_ = Tree(X_encoders=self.X_encoders,
-                          y_encoder=self.y_encoder)
+        self.tree_ = Tree(X_encoders=self.X_encoders_,
+                          y_encoder=self.y_encoder_)
         if self.prune:
             self.builder_.build(self.tree_, X_, y_, X_test, y_test)
         else:
@@ -170,21 +170,21 @@ class Id3Estimator(BaseEstimator):
         check_is_fitted(self, 'tree_')
         X = check_array(X)
         n_features = X.shape[1]
-        if n_features != self.n_features:
+        if n_features != self.n_features_:
             raise ValueError("Number of features of the model must "
                              "match the input. Model n_features is {} and "
                              "input n_features is {}."
-                             .format(self.n_features, n_features))
+                             .format(self.n_features_, n_features))
 
         X_ = np.empty(X.shape)
-        for i in range(self.n_features):
-            if self.is_numerical[i]:
+        for i in range(self.n_features_):
+            if self.is_numerical_[i]:
                 X_[:, i] = X[:, i]
             else:
                 try:
-                    X_[:, i] = self.X_encoders[i].transform(X[:, i])
+                    X_[:, i] = self.X_encoders_[i].transform(X[:, i])
                 except ValueError as e:
                     raise ValueError('New attribute value not found in '
                                      'train data.')
         y = self.builder_._predict(self.tree_, X_)
-        return self.y_encoder.inverse_transform(y)
+        return self.y_encoder_.inverse_transform(y)
