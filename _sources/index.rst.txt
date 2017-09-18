@@ -13,7 +13,7 @@ contains a single estimator with unit tests.
        auto_examples/index
        ...
 
-See the `README <https://github.com/svaante/decision-tree-id3/blob/master/README.md>`_
+See the `README <https://github.com/svaante/decision-tree-id3/blob/master/README.rst>`_
 for more information.
 
 
