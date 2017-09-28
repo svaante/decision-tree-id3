@@ -13,13 +13,13 @@ ls -l
 echo
 if [[ ! -f miniconda.sh ]]
    then
-   wget http://repo.continuum.io/miniconda/Miniconda-3.6.0-Linux-x86_64.sh \
+   wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
        -O miniconda.sh
-   fi
-chmod +x miniconda.sh && ./miniconda.sh -b
-cd ..
-export PATH=/home/travis/miniconda/bin:$PATH
-conda update --yes conda
+fi
+MINICONDA_PATH=/home/travis/miniconda
+    chmod +x miniconda.sh && ./miniconda.sh -b -p $MINICONDA_PATH
+export PATH=$MINICONDA_PATH/bin:$PATH
+miniconda.sh -b -p $HOME/miniconda
 popd
 
 # Configure the conda environment and put it in the path using the
@@ -38,3 +38,4 @@ python --version
 python -c "import numpy; print('numpy %s' % numpy.__version__)"
 python -c "import scipy; print('scipy %s' % scipy.__version__)"
 python setup.py develop
+
