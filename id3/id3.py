@@ -188,3 +188,37 @@ class Id3Estimator(BaseEstimator):
                                      'train data.')
         y = self.builder_._predict(self.tree_, X_)
         return self.y_encoder_.inverse_transform(y)
+
+    def predict_proba(self, X):
+        """Predict class probabilities for every sample in X.
+
+        Parameters
+        ----------
+        X : array-like of shape = [n_samples, n_features_idx]
+            The input samples.
+
+        Returns
+        -------
+        y : array of shape =  [n_samples, n_classes]
+        """
+        check_is_fitted(self, 'tree_')
+        X = check_array(X)
+        n_features = X.shape[1]
+        if n_features != self.n_features_:
+            raise ValueError("Number of features of the model must "
+                             "match the input. Model n_features is {} and "
+                             "input n_features is {}."
+                             .format(self.n_features_, n_features))
+
+        X_ = np.empty(X.shape)
+        for i in range(self.n_features_):
+            if self.is_numerical_[i]:
+                X_[:, i] = X[:, i]
+            else:
+                try:
+                    X_[:, i] = self.X_encoders_[i].transform(X[:, i])
+                except ValueError as e:
+                    raise ValueError('New attribute value not found in '
+                                     'train data.')
+        y = self.builder_._predict_proba(self.tree_, X_)
+        return y

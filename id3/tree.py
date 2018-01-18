@@ -166,3 +166,32 @@ class TreeBuilder(BaseBuilder):
             if y is not None:
                 node.add_predict_result(y[i], self.n_classes)
         return ret
+
+    def _predict_proba(self, tree, X, y=None):
+        ret = np.zeros((X.shape[0], self.n_classes), dtype=np.float64)
+        for i, x in enumerate(X):
+            node = tree.root
+            while(node.is_feature):
+                value = x[node.details.feature_idx]
+                for child, split_record in node.children:
+                    if split_record.calc_record.split_type == CalcRecord.NOM:
+                        if split_record.value_encoded == value:
+                            node = child
+                            break
+                    elif (split_record.calc_record.split_type
+                          == CalcRecord.NUM):
+                        if (split_record.value_encoded ==
+                            SplitRecord.GREATER and
+                                value > split_record.calc_record.pivot):
+                            node = child
+                            break
+                        elif (split_record.value_encoded ==
+                              SplitRecord.LESS and
+                              value <= split_record.calc_record.pivot):
+                            node = child
+                            break
+            items, counts = node.item_count
+            if counts.size > 0:
+                for item, count in zip(items, counts):
+                    ret[i, item] = count / np.sum(counts)
+        return ret
