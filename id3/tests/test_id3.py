@@ -57,6 +57,11 @@ y_nom = np.array(["(30k,38k)",
 
 test_splitter = Splitter(None, None, None, None)
 
+bc_sample = np.array([20.57, 17.77, 132.9, 1326, 0.08474, 0.07864, 0.0869,
+                   0.07017, 0.1812, 0.05667, 0.5435, 0.7339, 3.398, 74.08,
+                   0.005225, 0.01308, 0.0186, 0.0134, 0.01389, 0.003532,
+                   24.99, 23.41, 158.8, 1956, 0.1238, 0.1866, 0.2416,
+                   0.186, 0.275, 0.08902]).reshape(1, -1)
 
 def test_intrinsic_value():
     c1 = CalcRecord(None, None, attribute_counts=np.array([5, 4, 5]))
@@ -145,15 +150,23 @@ def test_prune():
     bunch = load_breast_cancer()
     id3estimator.fit(bunch.data, bunch.target)
 
-
 def test_predict():
     estimator = Id3Estimator()
     bunch = load_breast_cancer()
     estimator.fit(bunch.data, bunch.target)
-    sample = np.array([20.57, 17.77, 132.9, 1326, 0.08474, 0.07864, 0.0869,
-                       0.07017, 0.1812, 0.05667, 0.5435, 0.7339, 3.398, 74.08,
-                       0.005225, 0.01308, 0.0186, 0.0134, 0.01389, 0.003532,
-                       24.99, 23.41, 158.8, 1956, 0.1238, 0.1866, 0.2416,
-                       0.186, 0.275, 0.08902]).reshape(1, -1)
     assert_almost_equal(estimator.predict(bunch.data), bunch.target)
-    assert_almost_equal(estimator.predict(sample), 0)
+    assert_almost_equal(estimator.predict(bc_sample), 0)
+
+def test_predict_proba():
+    estimator = Id3Estimator()
+    bunch = load_breast_cancer()
+    estimator.fit(bunch.data, bunch.target)
+    # Test shape of probability data structure using breast cancer data
+    probs = estimator.predict_proba(bunch.data)
+    assert_equal(probs.shape[0],bunch.data.shape[0])
+    assert_equal(probs.shape[1],estimator.tree_.y_encoder.classes_.shape[0])
+    # Test probability values using sample data (as per test_predict method)
+    probs = estimator.predict_proba(bc_sample)
+    assert probs[0,0] >= 0.5
+    assert probs[0,1] < 0.5
+    assert_equal(np.sum(probs[0]),1.0)
