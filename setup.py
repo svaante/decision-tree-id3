@@ -19,7 +19,7 @@ except ImportError:
     sys.exit(1)
 
 setup(name='decision-tree-id3',
-      version='0.1.2',
+      version='0.1.3',
       description='A scikit-learn compatible package for id3 decision tree',
       author='Daniel Pettersson, Otto Nordander',
       packages=find_packages(),
