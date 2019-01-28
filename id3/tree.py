@@ -131,7 +131,7 @@ class TreeBuilder(BaseBuilder):
                                                  - node.predicts[max_class],
                                                  n_predicts)
 
-                if node_error_rate < children_error_rate:
+                if node_error_rate <= children_error_rate:
                     node.is_feature = False
                     node.value = max_class
                     node.n_correct_predicts = node.predicts[max_class]
