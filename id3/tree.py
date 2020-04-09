@@ -96,10 +96,7 @@ class TreeBuilder(BaseBuilder):
                     details=calc_record,
                     item_count=(items, counts))
         for record in split_records:
-            if record.size == 0:
-                node = self._class_node(items, counts)
-                root.add_child(node, record)
-            else:
+            if record.size != 0:
                 root.add_child(self._build(tree, record.bag,
                                features_idx, depth+1),
                                record)
