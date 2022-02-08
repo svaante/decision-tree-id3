@@ -1,4 +1,6 @@
-from sklearn.externals import six
+import six
+import sys
+sys.modules['sklearn.externals.six'] = six
 from .splitter import SplitRecord, CalcRecord
 import numpy as np
 
