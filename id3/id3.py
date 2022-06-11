@@ -34,6 +34,7 @@ class Id3Estimator(BaseEstimator):
     min_entropy_decrease : float
     is_repeating : bool
     """
+
     def __init__(self,
                  max_depth=None,
                  min_samples_split=2,
@@ -89,7 +90,7 @@ class Id3Estimator(BaseEstimator):
         self : object
             Returns self.
         """
-        X_, y_ = check_X_y(X, y)
+        X_, y_ = check_X_y(X, y, dtype='object')
         self.y_encoder_ = ExtendedLabelEncoder()
         y_ = self.y_encoder_.fit_transform(y_)
 
@@ -117,7 +118,7 @@ class Id3Estimator(BaseEstimator):
         self.is_numerical_ = [False] * self.n_features_
         X_tmp = np.zeros(X_.shape, dtype=np.float32)
         self.X_encoders_ = [ExtendedLabelEncoder() for _ in
-                           range(self.n_features_)]
+                            range(self.n_features_)]
         for i in range(self.n_features_):
             if check_input and check_numerical_array(X_[:, i]):
                 self.is_numerical_[i] = True
@@ -168,7 +169,7 @@ class Id3Estimator(BaseEstimator):
         y : array of shape = [n_samples]
         """
         check_is_fitted(self, 'tree_')
-        X = check_array(X)
+        X = check_array(X, dtype='object')
         n_features = X.shape[1]
         if n_features != self.n_features_:
             raise ValueError("Number of features of the model must "
