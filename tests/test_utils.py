@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
-from id3.utils import check_numerical_array
-from id3.utils import unique
-from id3.utils import ExtendedLabelEncoder
+from src.id3.utils import check_numerical_array
+from src.id3.utils import unique
+from src.id3.utils import ExtendedLabelEncoder
 
 numeric = np.arange(5)
 nominal = np.array(["nom", "nom", "nom"])
