@@ -14,7 +14,7 @@ $ dot -T png out.dot -o out.png
 
 """
 
-from id3 import Id3Estimator, export_graphviz
+from src.id3 import Id3Estimator, export_graphviz
 import numpy as np
 
 feature_names = ["age",

@@ -1,8 +1,8 @@
 from sklearn.datasets import load_breast_cancer
 from numpy.testing import assert_almost_equal, assert_equal
 import numpy as np
-from id3 import Id3Estimator
-from id3.splitter import Splitter, CalcRecord
+from src.id3 import Id3Estimator
+from src.id3.splitter import Splitter, CalcRecord
 
 
 y = np.array([0, 1, 2, 2, 3])

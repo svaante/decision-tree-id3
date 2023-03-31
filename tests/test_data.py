@@ -1,6 +1,6 @@
 from numpy.testing import assert_almost_equal, assert_raises
 import numpy as np
-from id3.data import load_data
+from src.id3.data import load_data
 import uuid
 
 X = np.arange(20).reshape(10, 2)

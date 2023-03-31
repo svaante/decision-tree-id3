@@ -1,5 +1,5 @@
 from sklearn.utils.estimator_checks import check_estimator
-from id3 import Id3Estimator
+from src.id3 import Id3Estimator
 
 
 def test_estimator():

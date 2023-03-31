@@ -1,6 +1,6 @@
-from ..data.load_data import load_data
-from .. import export_graphviz, export_text
-from .. import Id3Estimator
+from src.id3.data.load_data import load_data
+from src.id3 import export_graphviz, export_text
+from src.id3 import Id3Estimator
 from numpy.testing import assert_equal
 
 

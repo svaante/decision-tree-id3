@@ -6,7 +6,7 @@ Text export from Estimator
 An example text export of :class:`id3.id3.Id3Estimator` with
 :file:`id3.export.export_text`
 """
-from id3 import Id3Estimator, export_text
+from src.id3 import Id3Estimator, export_text
 import numpy as np
 
 feature_names = ["age",
